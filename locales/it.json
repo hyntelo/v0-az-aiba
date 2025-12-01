@@ -396,10 +396,6 @@
           "subtitle": "Citazioni Mediche",
           "aiButton": "Trova con IA"
         },
-        "upload": {
-          "title": "oppure carica un nuovo paper",
-          "subtitle": "Carica documenti di supporto, materiali di riferimento o risorse visive per fornire contesto aggiuntivo al tuo brief."
-        },
         "table": {
           "title": "Lista delle reference",
           "titleWithCount": "{{count}} Materiali Selezionati",
@@ -407,7 +403,20 @@
           "title": "Titolo",
           "authors": "Autori",
           "publicationDate": "Data pubblicazione",
-          "emptyMessage": "Nessuna reference selezionata"
+          "emptyMessage": "Nessuna reference selezionata",
+          "claimsCount": "Giallature"
+        },
+        "claimsCount": "Giallature",
+        "selectClaims": "Seleziona giallature",
+        "claimsModal": {
+          "title": "Seleziona giallature",
+          "page": "Pagina {{page}}",
+          "addToBrief": "Aggiungi al brief"
+        },
+        "upload": {
+          "title": "oppure carica un nuovo paper",
+          "subtitle": "Carica documenti di supporto, materiali di riferimento o risorse visive per fornire contesto aggiuntivo al tuo brief.",
+          "addedToKnowledgeBase": "Documento aggiunto alla knowledge base"
         }
       },
       "step2d": {

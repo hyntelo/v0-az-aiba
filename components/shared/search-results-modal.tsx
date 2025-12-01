@@ -32,6 +32,7 @@ interface SearchResultsModalProps<T> {
   onSelect: (items: T[]) => void
   getItemId: (item: T) => string
   multiSelect?: boolean
+  onItemClick?: (item: T) => void // Optional handler for clicking on an item
 }
 
 export function SearchResultsModal<T>({
@@ -43,6 +44,7 @@ export function SearchResultsModal<T>({
   onSelect,
   getItemId,
   multiSelect = true,
+  onItemClick,
 }: SearchResultsModalProps<T>) {
   const { t } = useTranslation()
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -116,7 +118,14 @@ export function SearchResultsModal<T>({
                         "cursor-pointer",
                         isSelected && "bg-accent-violet/10"
                       )}
-                      onClick={() => handleToggleSelection(itemId)}
+                      onClick={(e) => {
+                        // If onItemClick is provided and click is not on checkbox, call it
+                        if (onItemClick && !(e.target as HTMLElement).closest('input[type="checkbox"]')) {
+                          onItemClick(item)
+                        } else {
+                          handleToggleSelection(itemId)
+                        }
+                      }}
                     >
                       {multiSelect && (
                         <TableCell 

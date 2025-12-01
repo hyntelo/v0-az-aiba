@@ -5,6 +5,12 @@ export interface StartingDocument {
   usage: "global-adapt" | "update" | "inspiration" | "other"
 }
 
+export interface Claim {
+  id: string
+  pageNumber: number
+  text: string
+}
+
 export interface ScientificReference {
   id: string
   referenceId: string
@@ -12,6 +18,15 @@ export interface ScientificReference {
   authors: string
   journal?: string
   publicationDate?: string
+  claimsCount?: number // Number of giallature in document
+  claims?: Claim[] // Full list of claims (for modal display)
+  selectedClaims?: string[] // IDs of selected claims
+}
+
+export interface KnowledgeBaseDocument extends ScientificReference {
+  claims: Claim[]
+  uploadedAt?: Date
+  uploadedBy?: string
 }
 
 export interface CampaignData {

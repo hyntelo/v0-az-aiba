@@ -16,6 +16,7 @@ export interface SearchConfig<T> {
   aiSearch?: AiSearchButton
   searchButtonLabel?: string
   resultColumns: ResultColumn<T>[]
+  onItemClick?: (item: T) => void // Optional handler for clicking on a search result item
 }
 
 export interface UploadConfig {
@@ -184,6 +185,7 @@ export function ItemsManager<T>({
           onSelect={handleSelectFromSearch}
           getItemId={getItemId}
           multiSelect={true}
+          onItemClick={searchConfig.onItemClick}
         />
       )}
     </div>
