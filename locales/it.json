@@ -41,7 +41,26 @@
     "campaignBrief": "Brief di Campagna",
     "you": "Tu",
     "readyToCreate": "Pronto a creare un nuovo brief?",
-    "getStartedDescription": "Inizia con il nostro assistente di briefing basato sull'IA per semplificare le tue campagne di marketing farmaceutico."
+    "getStartedDescription": "Inizia con il nostro assistente di briefing basato sull'IA per semplificare le tue campagne di marketing farmaceutico.",
+    "briefList": "Lista dei brief",
+    "search": "Cerca",
+    "table": {
+      "id": "ID",
+      "title": "Titolo",
+      "author": "Autore",
+      "brand": "Brand",
+      "channels": "Canali",
+      "creationDate": "Creazione",
+      "modificationDate": "Modifica",
+      "status": "Status"
+    },
+    "actions": {
+      "edit": "Modifica",
+      "duplicate": "Duplica",
+      "delete": "Elimina",
+      "archive": "Archivia"
+    },
+    "statusComplete": "Completato"
   },
   "appShell": {
     "profile": "Profilo",

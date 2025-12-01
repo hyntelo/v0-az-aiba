@@ -3,7 +3,28 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Plus, FileText, Calendar, User, Bell, X, Sparkles } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+  TooltipContent,
+  TooltipTrigger,
+  TooltipProvider,
+} from "@/components/ui/tooltip"
+import * as TooltipPrimitive from "@radix-ui/react-tooltip"
+import { Plus, FileText, Calendar, User, Bell, X, Sparkles, MoreVertical, Search, ChevronUp, ChevronDown } from "lucide-react"
 import CampaignForm from "@/components/campaign-form"
 import { BriefDisplay } from "@/components/brief-display"
 import { AIGenerationModal } from "@/components/ai-generation-modal"
@@ -12,13 +33,60 @@ import { useAppStore } from "@/lib/store"
 import ProfilePage from "./profile/page"
 import SettingsPage from "./settings/page"
 import BrandGuidelinesPage from "./brand-guidelines/page"
-import { useEffect } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { existingBriefs } from "@/lib/mock-data"
 import { useTranslation } from "@/lib/i18n"
+import type { BriefData } from "@/lib/store/types"
 
 const statusColors = {
   draft: "bg-gray-100 text-gray-800",
   "ai-reviewed": "bg-gradient-to-r from-green-100 to-blue-100 text-green-800",
+}
+
+// Helper functions
+const formatBriefId = (id: string): string => {
+  // Extract numeric part from ID (e.g., "existing-brief-1" -> "1", then format as "IT-00001")
+  const numericMatch = id.match(/\d+$/)
+  if (numericMatch) {
+    const num = numericMatch[0]
+    return `IT-${num.padStart(5, "0")}`
+  }
+  // Fallback: use last part of ID
+  const parts = id.split("-")
+  const lastPart = parts[parts.length - 1]
+  if (lastPart && /^\d+$/.test(lastPart)) {
+    return `IT-${lastPart.padStart(5, "0")}`
+  }
+  return `IT-${id.slice(-5).padStart(5, "0")}`
+}
+
+const formatChannels = (channels: string[]): string => {
+  return channels.join("; ")
+}
+
+const formatDateTime = (date: Date): string => {
+  const day = String(date.getDate()).padStart(2, "0")
+  const month = String(date.getMonth() + 1).padStart(2, "0")
+  const year = date.getFullYear()
+  const hours = String(date.getHours()).padStart(2, "0")
+  const minutes = String(date.getMinutes()).padStart(2, "0")
+  return `${day}/${month}/${year} ${hours}:${minutes}`
+}
+
+const formatDateShort = (date: Date): string => {
+  const day = String(date.getDate()).padStart(2, "0")
+  const month = String(date.getMonth() + 1).padStart(2, "0")
+  const year = String(date.getFullYear()).slice(-2)
+  return `${day}/${month}/${year}`
+}
+
+const getAuthorName = (brief: BriefData, userProfile: { name: string }): string => {
+  // Extract initials from user name (e.g., "Sarah Chen" -> "S. Chen")
+  const nameParts = userProfile.name.split(" ")
+  if (nameParts.length >= 2) {
+    return `${nameParts[0][0]}. ${nameParts[nameParts.length - 1]}`
+  }
+  return userProfile.name
 }
 
 interface CampaignData {
@@ -34,8 +102,14 @@ interface CampaignData {
   additionalContext: string
 }
 
+type SortColumn = "id" | "title" | "author" | "brand" | "channels" | "createdAt" | "lastModified" | "status" | null
+type SortDirection = "asc" | "desc"
+
 export default function Dashboard() {
   const { t } = useTranslation()
+  const [searchQuery, setSearchQuery] = useState("")
+  const [sortColumn, setSortColumn] = useState<SortColumn>(null)
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc")
 
   const {
     currentView,
@@ -61,6 +135,83 @@ export default function Dashboard() {
   const draftCount = createdBriefs.filter((brief) => brief.status === "draft").length
   const aiReviewedCount = createdBriefs.filter((brief) => brief.status === "ai-reviewed").length
 
+  // Filter and sort briefs
+  const filteredAndSortedBriefs = useMemo(() => {
+    // First filter
+    let filtered = createdBriefs
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase()
+      filtered = createdBriefs.filter((brief) => {
+        const formattedId = formatBriefId(brief.id).toLowerCase()
+        const title = brief.title.toLowerCase()
+        const brand = brief.campaignData.brand.toLowerCase()
+        return formattedId.includes(query) || title.includes(query) || brand.includes(query)
+      })
+    }
+
+    // Then sort
+    if (!sortColumn) {
+      return filtered
+    }
+
+    const sorted = [...filtered].sort((a, b) => {
+      let aValue: string | number
+      let bValue: string | number
+
+      switch (sortColumn) {
+        case "id":
+          aValue = formatBriefId(a.id)
+          bValue = formatBriefId(b.id)
+          break
+        case "title":
+          aValue = a.title.toLowerCase()
+          bValue = b.title.toLowerCase()
+          break
+        case "author":
+          aValue = getAuthorName(a, userProfile).toLowerCase()
+          bValue = getAuthorName(b, userProfile).toLowerCase()
+          break
+        case "brand":
+          aValue = a.campaignData.brand.toLowerCase()
+          bValue = b.campaignData.brand.toLowerCase()
+          break
+        case "channels":
+          aValue = formatChannels(a.campaignData.channels).toLowerCase()
+          bValue = formatChannels(b.campaignData.channels).toLowerCase()
+          break
+        case "createdAt":
+          aValue = a.createdAt.getTime()
+          bValue = b.createdAt.getTime()
+          break
+        case "lastModified":
+          aValue = a.lastModified.getTime()
+          bValue = b.lastModified.getTime()
+          break
+        case "status":
+          aValue = a.status
+          bValue = b.status
+          break
+        default:
+          return 0
+      }
+
+      if (aValue < bValue) return sortDirection === "asc" ? -1 : 1
+      if (aValue > bValue) return sortDirection === "asc" ? 1 : -1
+      return 0
+    })
+
+    return sorted
+  }, [createdBriefs, searchQuery, sortColumn, sortDirection, userProfile])
+
+  const handleSort = (column: SortColumn) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc")
+    } else {
+      setSortColumn(column)
+      setSortDirection("asc")
+    }
+  }
+
   console.log("[v0] Dashboard stats:", {
     draftCount,
     aiReviewedCount,
@@ -84,10 +235,41 @@ export default function Dashboard() {
     setCurrentView("form")
   }
 
-  const handleBriefClick = (brief: any) => {
+  const handleBriefClick = (brief: BriefData) => {
     console.log("[v0] Opening brief:", brief.title)
     setCurrentBrief(brief)
     setCurrentView("brief")
+  }
+
+  const handleEdit = (brief: BriefData) => {
+    console.log("[v0] Edit brief:", brief.id)
+    setCurrentBrief(brief)
+    setCurrentView("brief")
+  }
+
+  const handleDuplicate = (brief: BriefData) => {
+    console.log("[v0] Duplicate brief:", brief.id)
+    // TODO: Implement duplicate functionality
+  }
+
+  const handleDelete = (brief: BriefData) => {
+    console.log("[v0] Delete brief:", brief.id)
+    // TODO: Implement delete functionality
+  }
+
+  const handleArchive = (brief: BriefData) => {
+    console.log("[v0] Archive brief:", brief.id)
+    // TODO: Implement archive functionality
+  }
+
+  const getStatusLabel = (status: string): string => {
+    if (status === "draft") {
+      return t("dashboard.statusDraft")
+    }
+    if (status === "ai-reviewed") {
+      return t("dashboard.statusComplete")
+    }
+    return status.replace("-", " ").toUpperCase()
   }
 
   const handleBackToDashboard = () => {
@@ -260,47 +442,274 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {createdBriefs.map((brief) => (
-            <Card
-              key={brief.id}
-              className="hyntelo-elevation-3 hover:hyntelo-elevation-6 transition-all duration-150 ease-out cursor-pointer"
-              onClick={() => handleBriefClick(brief)}
-            >
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <CardTitle className="text-lg font-medium text-foreground line-clamp-2">{brief.title}</CardTitle>
-                  <Badge
-                    variant="secondary"
-                    className={`ml-2 flex items-center gap-1 ${statusColors[brief.status as keyof typeof statusColors]}`}
-                  >
-                    {brief.status === "ai-reviewed" && <Sparkles className="w-3 h-3" />}
-                    {brief.status === "draft"
-                      ? t("dashboard.statusDraft")
-                      : brief.status === "ai-reviewed"
-                        ? t("dashboard.statusAiReviewed")
-                        : brief.status.replace("-", " ").toUpperCase()}
-                  </Badge>
+        <div className="mt-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+            <h3 className="text-lg font-medium text-foreground">{t("dashboard.briefList")}</h3>
+            <div className="relative w-full sm:w-64">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder={t("common.search")}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+          </div>
+
+          {filteredAndSortedBriefs.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              {searchQuery
+                ? "Nessun brief trovato per la ricerca"
+                : createdBriefs.length === 0
+                  ? t("dashboard.readyToCreate")
+                  : "Nessun brief corrisponde ai criteri di ricerca"}
+            </div>
+          ) : (
+            <div className="border rounded-lg overflow-hidden">
+              <TooltipProvider delayDuration={0}>
+                <div className="[&_[data-slot='table-container']]:!overflow-x-hidden">
+                  <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="hidden sm:table-cell w-[100px]">
+                      <button
+                        onClick={() => handleSort("id")}
+                        className="flex items-center gap-2 hover:text-foreground transition-colors"
+                      >
+                        <span>{t("dashboard.table.id")}</span>
+                        {sortColumn === "id" ? (
+                          sortDirection === "asc" ? (
+                            <ChevronUp className="h-4 w-4 text-foreground" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4 text-foreground" />
+                          )
+                        ) : (
+                          <div className="h-4 w-4 flex flex-col items-center justify-center opacity-30">
+                            <ChevronUp className="h-2 w-2" />
+                            <ChevronDown className="h-2 w-2 -mt-0.5" />
+                          </div>
+                        )}
+                      </button>
+                    </TableHead>
+                    <TableHead className="whitespace-normal">
+                      <button
+                        onClick={() => handleSort("title")}
+                        className="flex items-center gap-2 hover:text-foreground transition-colors"
+                      >
+                        <span>{t("dashboard.table.title")}</span>
+                        {sortColumn === "title" ? (
+                          sortDirection === "asc" ? (
+                            <ChevronUp className="h-4 w-4 text-foreground" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4 text-foreground" />
+                          )
+                        ) : (
+                          <div className="h-4 w-4 flex flex-col items-center justify-center opacity-30">
+                            <ChevronUp className="h-2 w-2" />
+                            <ChevronDown className="h-2 w-2 -mt-0.5" />
+                          </div>
+                        )}
+                      </button>
+                    </TableHead>
+                    <TableHead className="hidden md:table-cell">
+                      <button
+                        onClick={() => handleSort("author")}
+                        className="flex items-center gap-2 hover:text-foreground transition-colors"
+                      >
+                        <span>{t("dashboard.table.author")}</span>
+                        {sortColumn === "author" ? (
+                          sortDirection === "asc" ? (
+                            <ChevronUp className="h-4 w-4 text-foreground" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4 text-foreground" />
+                          )
+                        ) : (
+                          <div className="h-4 w-4 flex flex-col items-center justify-center opacity-30">
+                            <ChevronUp className="h-2 w-2" />
+                            <ChevronDown className="h-2 w-2 -mt-0.5" />
+                          </div>
+                        )}
+                      </button>
+                    </TableHead>
+                    <TableHead className="hidden lg:table-cell">
+                      <button
+                        onClick={() => handleSort("brand")}
+                        className="flex items-center gap-2 hover:text-foreground transition-colors"
+                      >
+                        <span>{t("dashboard.table.brand")}</span>
+                        {sortColumn === "brand" ? (
+                          sortDirection === "asc" ? (
+                            <ChevronUp className="h-4 w-4 text-foreground" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4 text-foreground" />
+                          )
+                        ) : (
+                          <div className="h-4 w-4 flex flex-col items-center justify-center opacity-30">
+                            <ChevronUp className="h-2 w-2" />
+                            <ChevronDown className="h-2 w-2 -mt-0.5" />
+                          </div>
+                        )}
+                      </button>
+                    </TableHead>
+                    <TableHead className="hidden xl:table-cell whitespace-normal">
+                      <button
+                        onClick={() => handleSort("channels")}
+                        className="flex items-center gap-2 hover:text-foreground transition-colors"
+                      >
+                        <span>{t("dashboard.table.channels")}</span>
+                        {sortColumn === "channels" ? (
+                          sortDirection === "asc" ? (
+                            <ChevronUp className="h-4 w-4 text-foreground" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4 text-foreground" />
+                          )
+                        ) : (
+                          <div className="h-4 w-4 flex flex-col items-center justify-center opacity-30">
+                            <ChevronUp className="h-2 w-2" />
+                            <ChevronDown className="h-2 w-2 -mt-0.5" />
+                          </div>
+                        )}
+                      </button>
+                    </TableHead>
+                    <TableHead className="hidden md:table-cell">
+                      <button
+                        onClick={() => handleSort("createdAt")}
+                        className="flex items-center gap-2 hover:text-foreground transition-colors"
+                      >
+                        <span>{t("dashboard.table.creationDate")}</span>
+                        {sortColumn === "createdAt" ? (
+                          sortDirection === "asc" ? (
+                            <ChevronUp className="h-4 w-4 text-foreground" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4 text-foreground" />
+                          )
+                        ) : (
+                          <div className="h-4 w-4 flex flex-col items-center justify-center opacity-30">
+                            <ChevronUp className="h-2 w-2" />
+                            <ChevronDown className="h-2 w-2 -mt-0.5" />
+                          </div>
+                        )}
+                      </button>
+                    </TableHead>
+                    <TableHead className="hidden lg:table-cell">
+                      <button
+                        onClick={() => handleSort("lastModified")}
+                        className="flex items-center gap-2 hover:text-foreground transition-colors"
+                      >
+                        <span>{t("dashboard.table.modificationDate")}</span>
+                        {sortColumn === "lastModified" ? (
+                          sortDirection === "asc" ? (
+                            <ChevronUp className="h-4 w-4 text-foreground" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4 text-foreground" />
+                          )
+                        ) : (
+                          <div className="h-4 w-4 flex flex-col items-center justify-center opacity-30">
+                            <ChevronUp className="h-2 w-2" />
+                            <ChevronDown className="h-2 w-2 -mt-0.5" />
+                          </div>
+                        )}
+                      </button>
+                    </TableHead>
+                    <TableHead>
+                      <button
+                        onClick={() => handleSort("status")}
+                        className="flex items-center gap-2 hover:text-foreground transition-colors"
+                      >
+                        <span>{t("dashboard.table.status")}</span>
+                        {sortColumn === "status" ? (
+                          sortDirection === "asc" ? (
+                            <ChevronUp className="h-4 w-4 text-foreground" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4 text-foreground" />
+                          )
+                        ) : (
+                          <div className="h-4 w-4 flex flex-col items-center justify-center opacity-30">
+                            <ChevronUp className="h-2 w-2" />
+                            <ChevronDown className="h-2 w-2 -mt-0.5" />
+                          </div>
+                        )}
+                      </button>
+                    </TableHead>
+                    <TableHead className="w-[50px]"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredAndSortedBriefs.map((brief) => (
+                    <TableRow key={brief.id} className="hover:bg-muted/50">
+                      <TableCell className="hidden sm:table-cell font-mono text-sm">{formatBriefId(brief.id)}</TableCell>
+                      <TableCell className="min-w-0 sm:min-w-[150px] md:min-w-[200px] whitespace-normal">
+                        <button
+                          onClick={() => handleBriefClick(brief)}
+                          className="text-left text-[#8582FC] hover:text-[#8582FC]/80 hover:underline font-medium break-words"
+                        >
+                          {brief.title}
+                        </button>
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell">{getAuthorName(brief, userProfile)}</TableCell>
+                      <TableCell className="hidden lg:table-cell">{brief.campaignData.brand}</TableCell>
+                      <TableCell className="hidden xl:table-cell whitespace-normal break-words">{formatChannels(brief.campaignData.channels)}</TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        <TooltipPrimitive.Root>
+                          <TooltipTrigger asChild>
+                            <span className="cursor-help">{formatDateShort(brief.createdAt)}</span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{formatDateTime(brief.createdAt)}</p>
+                          </TooltipContent>
+                        </TooltipPrimitive.Root>
+                      </TableCell>
+                      <TableCell className="hidden lg:table-cell">
+                        <TooltipPrimitive.Root>
+                          <TooltipTrigger asChild>
+                            <span className="cursor-help">{formatDateShort(brief.lastModified)}</span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{formatDateTime(brief.lastModified)}</p>
+                          </TooltipContent>
+                        </TooltipPrimitive.Root>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="secondary"
+                          className={`flex items-center gap-1 w-fit ${statusColors[brief.status as keyof typeof statusColors]}`}
+                        >
+                          {brief.status === "ai-reviewed" && <Sparkles className="w-3 h-3" />}
+                          {getStatusLabel(brief.status)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleEdit(brief)}>
+                              {t("dashboard.actions.edit")}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleDuplicate(brief)}>
+                              {t("dashboard.actions.duplicate")}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleDelete(brief)} className="text-destructive">
+                              {t("dashboard.actions.delete")}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleArchive(brief)}>
+                              {t("dashboard.actions.archive")}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <FileText className="w-4 h-4" />
-                  {t("dashboard.campaignBrief")}
-                </div>
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <User className="w-4 h-4" />
-                    {t("dashboard.you")}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4" />
-                    {new Date(brief.createdAt).toLocaleDateString()}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+              </TooltipProvider>
+            </div>
+          )}
         </div>
 
         {createdBriefs.length === 0 && (
