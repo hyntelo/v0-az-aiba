@@ -311,7 +311,36 @@
       },
       "step2d": {
         "title": "Technical Fields",
-        "description": "Configure technical fields"
+        "description": "Configure technical fields",
+        "subtitle": "Insert tracking information necessary for each channel",
+        "vae": {
+          "vvpmPlaceholderId": "ID Placeholder on VVPM",
+          "utmCode": "UTM Code",
+          "ctaName": "name",
+          "ctaLink": "link",
+          "addCta": "Add",
+          "search": "Search",
+          "create": "Create"
+        },
+        "whatsapp": {
+          "vvpmPlaceholderId": "ID Placeholder on VVPM",
+          "utmCode": "UTM Code",
+          "ctaName": "name",
+          "ctaLink": "link",
+          "addCta": "Add",
+          "search": "Search",
+          "create": "Create"
+        },
+        "printMaterials": {
+          "warehouseCode": "Warehouse code",
+          "qrCodeLink": "Link for QR code",
+          "rcp": "RCP",
+          "aifaWording": "AIFA wording"
+        },
+        "ctaTable": {
+          "name": "CTA name",
+          "link": "link"
+        }
       },
       "step3": {
         "title": "Generated Brief",

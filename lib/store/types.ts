@@ -29,6 +29,26 @@ export interface KnowledgeBaseDocument extends ScientificReference {
   uploadedBy?: string
 }
 
+export interface TechnicalFields {
+  vae?: {
+    vvpmPlaceholderId?: string
+    utmCode?: string
+    ctas?: Array<{ id: string; name: string; link: string }>
+  }
+  whatsapp?: {
+    vvpmPlaceholderId?: string
+    utmCode?: string
+    ctas?: Array<{ id: string; name: string; link: string }>
+  }
+  printMaterials?: {
+    warehouseCode?: string
+    qrCodeLink?: string
+    rcp?: string
+    aifaWording?: string
+  }
+  // Add other channels as needed
+}
+
 export interface CampaignData {
   projectName: string
   brand: string
@@ -43,6 +63,7 @@ export interface CampaignData {
   scientificReferences?: ScientificReference[]
   communicationPersonalityId?: string
   targetAudiencePresetId?: string
+  technicalFields?: TechnicalFields
 }
 
 export interface Asset {

@@ -421,7 +421,36 @@
       },
       "step2d": {
         "title": "Campi tecnici",
-        "description": "Configura i campi tecnici"
+        "description": "Configura i campi tecnici",
+        "subtitle": "Inserimento delle informazioni di tracciamento necessarie per ogni canale",
+        "vae": {
+          "vvpmPlaceholderId": "ID Placeholder su VVPM",
+          "utmCode": "Codice UTM",
+          "ctaName": "name",
+          "ctaLink": "link",
+          "addCta": "Aggiungi",
+          "search": "Cerca",
+          "create": "Crea"
+        },
+        "whatsapp": {
+          "vvpmPlaceholderId": "ID Placeholder su VVPM",
+          "utmCode": "Codice UTM",
+          "ctaName": "name",
+          "ctaLink": "link",
+          "addCta": "Aggiungi",
+          "search": "Cerca",
+          "create": "Crea"
+        },
+        "printMaterials": {
+          "warehouseCode": "Codice magazzino",
+          "qrCodeLink": "Link per QR code",
+          "rcp": "RCP",
+          "aifaWording": "Dicitura AIFA"
+        },
+        "ctaTable": {
+          "name": "CTA name",
+          "link": "link"
+        }
       },
       "step6": {
         "title": "Brief generato",
