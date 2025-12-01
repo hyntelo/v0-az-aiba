@@ -23,13 +23,12 @@ import {
   Menu,
   X,
   Plus,
-  ChevronLeft,
-  ChevronRight,
+  PanelLeft,
+  PanelRight,
 } from "lucide-react"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
 import { useAppStore } from "@/lib/store"
-import { BackButton } from "@/components/back-button"
 import { useTranslation } from "@/lib/i18n"
 
 interface AppShellProps {
@@ -142,11 +141,14 @@ export function AppShell({ children, currentPage = "dashboard", onCreateBrief }:
         ? t("appShell.newBrief")
         : currentView === "brief"
           ? t("appShell.generatedBrief")
-          : t("appShell.dashboard")
+          : currentView === "brand-guidelines"
+            ? t("appShell.brand-guidelines")
+            : currentView === "settings"
+              ? t("appShell.settings")
+              : t("appShell.dashboard")
 
   return (
     <div className="min-h-screen bg-background">
-      <BackButton />
 
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
@@ -162,23 +164,32 @@ export function AppShell({ children, currentPage = "dashboard", onCreateBrief }:
         )}
       >
         <div className="flex h-full flex-col">
-          {/* Logo */}
+          {/* Sidebar Header */}
           <div
             className={cn(
-              "flex h-16 items-center border-b border-sidebar-border transition-all duration-200 w-auto gap-px",
-              sidebarCollapsed ? "justify-center px-4" : "gap-3 px-6",
+              "flex h-16 items-center justify-between border-b border-sidebar-border transition-all duration-200 px-4",
             )}
           >
-            <Image
-              src="/astrazeneca-logo.svg"
-              alt="AstraZeneca"
-              width={24}
-              height={24}
-              className="flex-shrink-0 size-32 h-12 w-32"
-            />
-            {!sidebarCollapsed && (
-              <span className="text-[rgba(133,130,252,1)] font-medium text-xs text-left">Brief Assistant</span>
-            )}
+            <div className={cn("flex items-center gap-3 min-w-0", !sidebarCollapsed && "flex-1")}>
+              <Image
+                src="/logo-small.png"
+                alt="Logo"
+                width={24}
+                height={24}
+                className="flex-shrink-0 h-6 w-6"
+              />
+              {!sidebarCollapsed && (
+                <span className="text-[rgba(133,130,252,1)] font-medium text-xs text-left truncate">Brief Assistant</span>
+              )}
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 flex-shrink-0"
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            >
+              {sidebarCollapsed ? <PanelRight className="h-4 w-4" /> : <PanelLeft className="h-4 w-4" />}
+            </Button>
           </div>
 
           {/* Navigation */}
@@ -235,15 +246,6 @@ export function AppShell({ children, currentPage = "dashboard", onCreateBrief }:
             </button>
           </div>
         </div>
-
-        <Button
-          variant="ghost"
-          size="sm"
-          className="absolute -right-3 top-20 hidden lg:flex h-6 w-6 rounded-full border border-border bg-background shadow-sm hover:bg-accent"
-          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-        >
-          {sidebarCollapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
-        </Button>
       </aside>
 
       {/* Main content */}

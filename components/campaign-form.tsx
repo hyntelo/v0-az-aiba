@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowLeft, Lightbulb, Loader2, Save, CheckCircle, AlertCircle, MessageSquare } from "lucide-react"
+import { Lightbulb, Loader2, MessageSquare } from "lucide-react"
 import { useAppStore } from "@/lib/store"
 import { useEffect } from "react"
 import { demoData } from "@/lib/mock-data"
@@ -83,12 +83,7 @@ export default function CampaignForm() {
     setCurrentView,
     resetApp,
     generateBrief,
-    autoSaveStatus,
-    setAutoSaveStatus,
-    lastAutoSave,
-    setLastAutoSave,
     currentBrief,
-    saveDraft,
     autoSaveDraft,
     brandGuidelines,
     addAttachmentToCampaign,
@@ -212,13 +207,6 @@ export default function CampaignForm() {
     handleInputChange("channels", newChannels)
   }
 
-  const handleManualSave = async () => {
-    if (!currentBrief) return
-
-    console.log("[v0] Manual save triggered")
-    await saveDraft(currentBrief.id)
-  }
-
   const handleBack = () => {
     resetApp()
   }
@@ -244,48 +232,6 @@ export default function CampaignForm() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card hyntelo-elevation-1">
-        <div className="max-w-4xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" size="sm" onClick={handleBack} className="hover:bg-primary/6">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                {t("form.backToDashboard")}
-              </Button>
-              <div className="h-6 w-px bg-border" />
-              <h1 className="text-xl font-medium text-foreground">{t("form.createNewBrief")}</h1>
-            </div>
-            <div className="flex items-center gap-4">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={handleManualSave}
-                className="flex items-center gap-2"
-                disabled={autoSaveStatus === "saving"}
-              >
-                {autoSaveStatus === "saving" && <Loader2 className="w-4 h-4 animate-spin" />}
-                {autoSaveStatus === "saved" && <CheckCircle className="w-4 h-4 text-green-600" />}
-                {autoSaveStatus === "error" && <AlertCircle className="w-4 h-4 text-red-600" />}
-                {autoSaveStatus === "idle" && <Save className="w-4 h-4" />}
-                {autoSaveStatus === "saving"
-                  ? t("form.saving")
-                  : autoSaveStatus === "saved"
-                    ? t("form.saved")
-                    : autoSaveStatus === "error"
-                      ? t("form.error")
-                      : t("form.save")}
-              </Button>
-              {lastAutoSave && (
-                <span className="text-xs text-muted-foreground">
-                  {t("form.lastSaved")}: {lastAutoSave.toLocaleTimeString()}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
-
       <main className="max-w-4xl mx-auto px-6 py-8">
         <div className="mb-8">
           <h2 className="text-2xl font-medium text-foreground mb-2">{t("form.campaignContext")}</h2>

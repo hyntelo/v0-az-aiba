@@ -30,14 +30,14 @@
     "draft": "bozza",
     "drafts": "bozze",
     "workInProgress": "Lavoro in corso",
-    "aiReviewed": "Revisionato dall'IA",
+    "aiReviewed": "Completato",
     "completed": "completati",
     "readyToUse": "Pronto all'uso",
     "totalBriefs": "Brief Totali",
     "created": "creati",
     "allTime": "Totale",
     "statusDraft": "Bozza",
-    "statusAiReviewed": "Revisionato dall'IA",
+    "statusAiReviewed": "Completato",
     "campaignBrief": "Brief di Campagna",
     "you": "Tu",
     "readyToCreate": "Pronto a creare un nuovo brief?",
@@ -58,7 +58,7 @@
   },
   "briefStatus": {
     "draft": "Bozza",
-    "aiReviewed": "Revisionato dall'IA"
+    "aiReviewed": "Completato"
   },
   "briefDisplay": {
     "campaignObjectives": "Obiettivi della Campagna",
@@ -66,7 +66,7 @@
     "toneOfVoice": "Tono di Voce",
     "complianceNotes": "Note di Conformità",
     "draft": "BOZZA",
-    "aiReviewed": "REVISIONATO DALL'IA",
+    "aiReviewed": "COMPLETATO",
     "undoRegeneration": "Annulla rigenerazione",
     "created": "Creato",
     "readOnly": "Sola Lettura",
@@ -98,7 +98,7 @@
     "submitForAIReview": "Invia per Revisione IA",
     "exportBrief": "Esporta Brief",
     "confirmAllSections": "Conferma Tutte le Sezioni",
-    "aiReviewCompletedSuccessfully": "Revisione IA del brief completata con successo!"
+    "aiReviewCompletedSuccessfully": "Brief completato con successo!"
   },
   "exportModal": {
     "pdfDocument": "Documento PDF",

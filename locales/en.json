@@ -30,14 +30,14 @@
     "draft": "draft",
     "drafts": "drafts",
     "workInProgress": "Work in progress",
-    "aiReviewed": "AI Reviewed",
+    "aiReviewed": "Completed",
     "completed": "completed",
     "readyToUse": "Ready to use",
     "totalBriefs": "Total Briefs",
     "created": "created",
     "allTime": "All time",
     "statusDraft": "Draft",
-    "statusAiReviewed": "AI Reviewed",
+    "statusAiReviewed": "Completed",
     "campaignBrief": "Campaign Brief",
     "you": "You",
     "readyToCreate": "Ready to create a new brief?",
@@ -58,7 +58,7 @@
   },
   "briefStatus": {
     "draft": "Draft",
-    "aiReviewed": "AI Reviewed"
+    "aiReviewed": "Completed"
   },
   "briefDisplay": {
     "campaignObjectives": "Campaign Objectives",
@@ -66,7 +66,7 @@
     "toneOfVoice": "Tone of Voice",
     "complianceNotes": "Compliance Notes",
     "draft": "DRAFT",
-    "aiReviewed": "AI REVIEWED",
+    "aiReviewed": "COMPLETED",
     "undoRegeneration": "Undo regeneration",
     "created": "Created",
     "readOnly": "Read Only",
@@ -98,7 +98,7 @@
     "submitForAIReview": "Submit for AI Review",
     "exportBrief": "Export Brief",
     "confirmAllSections": "Confirm All Sections",
-    "aiReviewCompletedSuccessfully": "Brief AI review completed successfully!"
+    "aiReviewCompletedSuccessfully": "Brief completed successfully!"
   },
   "exportModal": {
     "pdfDocument": "PDF Document",
