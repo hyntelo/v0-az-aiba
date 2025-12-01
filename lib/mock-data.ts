@@ -1,13 +1,13 @@
 export const demoBrief = {
   campaignData: {
     projectName: "Trattamento Iperkaliemia con Lokelma",
-    department: "Marketing",
     brand: "Lokelma",
+    therapeuticArea: "Cardiologia",
     expectedLaunchDate: "2025-12-31",
     specialty: "Cardiology",
     requestSummary:
       "Campagna educativa per evidenziare i benefici di Lokelma",
-    channels: ["Email Marketing", "Print Materials"],
+    channels: ["emailMarketing", "printMaterials"],
     additionalContext:
       "",
     attachments: [],
@@ -67,13 +67,13 @@ export const existingBriefs = [
     title: "Campagna Digitale per la Valutazione del Rischio Cardiovascolare",
     campaignData: {
       projectName: "Campagna Digitale per la Valutazione del Rischio Cardiovascolare",
-      department: "Medical Affairs",
       brand: "CardioShield Plus",
+      therapeuticArea: "Cardiologia",
       expectedLaunchDate: "2025-04-15",
       specialty: "Cardiology",
       requestSummary:
         "Iniziativa educativa digitale completa rivolta a cardiologi e medici di base per migliorare i protocolli di valutazione del rischio cardiovascolare e gli esiti dei pazienti attraverso strumenti di screening basati sull'evidenza.",
-      channels: ["Email Marketing", "Digital Advertising", "Webinars"],
+      channels: ["emailMarketing", "digitalAdvertising", "webinars"],
       additionalContext:
         "Deve includere le ultime linee guida ACC/AHA e garantire che tutti i calcolatori di rischio siano validati. La campagna richiede una revisione medico-legale per gli strumenti di supporto alle decisioni cliniche.",
       attachments: [],
@@ -123,13 +123,13 @@ export const existingBriefs = [
     title: "Serie Educativa per Pazienti sulla Gestione del Diabete",
     campaignData: {
       projectName: "Serie Educativa per Pazienti sulla Gestione del Diabete",
-      department: "Marketing",
       brand: "DiabetesGuard",
+      therapeuticArea: "Endocrinologia",
       expectedLaunchDate: "2025-03-30",
       specialty: "Endocrinology",
       requestSummary:
         "Campagna educativa multicanale per pazienti focalizzata sull'autogestione del diabete di tipo 2, modifiche dello stile di vita e aderenza alla terapia per migliorare gli esiti dei pazienti e ridurre l'utilizzo delle risorse sanitarie.",
-      channels: ["Social Media", "Email Marketing", "Print Materials"],
+      channels: ["socialMedia", "emailMarketing", "printMaterials"],
       additionalContext:
         "Il contenuto deve essere culturalmente sensibile e disponibile in italiano e inglese. Tutti i consigli medici devono indirizzare i pazienti a consultare gli operatori sanitari. Richiede conformità alle linee guida ADA.",
       attachments: [],
@@ -169,13 +169,13 @@ export const existingBriefs = [
     title: "Materiali per Conferenza Professionale sulla Salute Respiratoria",
     campaignData: {
       projectName: "Materiali per Conferenza Professionale sulla Salute Respiratoria",
-      department: "Medical Affairs",
       brand: "RespiraClear",
+      therapeuticArea: "Malattie Respiratorie",
       expectedLaunchDate: "2025-02-28",
       specialty: "Respiratory",
       requestSummary:
         "Presentazione completa per conferenza e materiali educativi per il Summit Annuale di Medicina Respiratoria, focalizzati su approcci terapeutici innovativi per condizioni respiratorie croniche e ultimi risultati della ricerca clinica.",
-      channels: ["Medical Conferences", "Print Materials", "Digital Advertising"],
+      channels: ["medicalConferences", "printMaterials", "digitalAdvertising"],
       additionalContext:
         "La presentazione deve includere dati peer-reviewed da studi clinici di fase III. Tutti i materiali richiedono revisione medico-scientifica e conformità alle linee guida di presentazione della conferenza. Budget approvato per spazio stand premium.",
       attachments: [],
@@ -216,6 +216,164 @@ export const existingBriefs = [
         changedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
         comment:
           "Revisione AI completata - il contenuto dimostra un'eccellente presentazione dei dati clinici e soddisfa tutti i requisiti di conformità",
+      },
+    ],
+    isReadOnly: true,
+  },
+  {
+    id: "existing-brief-4",
+    title: "Campagna di Awareness per Terapia Oncologica Innovativa",
+    campaignData: {
+      projectName: "Campagna di Awareness per Terapia Oncologica Innovativa",
+      brand: "OncoAdvance",
+      therapeuticArea: "Oncologia",
+      expectedLaunchDate: "2025-06-30",
+      specialty: "Oncology",
+      requestSummary:
+        "Iniziativa educativa per aumentare la consapevolezza tra oncologi e ematologi su una nuova terapia target per tumori solidi, evidenziando i benefici in termini di sopravvivenza e qualità della vita.",
+      channels: ["medicalConferences", "digitalAdvertising", "webinars"],
+      additionalContext:
+        "La campagna deve rispettare le normative EMA e includere dati di sicurezza aggiornati. Richiede revisione medico-legale completa prima della pubblicazione.",
+      attachments: [],
+      communicationPersonalityId: "scientific-publication",
+      targetAudiencePresetId: "results-driven-manager",
+    },
+    generatedContent: {
+      objectives:
+        "Aumentare la consapevolezza tra gli oncologi del 40% entro 6 mesi attraverso educazione mirata, generando oltre 50 lead qualificati e migliorando la comprensione dei meccanismi d'azione della terapia.",
+      keyMessages:
+        "La terapia target rappresenta un avanzamento significativo nel trattamento oncologico, dimostrando miglioramenti nella sopravvivenza globale e nella qualità della vita dei pazienti con tumori avanzati.",
+      toneOfVoice: "Scientifico, rigoroso, basato sull'evidenza con focus sui risultati clinici e sulla sicurezza",
+      complianceNotes:
+        "Tutti i materiali devono essere conformi alle normative EMA e includere dati di sicurezza completi. Le affermazioni devono essere supportate da studi clinici peer-reviewed pubblicati.",
+    },
+    assets: [],
+    references: [],
+    createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
+    status: "ai-reviewed" as const,
+    lastModified: new Date(Date.now() - 9 * 24 * 60 * 60 * 1000),
+    lastSavedAt: new Date(Date.now() - 9 * 24 * 60 * 60 * 1000),
+    statusHistory: [
+      {
+        id: "status-8",
+        briefId: "existing-brief-4",
+        fromStatus: null,
+        toStatus: "draft" as const,
+        changedBy: "John Smith",
+        changedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
+        comment: "Bozza iniziale creata",
+      },
+      {
+        id: "status-9",
+        briefId: "existing-brief-4",
+        fromStatus: "draft" as const,
+        toStatus: "ai-reviewed" as const,
+        changedBy: "AI Review System",
+        changedAt: new Date(Date.now() - 9 * 24 * 60 * 60 * 1000),
+        comment:
+          "Revisione AI completata - contenuto scientifico accurato e conforme alle normative",
+      },
+    ],
+    isReadOnly: true,
+  },
+  {
+    id: "existing-brief-5",
+    title: "Programma Educativo per Pazienti con Malattie Rare",
+    campaignData: {
+      projectName: "Programma Educativo per Pazienti con Malattie Rare",
+      brand: "RareCare Solutions",
+      therapeuticArea: "Malattie Rare",
+      expectedLaunchDate: "2025-05-15",
+      specialty: "Rare Diseases",
+      requestSummary:
+        "Iniziativa multicanale per supportare pazienti e caregiver nella gestione di malattie rare, fornendo risorse educative, supporto emotivo e informazioni su terapie disponibili.",
+      channels: ["socialMedia", "emailMarketing", "printMaterials", "webinars"],
+      additionalContext:
+        "Il contenuto deve essere accessibile, empatico e culturalmente sensibile. Richiede traduzione in multiple lingue e adattamento per diverse comunità.",
+      attachments: [],
+      communicationPersonalityId: "marketing",
+      targetAudiencePresetId: "practical-parent",
+    },
+    generatedContent: {
+      objectives:
+        "Migliorare la qualità della vita dei pazienti con malattie rare del 30% entro 8 mesi attraverso educazione e supporto, aumentando l'aderenza terapeutica e riducendo l'isolamento sociale.",
+      keyMessages:
+        "I pazienti con malattie rare non sono soli. Con le giuste risorse, supporto e informazioni, possono gestire meglio la loro condizione e vivere vite più piene.",
+      toneOfVoice: "Empatico, supportivo, incoraggiante, accessibile con enfasi sulla speranza e sul supporto della comunità",
+      complianceNotes:
+        "Tutti i contenuti devono essere conformi alle linee guida per comunicazioni ai pazienti. I consigli medici devono essere generali e indirizzare sempre alla consultazione con operatori sanitari specializzati.",
+    },
+    assets: [],
+    references: [],
+    createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
+    status: "draft" as const,
+    lastModified: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+    lastSavedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+    statusHistory: [
+      {
+        id: "status-10",
+        briefId: "existing-brief-5",
+        fromStatus: null,
+        toStatus: "draft" as const,
+        changedBy: "Maria Rossi",
+        changedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
+        comment: "Bozza iniziale creata",
+      },
+    ],
+    isReadOnly: false,
+  },
+  {
+    id: "existing-brief-6",
+    title: "Materiali per Formazione Medici di Base su Gestione del Dolore",
+    campaignData: {
+      projectName: "Materiali per Formazione Medici di Base su Gestione del Dolore",
+      brand: "PainRelief Pro",
+      therapeuticArea: "Neurologia",
+      expectedLaunchDate: "2025-07-20",
+      specialty: "Pain Management",
+      requestSummary:
+        "Programma formativo completo per medici di base e specialisti sulla gestione del dolore cronico, includendo protocolli evidence-based e approcci terapeutici multidisciplinari.",
+      channels: ["medicalConferences", "printMaterials", "webinars"],
+      additionalContext:
+        "Il programma deve allinearsi con le linee guida nazionali per la gestione del dolore e includere casi clinici pratici. Richiede accreditamento ECM.",
+      attachments: [],
+      communicationPersonalityId: "scientific-publication",
+      targetAudiencePresetId: "results-driven-manager",
+    },
+    generatedContent: {
+      objectives:
+        "Migliorare le competenze dei medici di base nella gestione del dolore cronico del 45% entro 6 mesi, aumentando l'uso di protocolli evidence-based e migliorando gli esiti dei pazienti.",
+      keyMessages:
+        "Una gestione efficace del dolore richiede un approccio multidisciplinare, protocolli evidence-based e attenzione alla qualità della vita del paziente, non solo alla riduzione del dolore.",
+      toneOfVoice: "Educativo, pratico, basato sull'evidenza con focus sull'applicazione clinica e sugli esiti dei pazienti",
+      complianceNotes:
+        "Tutti i materiali formativi devono essere conformi alle linee guida nazionali e internazionali per la gestione del dolore. Richiede revisione medico-scientifica e accreditamento ECM.",
+    },
+    assets: [],
+    references: [],
+    createdAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
+    status: "ai-reviewed" as const,
+    lastModified: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
+    lastSavedAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
+    statusHistory: [
+      {
+        id: "status-11",
+        briefId: "existing-brief-6",
+        fromStatus: null,
+        toStatus: "draft" as const,
+        changedBy: "David Brown",
+        changedAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
+        comment: "Bozza iniziale creata",
+      },
+      {
+        id: "status-12",
+        briefId: "existing-brief-6",
+        fromStatus: "draft" as const,
+        toStatus: "ai-reviewed" as const,
+        changedBy: "AI Review System",
+        changedAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
+        comment:
+          "Revisione AI completata - materiale formativo completo e conforme alle linee guida",
       },
     ],
     isReadOnly: true,

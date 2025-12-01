@@ -248,12 +248,32 @@
     "brandProduct": "Brand/Product Name",
     "selectBrand": "Select brand/product",
     "expectedLaunchDate": "Expected Launch Date",
-    "specialty": "Specialty",
+    "therapeuticArea": "Therapeutic Area",
+    "selectTherapeuticArea": "Select therapeutic area",
+    "specialty": "Indication",
     "selectSpecialty": "Select medical specialty",
-    "requestSummary": "Request Summary",
+    "requestSummary": "Objectives and Description",
     "requestSummaryPlaceholder": "Provide the objective you would like to achieve with this content and a concise summary of what you need...",
     "contentFormats": "Content Formats",
     "selectFormats": "Select Formats",
+    "channels": {
+      "emailMarketing": "Email Marketing",
+      "socialMedia": "Social Media",
+      "medicalConferences": "Medical Conferences",
+      "printMaterials": "Print Materials",
+      "digitalAdvertising": "Digital Advertising",
+      "webinars": "Webinars",
+      "salesMaterials": "Sales Materials",
+      "vae": "VAE",
+      "whatsapp": "WhatsApp"
+    },
+    "aiSuggestions": {
+      "specialty": "Select the medical specialty most relevant to your campaign focus",
+      "requestSummary": "Provide a concise overview that captures the essence of your campaign request",
+      "channels": "Select channels that align with your audience's preferred communication methods",
+      "communicationPersonality": "Choose a communication style that matches your campaign objectives and audience",
+      "targetAudiencePreset": "Select a target audience preset to apply specific communication guidelines"
+    },
     "additionalContext": "Additional Context",
     "additionalInformation": "Additional Information (Optional)",
     "additionalInformationPlaceholder": "Any specific requirements, compliance considerations, or additional context...",
@@ -270,7 +290,38 @@
     "specialtyRequired": "Specialty is required",
     "requestSummaryRequired": "Request summary is required",
     "atLeastOneChannelRequired": "At least one channel must be selected",
-    "launchDateMustBeFuture": "Launch date must be in the future"
+    "launchDateMustBeFuture": "Launch date must be in the future",
+    "steps": {
+      "step1": {
+        "title": "Campaign Context",
+        "description": "Provide details about your campaign"
+      },
+      "step2a": {
+        "title": "Additional Context",
+        "description": "Add optional additional information"
+      },
+      "step2b": {
+        "title": "Starting Documents",
+        "description": "Upload supporting documents"
+      },
+      "step2c": {
+        "title": "Scientific References",
+        "description": "Add scientific references"
+      },
+      "step2d": {
+        "title": "Technical Fields",
+        "description": "Configure technical fields"
+      },
+      "step3": {
+        "title": "Generated Brief",
+        "description": "Review the generated brief"
+      }
+    },
+    "navigation": {
+      "previous": "Previous",
+      "next": "Next",
+      "generate": "Generate Brief"
+    }
   },
   "brandGuidelines": {
     "title": "Brand Guidelines",

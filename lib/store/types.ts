@@ -1,7 +1,7 @@
 export interface CampaignData {
   projectName: string
-  department: string
   brand: string
+  therapeuticArea: string
   expectedLaunchDate: string
   specialty: string
   requestSummary: string

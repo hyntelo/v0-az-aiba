@@ -108,7 +108,7 @@
     "campaignContext": "Contesto della Campagna",
     "editCampaignDetails": "Modifica Dettagli Campagna",
     "brand": "Brand",
-    "targetAudience": "Pubblico Target",
+    "targetAudience": "Target Audience",
     "communicationStyle": "Stile di Comunicazione",
     "requestSummary": "Riepilogo Richiesta",
     "channels": "Canali",
@@ -276,8 +276,8 @@
     "brandGuidelines": "Linee Guida del Brand",
     "communicationStyle": "Stile di Comunicazione",
     "selectCommunicationStyle": "Seleziona lo stile di comunicazione",
-    "audiencePreset": "Preset Pubblico",
-    "selectAudiencePreset": "Seleziona preset pubblico",
+    "audiencePreset": "Target Audience",
+    "selectAudiencePreset": "Seleziona Target Audience",
     "projectInformation": "Informazioni Progetto",
     "projectName": "Nome Progetto",
     "projectNamePlaceholder": "es., Campagna Educativa Iperkaliemia Q4",
@@ -286,12 +286,32 @@
     "brandProduct": "Nome Brand/Prodotto",
     "selectBrand": "Seleziona brand/prodotto",
     "expectedLaunchDate": "Data di Lancio Prevista",
-    "specialty": "Specialità",
+    "therapeuticArea": "Area terapeutica",
+    "selectTherapeuticArea": "Seleziona area terapeutica",
+    "specialty": "Indicazione",
     "selectSpecialty": "Seleziona specialità medica",
-    "requestSummary": "Riepilogo Richiesta",
+    "requestSummary": "Obiettivi e descrizione",
     "requestSummaryPlaceholder": "Fornisci l'obiettivo che vorresti raggiungere con questo contenuto e un riepilogo conciso di ciò di cui hai bisogno...",
     "contentFormats": "Formati di Contenuto",
     "selectFormats": "Seleziona Formati",
+    "channels": {
+      "emailMarketing": "Email Marketing",
+      "socialMedia": "Social Media",
+      "medicalConferences": "Conferenze Mediche",
+      "printMaterials": "Materiali Stampati",
+      "digitalAdvertising": "Pubblicità Digitale",
+      "webinars": "Webinar",
+      "salesMaterials": "Materiali di Vendita",
+      "vae": "VAE",
+      "whatsapp": "WhatsApp"
+    },
+    "aiSuggestions": {
+      "specialty": "Seleziona la specialità medica più rilevante per il focus della tua campagna",
+      "requestSummary": "Fornisci una panoramica concisa che catturi l'essenza della tua richiesta di campagna",
+      "channels": "Seleziona i canali che si allineano con i metodi di comunicazione preferiti dal tuo pubblico",
+      "communicationPersonality": "Scegli uno stile di comunicazione che corrisponda agli obiettivi della campagna e al pubblico",
+      "targetAudiencePreset": "Seleziona un Target Audience per applicare linee guida di comunicazione specifiche"
+    },
     "additionalContext": "Contesto Aggiuntivo",
     "additionalInformation": "Informazioni Aggiuntive (Facoltativo)",
     "additionalInformationPlaceholder": "Eventuali requisiti specifici, considerazioni di conformità o contesto aggiuntivo...",
@@ -308,7 +328,38 @@
     "specialtyRequired": "La specialità è obbligatoria",
     "requestSummaryRequired": "Il riepilogo della richiesta è obbligatorio",
     "atLeastOneChannelRequired": "Deve essere selezionato almeno un canale",
-    "launchDateMustBeFuture": "La data di lancio deve essere futura"
+    "launchDateMustBeFuture": "La data di lancio deve essere futura",
+    "steps": {
+      "step1": {
+        "title": "Contesto della campagna",
+        "description": "Fornisci dettagli sulla tua campagna"
+      },
+      "step2a": {
+        "title": "Contesto aggiuntivo",
+        "description": "Aggiungi informazioni aggiuntive opzionali"
+      },
+      "step2b": {
+        "title": "Documenti Di partenza",
+        "description": "Carica documenti di supporto"
+      },
+      "step2c": {
+        "title": "Reference Scientifiche",
+        "description": "Aggiungi riferimenti scientifici"
+      },
+      "step2d": {
+        "title": "Campi tecnici",
+        "description": "Configura i campi tecnici"
+      },
+      "step3": {
+        "title": "Brief generato",
+        "description": "Rivedi il brief generato"
+      }
+    },
+    "navigation": {
+      "previous": "Indietro",
+      "next": "Avanti",
+      "generate": "Genera Brief"
+    }
   },
   "brandGuidelines": {
     "title": "Brand Guidelines",
@@ -349,13 +400,13 @@
       "undoButton": "Annulla Modifiche"
     },
     "targetAudience": {
-      "title": "Preset Pubblico Target",
+      "title": "Target Audience",
       "description": "Segmenti di pubblico preconfigurati con linee guida specifiche",
       "addButton": "Aggiungi Pubblico",
-      "addDialogTitle": "Aggiungi Preset Pubblico Target",
-      "addDialogDescription": "Crea una nuova configurazione di pubblico target",
-      "editDialogTitle": "Modifica Preset Pubblico Target",
-      "editDialogDescription": "Aggiorna questa configurazione di pubblico target",
+      "addDialogTitle": "Aggiungi Target Audience",
+      "addDialogDescription": "Crea una nuova configurazione di Target Audience",
+      "editDialogTitle": "Modifica Target Audience",
+      "editDialogDescription": "Aggiorna questa configurazione di Target Audience",
       "name": "Nome",
       "namePlaceholder": "es., Oncologi",
       "descriptionLabel": "Descrizione",
@@ -392,11 +443,11 @@
       "personalityUpdatedDesc": "è stata aggiornata con successo.",
       "personalityDeleted": "Personalità di comunicazione eliminata",
       "personalityDeletedDesc": "è stata eliminata.",
-      "audienceAdded": "Pubblico target aggiunto",
+      "audienceAdded": "Target Audience aggiunto",
       "audienceAddedDesc": "è stato aggiunto con successo.",
-      "audienceUpdated": "Pubblico target aggiornato",
+      "audienceUpdated": "Target Audience aggiornato",
       "audienceUpdatedDesc": "è stato aggiornato con successo.",
-      "audienceDeleted": "Pubblico target eliminato",
+      "audienceDeleted": "Target Audience eliminato",
       "audienceDeletedDesc": "è stato eliminato.",
       "productAdded": "Linee guida prodotto aggiunte",
       "productAddedDesc": "Le linee guida per",

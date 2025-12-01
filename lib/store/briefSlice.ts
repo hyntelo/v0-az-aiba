@@ -108,8 +108,8 @@ export interface BriefSlice {
 
 const emptyCampaign: CampaignData = {
   projectName: "",
-  department: "",
   brand: "",
+  therapeuticArea: "",
   expectedLaunchDate: "",
   specialty: "",
   requestSummary: "",

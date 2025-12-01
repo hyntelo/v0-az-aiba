@@ -81,18 +81,30 @@ const formatDateShort = (date: Date): string => {
 }
 
 const getAuthorName = (brief: BriefData, userProfile: { name: string }): string => {
+  // Extract author from statusHistory (first entry's changedBy field)
+  const author = brief.statusHistory && brief.statusHistory.length > 0 
+    ? brief.statusHistory[0].changedBy 
+    : userProfile.name
+  
   // Extract initials from user name (e.g., "Sarah Chen" -> "S. Chen")
-  const nameParts = userProfile.name.split(" ")
+  const nameParts = author.split(" ")
   if (nameParts.length >= 2) {
     return `${nameParts[0][0]}. ${nameParts[nameParts.length - 1]}`
   }
-  return userProfile.name
+  return author
+}
+
+const getBriefAuthor = (brief: BriefData): string => {
+  // Get the full author name from statusHistory
+  return brief.statusHistory && brief.statusHistory.length > 0 
+    ? brief.statusHistory[0].changedBy 
+    : ""
 }
 
 interface CampaignData {
   projectName: string
-  department: string
   brand: string
+  therapeuticArea: string
   expectedLaunchDate: string
   specialty: string
   requestSummary: string
@@ -110,6 +122,7 @@ export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState("")
   const [sortColumn, setSortColumn] = useState<SortColumn>(null)
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc")
+  const [statusFilter, setStatusFilter] = useState<"all" | "draft" | "ai-reviewed">("all")
 
   const {
     currentView,
@@ -137,11 +150,16 @@ export default function Dashboard() {
 
   // Filter and sort briefs
   const filteredAndSortedBriefs = useMemo(() => {
-    // First filter
+    // First filter by status
     let filtered = createdBriefs
+    if (statusFilter !== "all") {
+      filtered = createdBriefs.filter((brief) => brief.status === statusFilter)
+    }
+    
+    // Then filter by search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase()
-      filtered = createdBriefs.filter((brief) => {
+      filtered = filtered.filter((brief) => {
         const formattedId = formatBriefId(brief.id).toLowerCase()
         const title = brief.title.toLowerCase()
         const brand = brief.campaignData.brand.toLowerCase()
@@ -201,7 +219,7 @@ export default function Dashboard() {
     })
 
     return sorted
-  }, [createdBriefs, searchQuery, sortColumn, sortDirection, userProfile])
+  }, [createdBriefs, searchQuery, sortColumn, sortDirection, userProfile, statusFilter])
 
   const handleSort = (column: SortColumn) => {
     if (sortColumn === column) {
@@ -222,15 +240,14 @@ export default function Dashboard() {
     console.log("[v0] Creating new brief - clearing campaign data")
     useAppStore.getState().setCampaignData({
       projectName: "",
-      department: "",
       brand: "",
+      therapeuticArea: "",
       expectedLaunchDate: "",
       specialty: "",
       requestSummary: "",
-      objective: "",
-      targetAudience: "",
       channels: [],
       additionalContext: "",
+      attachments: [],
     })
     setCurrentView("form")
   }
@@ -402,7 +419,34 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="hyntelo-elevation-3 hover:hyntelo-elevation-6 transition-all duration-150 ease-out">
+          <Card 
+            className={`hyntelo-elevation-3 hover:hyntelo-elevation-6 transition-all duration-150 ease-out cursor-pointer ${
+              statusFilter === "all" 
+                ? "border-2 border-green-500/30 bg-gradient-to-br from-green-500/10 to-transparent" 
+                : "border-2 border-transparent"
+            }`}
+            onClick={() => setStatusFilter("all")}
+          >
+            <CardContent className="p-6 text-center">
+              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center">
+                <User className="w-6 h-6 text-green-600" />
+              </div>
+              <h3 className="font-medium text-[#211C38] mb-2">{t("dashboard.totalBriefs")}</h3>
+              <p className="text-sm text-muted-foreground mb-2">
+                {createdBriefs.length} {t("dashboard.created")}
+              </p>
+              <p className="text-xs text-muted-foreground">{t("dashboard.allTime")}</p>
+            </CardContent>
+          </Card>
+
+          <Card 
+            className={`hyntelo-elevation-3 hover:hyntelo-elevation-6 transition-all duration-150 ease-out cursor-pointer ${
+              statusFilter === "draft" 
+                ? "border-2 border-[#8EB4D6]/30 bg-gradient-to-br from-[#8EB4D6]/10 to-transparent" 
+                : "border-2 border-transparent"
+            }`}
+            onClick={() => setStatusFilter("draft")}
+          >
             <CardContent className="p-6 text-center">
               <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-[#8EB4D6]/10 flex items-center justify-center">
                 <FileText className="w-6 h-6 text-[#8EB4D6]" />
@@ -415,7 +459,14 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="hyntelo-elevation-3 hover:hyntelo-elevation-6 transition-all duration-150 ease-out">
+          <Card 
+            className={`hyntelo-elevation-3 hover:hyntelo-elevation-6 transition-all duration-150 ease-out cursor-pointer ${
+              statusFilter === "ai-reviewed" 
+                ? "border-2 border-[#8582FC]/30 bg-gradient-to-br from-[#8582FC]/10 to-transparent" 
+                : "border-2 border-transparent"
+            }`}
+            onClick={() => setStatusFilter("ai-reviewed")}
+          >
             <CardContent className="p-6 text-center">
               <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-gradient-to-r from-[#8582FC]/10 to-[#8EB4D6]/10 flex items-center justify-center">
                 <Sparkles className="w-6 h-6 text-[#8582FC]" />
@@ -425,19 +476,6 @@ export default function Dashboard() {
                 {aiReviewedCount} {t("dashboard.completed")}
               </p>
               <p className="text-xs text-muted-foreground">{t("dashboard.readyToUse")}</p>
-            </CardContent>
-          </Card>
-
-          <Card className="hyntelo-elevation-3 hover:hyntelo-elevation-6 transition-all duration-150 ease-out">
-            <CardContent className="p-6 text-center">
-              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center">
-                <User className="w-6 h-6 text-green-600" />
-              </div>
-              <h3 className="font-medium text-[#211C38] mb-2">{t("dashboard.totalBriefs")}</h3>
-              <p className="text-sm text-muted-foreground mb-2">
-                {createdBriefs.length} {t("dashboard.created")}
-              </p>
-              <p className="text-xs text-muted-foreground">{t("dashboard.allTime")}</p>
             </CardContent>
           </Card>
         </div>
@@ -687,18 +725,26 @@ export default function Dashboard() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleEdit(brief)}>
-                              {t("dashboard.actions.edit")}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDuplicate(brief)}>
-                              {t("dashboard.actions.duplicate")}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDelete(brief)} className="text-destructive">
-                              {t("dashboard.actions.delete")}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleArchive(brief)}>
-                              {t("dashboard.actions.archive")}
-                            </DropdownMenuItem>
+                            {getBriefAuthor(brief) === userProfile.name ? (
+                              <>
+                                <DropdownMenuItem onClick={() => handleEdit(brief)}>
+                                  {t("dashboard.actions.edit")}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleDuplicate(brief)}>
+                                  {t("dashboard.actions.duplicate")}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleDelete(brief)} className="text-destructive">
+                                  {t("dashboard.actions.delete")}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleArchive(brief)}>
+                                  {t("dashboard.actions.archive")}
+                                </DropdownMenuItem>
+                              </>
+                            ) : (
+                              <DropdownMenuItem onClick={() => handleDuplicate(brief)}>
+                                {t("dashboard.actions.duplicate")}
+                              </DropdownMenuItem>
+                            )}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>

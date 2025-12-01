@@ -1,76 +1,27 @@
 "use client"
 
 import type React from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Lightbulb, Loader2, MessageSquare } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
+import { Loader2 } from "lucide-react"
 import { useAppStore } from "@/lib/store"
-import { useEffect } from "react"
 import { demoData } from "@/lib/mock-data"
-import { FileUpload } from "@/components/file-upload"
 import { useTranslation } from "@/lib/i18n"
+import { BriefStepper, type Step, type StepStatus } from "@/components/brief-stepper"
+import { Step1CampaignContext } from "@/components/sections/step-1-campaign-context"
+import { Step2aAdditionalContext } from "@/components/sections/step-2a-additional-context"
+import { Step2bStartingDocuments } from "@/components/sections/step-2b-starting-documents"
+import { Step2cScientificReferences } from "@/components/sections/step-2c-scientific-references"
+import { Step2dTechnicalFields } from "@/components/sections/step-2d-technical-fields"
 
-interface CampaignFormProps {
-  onBack: () => void
-  onSubmit: (data: any) => void
-}
-
-const channelOptions = [
-  "Email Marketing",
-  "Social Media",
-  "Medical Conferences",
-  "Print Materials",
-  "Digital Advertising",
-  "Webinars",
-  "Sales Materials",
-]
-
-const departmentOptions = [
-  "Medical Affairs",
-  "Marketing",
-  "Clinical Development",
-  "Regulatory Affairs",
-  "Commercial",
-  "Market Access",
-]
-
-const specialtyOptions: Record<string, string[]> = {
-  default: ["Oncology", "Cardiology", "Endocrinology", "Immunology", "Respiratory"],
-}
-
-const launchDateOptions = [
-  "2025-03-15",
-  "2025-04-01",
-  "2025-04-15",
-  "2025-05-01",
-  "2025-06-01",
-  "2025-07-01",
-  "2025-08-01",
-  "2025-09-01",
-  "2025-10-01",
-  "2025-11-01",
-  "2025-12-01",
-  "2026-01-01",
-]
-
-const aiSuggestions = {
-  objective: "Considera l'uso di obiettivi SMART (Specifici, Misurabili, Raggiungibili, Rilevanti, Temporizzati)",
-  targetAudience: "Includi dati demografici, specialità mediche e fattori decisionali",
-  channels: "Seleziona i canali che si allineano con i metodi di comunicazione preferiti dal tuo pubblico",
-  requestSummary: "Fornisci una panoramica concisa che catturi l'essenza della tua richiesta di campagna",
-  specialty: "Seleziona la specialità medica più rilevante per il focus della tua campagna",
-  communicationPersonality:
-    "Scegli uno stile di comunicazione che corrisponda agli obiettivi della campagna e al pubblico",
-  targetAudiencePreset: "Seleziona un pubblico predefinito per applicare linee guida di comunicazione specifiche",
-}
+const TOTAL_STEPS = 6
 
 export default function CampaignForm() {
   const { t } = useTranslation()
+  const [currentStep, setCurrentStep] = useState(1)
+  const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set())
+  const topRef = useRef<HTMLDivElement>(null)
 
   const {
     campaignData,
@@ -86,29 +37,22 @@ export default function CampaignForm() {
     currentBrief,
     autoSaveDraft,
     brandGuidelines,
-    addAttachmentToCampaign,
-    removeAttachmentFromCampaign,
   } = useAppStore()
 
   const formData = campaignData
 
   const fillDemoData = () => {
-    setCampaignData(demoData)
+    const demoDataWithChannels = {
+      ...demoData,
+      channels: ["vae", "whatsapp", "salesMaterials"],
+    }
+    setCampaignData(demoDataWithChannels)
     clearFormErrors()
     console.log("[v0] Demo data filled via keyboard shortcut")
   }
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      console.log("[v0] Key pressed:", {
-        key: event.key,
-        altKey: event.altKey,
-        metaKey: event.metaKey,
-        ctrlKey: event.ctrlKey,
-        code: event.code,
-        keyCode: event.keyCode,
-      })
-
       const isAltOrOption = event.altKey || (event.getModifierState && event.getModifierState("Alt"))
       const isCKey = event.key.toLowerCase() === "c" || event.code === "KeyC"
 
@@ -135,19 +79,25 @@ export default function CampaignForm() {
         console.log("[v0] Auto-saving draft...")
         await autoSaveDraft(currentBrief.id)
       }
-    }, 30000) // Auto-save every 30 seconds
+    }, 30000)
 
     return () => clearInterval(autoSaveInterval)
   }, [formData, currentBrief, autoSaveDraft])
 
-  const validateForm = () => {
+  // Scroll to top when step changes
+  useEffect(() => {
+    setTimeout(() => {
+      topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+      window.scrollTo({ top: 0, behavior: "smooth" })
+    }, 100)
+  }, [currentStep])
+
+  // Validation functions
+  const validateStep1 = (): boolean => {
     const newErrors: Record<string, string> = {}
 
     if (!formData.projectName?.trim()) {
       newErrors.projectName = t("form.projectNameRequired")
-    }
-    if (!formData.department?.trim()) {
-      newErrors.department = t("form.departmentRequired")
     }
     if (!formData.brand?.trim()) {
       newErrors.brand = t("form.brandRequired")
@@ -177,18 +127,43 @@ export default function CampaignForm() {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const validateStep2a = (): boolean => {
+    // Placeholder - always valid for now
+    return true
+  }
 
-    if (!validateForm()) return
+  const validateStep2b = (): boolean => {
+    // Placeholder - always valid for now
+    return true
+  }
 
-    setIsGeneratingBrief(true)
+  const validateStep2c = (): boolean => {
+    // Placeholder - always valid for now
+    return true
+  }
 
-    setTimeout(() => {
-      generateBrief()
-      setIsGeneratingBrief(false)
-      setCurrentView("brief")
-    }, 3000)
+  const validateStep2d = (): boolean => {
+    // Placeholder - always valid for now
+    return true
+  }
+
+  const validateCurrentStep = (): boolean => {
+    switch (currentStep) {
+      case 1:
+        return validateStep1()
+      case 2:
+        return validateStep2a()
+      case 3:
+        return validateStep2b()
+      case 4:
+        return validateStep2c()
+      case 5:
+        return validateStep2d()
+      case 6:
+        return true // Step 3 (generation) doesn't need validation
+      default:
+        return false
+    }
   }
 
   const handleInputChange = (field: string, value: string | string[]) => {
@@ -207,8 +182,91 @@ export default function CampaignForm() {
     handleInputChange("channels", newChannels)
   }
 
+  const handleNext = () => {
+    if (validateCurrentStep()) {
+      const newCompletedSteps = new Set(completedSteps)
+      newCompletedSteps.add(currentStep)
+
+      if (currentStep < TOTAL_STEPS) {
+        setCompletedSteps(newCompletedSteps)
+        setCurrentStep(currentStep + 1)
+        // Scroll to top to show stepper and title
+        setTimeout(() => {
+          topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+          window.scrollTo({ top: 0, behavior: "smooth" })
+        }, 0)
+      }
+    }
+  }
+
+  const handlePrevious = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1)
+    }
+  }
+
+  const handleStepClick = (stepId: number) => {
+    // Allow navigation to any step that is before or equal to the current step
+    if (stepId <= currentStep) {
+      setCurrentStep(stepId)
+    }
+  }
+
+  const handleGenerateBrief = async () => {
+    setIsGeneratingBrief(true)
+
+    setTimeout(() => {
+      generateBrief()
+      setIsGeneratingBrief(false)
+      setCurrentView("brief")
+    }, 3000)
+  }
+
   const handleBack = () => {
     resetApp()
+  }
+
+  // Build steps for stepper
+  const buildSteps = (): Step[] => {
+    return [
+      {
+        id: 1,
+        label: t("form.steps.step1.title"),
+        status: getStepStatus(1),
+      },
+      {
+        id: 2,
+        label: t("form.steps.step2a.title"),
+        status: getStepStatus(2),
+      },
+      {
+        id: 3,
+        label: t("form.steps.step2b.title"),
+        status: getStepStatus(3),
+      },
+      {
+        id: 4,
+        label: t("form.steps.step2c.title"),
+        status: getStepStatus(4),
+      },
+      {
+        id: 5,
+        label: t("form.steps.step2d.title"),
+        status: getStepStatus(5),
+      },
+      {
+        id: 6,
+        label: t("form.steps.step3.title"),
+        status: getStepStatus(6),
+      },
+    ]
+  }
+
+  const getStepStatus = (stepId: number): StepStatus => {
+    if (stepId === currentStep) {
+      return "active"
+    }
+    return "pending"
   }
 
   if (isGeneratingBrief) {
@@ -230,297 +288,70 @@ export default function CampaignForm() {
     )
   }
 
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 1:
+        return (
+          <Step1CampaignContext
+            formData={formData}
+            formErrors={formErrors}
+            brandGuidelines={brandGuidelines}
+            onInputChange={handleInputChange}
+            onChannelChange={handleChannelChange}
+          />
+        )
+      case 2:
+        return <Step2aAdditionalContext />
+      case 3:
+        return <Step2bStartingDocuments />
+      case 4:
+        return <Step2cScientificReferences />
+      case 5:
+        return <Step2dTechnicalFields />
+      case 6:
+        // Step 3 - Brief generato (shows confirmation before generation)
+        return (
+          <Card className="hyntelo-elevation-3">
+            <CardContent className="p-8 text-center">
+              <h3 className="text-lg font-medium text-foreground mb-2">{t("form.steps.step3.title")}</h3>
+              <p className="text-muted-foreground mb-6">{t("form.steps.step3.description")}</p>
+              <p className="text-sm text-muted-foreground">
+                {t("form.generatingDescription")}
+              </p>
+            </CardContent>
+          </Card>
+        )
+      default:
+        return null
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <main className="max-w-4xl mx-auto px-6 py-8">
-        <div className="mb-8">
-          <h2 className="text-2xl font-medium text-foreground mb-2">{t("form.campaignContext")}</h2>
+        <div ref={topRef} className="mb-8">
+          <BriefStepper steps={buildSteps()} onStepClick={handleStepClick} />
+          
+          <h2 className="text-2xl font-medium text-foreground mb-2 mt-8">{t("form.campaignContext")}</h2>
           <p className="text-muted-foreground">{t("form.campaignContextDescription")}</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <Card className="hyntelo-elevation-3">
-            <CardHeader>
-              <CardTitle className="text-lg font-medium flex items-center gap-2">
-                <MessageSquare className="w-5 h-5" />
-                {t("form.brandGuidelines")}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Label htmlFor="communicationPersonality" className="text-sm font-medium">
-                      {t("form.communicationStyle")}
-                    </Label>
-                    <div className="group relative">
-                      <Lightbulb className="w-4 h-4 text-accent-violet cursor-help" />
-                      <div className="absolute left-0 top-6 w-64 p-3 bg-card border border-border rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10">
-                        <p className="text-xs text-muted-foreground">{aiSuggestions.communicationPersonality}</p>
-                      </div>
-                    </div>
-                  </div>
-                  <Select
-                    value={formData.communicationPersonalityId || ""}
-                    onValueChange={(value) => handleInputChange("communicationPersonalityId", value)}
-                  >
-                    <SelectTrigger className="!h-[42px] w-full">
-                      <SelectValue placeholder={t("form.selectCommunicationStyle")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {brandGuidelines.communicationPersonalities.map((personality) => (
-                        <SelectItem key={personality.id} value={personality.id}>
-                          <div className="flex flex-col">
-                            <span className="font-medium">{personality.name}</span>
-                            <span className="text-xs text-muted-foreground">{personality.description}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+        <div className="mb-8">{renderStepContent()}</div>
 
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Label htmlFor="targetAudiencePreset" className="text-sm font-medium">
-                      {t("form.audiencePreset")}
-                    </Label>
-                    <div className="group relative">
-                      <Lightbulb className="w-4 h-4 text-accent-violet cursor-help" />
-                      <div className="absolute left-0 top-6 w-64 p-3 bg-card border border-border rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10">
-                        <p className="text-xs text-muted-foreground">{aiSuggestions.targetAudiencePreset}</p>
-                      </div>
-                    </div>
-                  </div>
-                  <Select
-                    value={formData.targetAudiencePresetId || ""}
-                    onValueChange={(value) => handleInputChange("targetAudiencePresetId", value)}
-                  >
-                    <SelectTrigger className="!h-[42px] w-full">
-                      <SelectValue placeholder={t("form.selectAudiencePreset")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {brandGuidelines.targetAudiencePresets.map((audience) => (
-                        <SelectItem key={audience.id} value={audience.id}>
-                          <div className="flex flex-col">
-                            <span className="font-medium">{audience.name}</span>
-                            <span className="text-xs text-muted-foreground">{audience.description}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="hyntelo-elevation-3">
-            <CardHeader>
-              <CardTitle className="text-lg font-medium">{t("form.projectInformation")}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="projectName" className="text-sm font-medium">
-                  {t("form.projectName")} *
-                </Label>
-                <Input
-                  id="projectName"
-                  value={formData.projectName || ""}
-                  onChange={(e) => handleInputChange("projectName", e.target.value)}
-                  placeholder={t("form.projectNamePlaceholder")}
-                  className={formErrors.projectName ? "border-red-500 focus-visible:ring-red-500" : ""}
-                />
-                {formErrors.projectName && <p className="text-sm text-red-600">{formErrors.projectName}</p>}
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="department" className="text-sm font-medium">
-                    {t("form.department")} *
-                  </Label>
-                  <Select
-                    value={formData.department || ""}
-                    onValueChange={(value) => handleInputChange("department", value)}
-                  >
-                    <SelectTrigger
-                      className={`!h-[42px] w-full ${formErrors.department ? "border-red-500 focus-visible:ring-red-500" : ""}`}
-                    >
-                      <SelectValue placeholder={t("form.selectDepartment")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {departmentOptions.map((dept) => (
-                        <SelectItem key={dept} value={dept}>
-                          {dept}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {formErrors.department && <p className="text-sm text-red-600">{formErrors.department}</p>}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="brand" className="text-sm font-medium">
-                    {t("form.brandProduct")} *
-                  </Label>
-                  <Select value={formData.brand || ""} onValueChange={(value) => handleInputChange("brand", value)}>
-                    <SelectTrigger
-                      className={`!h-[42px] w-full ${formErrors.brand ? "border-red-500 focus-visible:ring-red-500" : ""}`}
-                    >
-                      <SelectValue placeholder={t("form.selectBrand")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {brandGuidelines.productBrandGuidelines.map((product) => (
-                        <SelectItem key={product.id} value={product.productName}>
-                          {product.productName}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {formErrors.brand && <p className="text-sm text-red-600">{formErrors.brand}</p>}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="expectedLaunchDate" className="text-sm font-medium">
-                    {t("form.expectedLaunchDate")} *
-                  </Label>
-                  <Input
-                    id="expectedLaunchDate"
-                    type="date"
-                    value={formData.expectedLaunchDate || ""}
-                    onChange={(e) => handleInputChange("expectedLaunchDate", e.target.value)}
-                    className={`!h-[42px] w-full ${formErrors.expectedLaunchDate ? "border-red-500 focus-visible:ring-red-500" : ""}`}
-                  />
-                  {formErrors.expectedLaunchDate && (
-                    <p className="text-sm text-red-600">{formErrors.expectedLaunchDate}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Label htmlFor="specialty" className="text-sm font-medium">
-                      {t("form.specialty")} *
-                    </Label>
-                    <div className="group relative">
-                      <Lightbulb className="w-4 h-4 text-accent-violet cursor-help" />
-                      <div className="absolute left-0 top-6 w-64 p-3 bg-card border border-border rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10">
-                        <p className="text-xs text-muted-foreground">{aiSuggestions.specialty}</p>
-                      </div>
-                    </div>
-                  </div>
-                  <Select
-                    value={formData.specialty || ""}
-                    onValueChange={(value) => handleInputChange("specialty", value)}
-                  >
-                    <SelectTrigger
-                      className={`!h-[42px] w-full ${formErrors.specialty ? "border-red-500 focus-visible:ring-red-500" : ""}`}
-                    >
-                      <SelectValue placeholder={t("form.selectSpecialty")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {specialtyOptions.default.map((specialty) => (
-                        <SelectItem key={specialty} value={specialty}>
-                          {specialty}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {formErrors.specialty && <p className="text-sm text-red-600">{formErrors.specialty}</p>}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Label htmlFor="requestSummary" className="text-sm font-medium">
-                    {t("form.requestSummary")} *
-                  </Label>
-                  <div className="group relative">
-                    <Lightbulb className="w-4 h-4 text-accent-violet cursor-help" />
-                    <div className="absolute left-0 top-6 w-64 p-3 bg-card border border-border rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10">
-                      <p className="text-xs text-muted-foreground">{aiSuggestions.requestSummary}</p>
-                    </div>
-                  </div>
-                </div>
-                <Textarea
-                  id="requestSummary"
-                  value={formData.requestSummary || ""}
-                  onChange={(e) => handleInputChange("requestSummary", e.target.value)}
-                  placeholder={t("form.requestSummaryPlaceholder")}
-                  rows={3}
-                  className={formErrors.requestSummary ? "border-red-500 focus-visible:ring-red-500" : ""}
-                />
-                {formErrors.requestSummary && <p className="text-sm text-red-600">{formErrors.requestSummary}</p>}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="hyntelo-elevation-3">
-            <CardHeader>
-              <CardTitle className="text-lg font-medium">{t("form.contentFormats")}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Label className="text-sm font-medium">{t("form.selectFormats")}*</Label>
-                  <div className="group relative">
-                    <Lightbulb className="w-4 h-4 text-accent-violet cursor-help" />
-                    <div className="absolute left-0 top-6 w-64 p-3 bg-card border border-border rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10">
-                      <p className="text-xs text-muted-foreground">{aiSuggestions.channels}</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4 mt-4">
-                  {channelOptions.map((channel) => (
-                    <div key={channel} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={channel}
-                        checked={formData.channels.includes(channel)}
-                        onCheckedChange={(checked) => handleChannelChange(channel, checked as boolean)}
-                      />
-                      <Label htmlFor={channel} className="text-sm font-normal cursor-pointer">
-                        {channel}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-                {formErrors.channels && <p className="text-sm text-red-600 mt-2">{formErrors.channels}</p>}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="hyntelo-elevation-3">
-            <CardHeader>
-              <CardTitle className="text-lg font-medium">{t("form.additionalContext")}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="context" className="text-sm font-medium">
-                  {t("form.additionalInformation")}
-                </Label>
-                <Textarea
-                  id="context"
-                  value={formData.additionalContext || ""}
-                  onChange={(e) => handleInputChange("additionalContext", e.target.value)}
-                  placeholder={t("form.additionalInformationPlaceholder")}
-                  rows={4}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">{t("form.attachments")}</Label>
-                <p className="text-xs text-muted-foreground mb-3">{t("form.attachmentsDescription")}</p>
-                <FileUpload
-                  attachments={formData.attachments || []}
-                  onAttachmentAdd={addAttachmentToCampaign}
-                  onAttachmentRemove={removeAttachmentFromCampaign}
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <div className="flex justify-end gap-4">
+        <div className="flex justify-between gap-4">
+          <div>
+            {currentStep > 1 && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handlePrevious}
+                className="border-primary text-primary hover:bg-primary/6 bg-transparent"
+              >
+                {t("form.navigation.previous")}
+              </Button>
+            )}
+          </div>
+          <div className="flex gap-4">
             <Button
               type="button"
               variant="outline"
@@ -529,14 +360,25 @@ export default function CampaignForm() {
             >
               {t("form.cancel")}
             </Button>
-            <Button
-              type="submit"
-              className="bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-150 ease-out hover:scale-[0.97] active:scale-[0.97]"
-            >
-              {t("form.generateBrief")}
-            </Button>
+            {currentStep < TOTAL_STEPS ? (
+              <Button
+                type="button"
+                onClick={handleNext}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-150 ease-out hover:scale-[0.97] active:scale-[0.97]"
+              >
+                {t("form.navigation.next")}
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                onClick={handleGenerateBrief}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-150 ease-out hover:scale-[0.97] active:scale-[0.97]"
+              >
+                {t("form.navigation.generate")}
+              </Button>
+            )}
           </div>
-        </form>
+        </div>
       </main>
     </div>
   )
