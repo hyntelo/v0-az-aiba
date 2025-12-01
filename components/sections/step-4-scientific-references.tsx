@@ -203,7 +203,7 @@ export function Step4ScientificReferences() {
             },
           }}
           tableConfig={{
-            title: t("form.steps.step4.table.title"),
+            title: (count: number) => t("form.steps.step4.table.titleWithCount", { count }),
             columns: tableColumns,
             emptyMessage: t("form.steps.step4.table.emptyMessage"),
           }}

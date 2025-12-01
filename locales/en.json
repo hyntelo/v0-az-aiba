@@ -15,6 +15,7 @@
     "filter": "Filter",
     "close": "Close",
     "submit": "Submit",
+    "select": "Select",
     "required": "Required",
     "optional": "Optional",
     "unknown": "Unknown",

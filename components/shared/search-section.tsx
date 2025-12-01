@@ -110,11 +110,15 @@ export function SearchSection({
         )}
 
         {/* Search Fields */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {fields.map((field) => (
+        <div className="space-y-4">
+          {/* Text Fields - Prominent, full width */}
+          {fields
+            .filter((field) => field.type === "text")
+            .map((field) => (
             <div key={field.name} className="space-y-2">
-              <Label htmlFor={field.name}>{field.label}</Label>
-              {field.type === "text" ? (
+                <Label htmlFor={field.name} className="text-base font-medium">
+                  {field.label}
+                </Label>
                 <Input
                   id={field.name}
                   type="text"
@@ -123,7 +127,17 @@ export function SearchSection({
                   onChange={(e) => handleFieldChange(field.name, e.target.value)}
                   className="w-full"
                 />
-              ) : (
+              </div>
+            ))}
+
+          {/* Select Fields - All in one row */}
+          {fields.filter((field) => field.type === "select").length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {fields
+                .filter((field) => field.type === "select")
+                .map((field) => (
+                  <div key={field.name} className="space-y-2">
+                    <Label htmlFor={field.name}>{field.label}</Label>
                 <Select
                   value={searchValues[field.name] || ""}
                   onValueChange={(value) => handleFieldChange(field.name, value)}
@@ -139,9 +153,10 @@ export function SearchSection({
                     ))}
                   </SelectContent>
                 </Select>
-              )}
+                  </div>
+                ))}
             </div>
-          ))}
+          )}
         </div>
 
         {/* Search Button */}

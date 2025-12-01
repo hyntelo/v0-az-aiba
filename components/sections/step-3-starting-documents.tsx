@@ -187,7 +187,7 @@ export function Step3StartingDocuments() {
             resultColumns,
           }}
           tableConfig={{
-            title: t("form.steps.step3.table.title"),
+            title: (count: number) => t("form.steps.step3.table.titleWithCount", { count }),
             columns: tableColumns,
             emptyMessage: t("form.steps.step3.table.emptyMessage"),
           }}

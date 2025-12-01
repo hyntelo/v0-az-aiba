@@ -15,6 +15,7 @@
     "filter": "Filtra",
     "close": "Chiudi",
     "submit": "Invia",
+    "select": "Seleziona",
     "required": "Obbligatorio",
     "optional": "Facoltativo",
     "unknown": "Sconosciuto",
@@ -346,6 +347,7 @@
         },
         "table": {
           "title": "Lista degli allegati caricati",
+          "titleWithCount": "{{count}} Materiali Selezionati",
           "attachmentName": "Nome allegato",
           "description": "Descrizione",
           "descriptionPlaceholder": "Inserisci descrizione...",
@@ -379,6 +381,7 @@
         },
         "table": {
           "title": "Lista dei materiali",
+          "titleWithCount": "{{count}} Materiali Selezionati",
           "documentId": "ID Documento",
           "title": "Titolo",
           "usage": "Utilizzo",
@@ -399,6 +402,7 @@
         },
         "table": {
           "title": "Lista delle reference",
+          "titleWithCount": "{{count}} Materiali Selezionati",
           "referenceId": "ID Reference",
           "title": "Titolo",
           "authors": "Autori",

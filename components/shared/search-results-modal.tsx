@@ -1,9 +1,10 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { X, Check } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Table,
   TableBody,
@@ -13,6 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
+import { useTranslation } from "@/lib/i18n"
 
 export interface ResultColumn<T> {
   key: string
@@ -42,7 +44,15 @@ export function SearchResultsModal<T>({
   getItemId,
   multiSelect = true,
 }: SearchResultsModalProps<T>) {
+  const { t } = useTranslation()
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+
+  // Reset selection when modal opens/closes
+  useEffect(() => {
+    if (!isOpen) {
+      setSelectedIds(new Set())
+    }
+  }, [isOpen])
 
   const handleToggleSelection = (itemId: string) => {
     if (multiSelect) {
@@ -109,16 +119,19 @@ export function SearchResultsModal<T>({
                       onClick={() => handleToggleSelection(itemId)}
                     >
                       {multiSelect && (
-                        <TableCell>
-                          <div
-                            className={cn(
-                              "w-5 h-5 rounded border-2 flex items-center justify-center transition-colors",
-                              isSelected
-                                ? "bg-accent-violet border-accent-violet"
-                                : "border-gray-300"
-                            )}
-                          >
-                            {isSelected && <Check className="w-3 h-3 text-white" />}
+                        <TableCell 
+                          onClick={(e) => e.stopPropagation()}
+                          className="w-[50px]"
+                        >
+                          <div onClick={(e) => e.stopPropagation()}>
+                            <Checkbox
+                              checked={isSelected}
+                              onCheckedChange={(checked) => {
+                                if (checked !== undefined) {
+                                  handleToggleSelection(itemId)
+                                }
+                              }}
+                            />
                           </div>
                         </TableCell>
                       )}
@@ -136,16 +149,16 @@ export function SearchResultsModal<T>({
         </div>
         <div className="px-6 py-4 border-t flex justify-end gap-2">
           <Button variant="outline" onClick={handleCancel}>
-            Annulla
+            {t("common.cancel")}
           </Button>
           <Button
             onClick={handleConfirm}
             disabled={selectedIds.size === 0}
-            className="bg-accent-violet hover:bg-accent-violet/90"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground"
           >
-            {multiSelect
-              ? `Seleziona ${selectedIds.size} elemento${selectedIds.size !== 1 ? "i" : ""}`
-              : "Seleziona"}
+            {multiSelect && selectedIds.size > 0
+              ? `${t("common.select")} ${selectedIds.size} ${selectedIds.size === 1 ? "elemento" : "elementi"}`
+              : t("common.select")}
           </Button>
         </div>
       </DialogContent>

@@ -28,7 +28,7 @@ export interface UploadConfig {
 }
 
 export interface TableConfig<T> {
-  title: string
+  title: string | ((count: number) => string)
   columns: TableColumn<T>[]
   emptyMessage?: string
 }
@@ -155,7 +155,11 @@ export function ItemsManager<T>({
 
         {/* Table Section */}
         <div className="space-y-2">
-          <h3 className="text-lg font-medium">{tableConfig.title}</h3>
+          {items.length > 0 && (
+            <h3 className="text-lg font-medium">
+              {typeof tableConfig.title === "function" ? tableConfig.title(items.length) : tableConfig.title}
+            </h3>
+          )}
           <SearchableItemsTable
             items={items}
             columns={tableConfig.columns}

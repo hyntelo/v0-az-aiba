@@ -10,9 +10,11 @@ export function Step2dTechnicalFields() {
     <Card className="hyntelo-elevation-3">
       <CardHeader>
         <CardTitle className="text-lg font-medium">{t("form.steps.step2d.title")}</CardTitle>
+        <p className="text-sm text-muted-foreground mt-1">
+          {t("form.steps.step2d.description")}
+        </p>
       </CardHeader>
       <CardContent>
-        <p className="text-muted-foreground">{t("form.steps.step2d.description")}</p>
         {/* Content will be added later */}
       </CardContent>
     </Card>

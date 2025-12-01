@@ -63,7 +63,10 @@ export function Step1CampaignContext({
       {/* Section 1: Informazioni Progetto */}
       <Card className="hyntelo-elevation-3">
         <CardHeader>
-          <CardTitle className="text-lg font-medium">{t("form.projectInformation")}</CardTitle>
+          <CardTitle className="text-lg font-medium">{t("form.steps.step1.title")}</CardTitle>
+          <p className="text-sm text-muted-foreground mt-1">
+            {t("form.steps.step1.description")}
+          </p>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
