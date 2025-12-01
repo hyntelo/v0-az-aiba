@@ -3,6 +3,7 @@ export interface StartingDocument {
   documentId: string
   title: string
   usage: "global-adapt" | "update" | "inspiration" | "other"
+  pages?: string
 }
 
 export interface Claim {
@@ -63,6 +64,7 @@ export interface CampaignData {
   scientificReferences?: ScientificReference[]
   communicationPersonalityId?: string
   targetAudiencePresetId?: string
+  typology?: string
   technicalFields?: TechnicalFields
 }
 
@@ -109,15 +111,21 @@ export interface StatusChange {
   comment?: string
 }
 
+export interface KeyMessage {
+  id: string
+  tag: string
+  description: string
+}
+
 export interface BriefData {
   id: string
   title: string
   campaignData: CampaignData
   generatedContent?: {
     objectives: string
-    keyMessages: string
-    toneOfVoice: string
-    complianceNotes: string
+    keyMessages: Record<string, KeyMessage[]> // Channel-specific array
+    toneOfVoice: Record<string, string> // Channel-specific
+    complianceNotes: Record<string, string> // Channel-specific
   }
   references: Reference[]
   createdAt: Date

@@ -12,6 +12,9 @@ import {
 import { ItemsManager } from "@/components/shared/items-manager"
 import { type TableColumn } from "@/components/shared/searchable-items-table"
 import { type ResultColumn } from "@/components/shared/search-results-modal"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { ExternalLink } from "lucide-react"
 import { useTranslation } from "@/lib/i18n"
 import { useAppStore } from "@/lib/store"
 import type { StartingDocument } from "@/lib/store/types"
@@ -31,6 +34,13 @@ export function Step3StartingDocuments() {
   const handleUsageChange = (documentId: string, usage: StartingDocument["usage"]) => {
     const updatedDocuments = documents.map((doc) =>
       doc.id === documentId ? { ...doc, usage } : doc
+    )
+    handleDocumentsChange(updatedDocuments)
+  }
+
+  const handlePagesChange = (documentId: string, pages: string) => {
+    const updatedDocuments = documents.map((doc) =>
+      doc.id === documentId ? { ...doc, pages } : doc
     )
     handleDocumentsChange(updatedDocuments)
   }
@@ -55,6 +65,14 @@ export function Step3StartingDocuments() {
         usage: "update",
       },
     ]
+  }
+
+  // Construct VVPM URL from documentId
+  const getVvpmUrl = (documentId: string): string => {
+    // TODO: Replace with actual VVPM base URL
+    // For now, using a placeholder format that can be configured
+    const baseUrl = process.env.NEXT_PUBLIC_VVPM_URL || "https://vvpm.example.com"
+    return `${baseUrl}/document/${documentId}`
   }
 
   const tableColumns: TableColumn<StartingDocument>[] = [
@@ -109,6 +127,22 @@ export function Step3StartingDocuments() {
         </div>
       ),
     },
+    {
+      key: "pages",
+      label: t("form.steps.step3.table.pages"),
+      render: (item) => (
+        <div className="min-w-[120px] max-w-[200px]">
+          <Input
+            type="text"
+            value={item.pages || ""}
+            onChange={(e) => handlePagesChange(item.id, e.target.value)}
+            placeholder="es. 1,2;4 o 1-10"
+            className="h-8 text-sm"
+          />
+        </div>
+      ),
+      hideOnMobile: true,
+    },
   ]
 
   const resultColumns: ResultColumn<StartingDocument>[] = [
@@ -121,6 +155,28 @@ export function Step3StartingDocuments() {
       key: "title",
       label: t("form.steps.step3.table.title"),
       render: (item) => <span>{item.title}</span>,
+    },
+    {
+      key: "actions",
+      label: "",
+      render: (item) => (
+        <Button
+          variant="outline"
+          size="sm"
+          asChild
+          className="h-8"
+        >
+          <a
+            href={getVvpmUrl(item.documentId)}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <ExternalLink className="w-4 h-4 mr-2" />
+            {t("form.steps.step3.viewInVvpm")}
+          </a>
+        </Button>
+      ),
     },
   ]
 
@@ -190,6 +246,23 @@ export function Step3StartingDocuments() {
             title: (count: number) => t("form.steps.step3.table.titleWithCount", { count }),
             columns: tableColumns,
             emptyMessage: t("form.steps.step3.table.emptyMessage"),
+            renderActions: (item: StartingDocument) => (
+              <Button
+                variant="ghost"
+                size="sm"
+                asChild
+                className="h-8 w-8 p-0"
+                aria-label={t("form.steps.step3.viewInVvpm")}
+              >
+                <a
+                  href={getVvpmUrl(item.documentId)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              </Button>
+            ),
           }}
           items={documents}
           onItemsChange={handleDocumentsChange}

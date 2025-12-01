@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Lightbulb, MessageSquare } from "lucide-react"
+import { Lightbulb, MessageSquare, FileText, Radio } from "lucide-react"
 import { useTranslation } from "@/lib/i18n"
 import type { CampaignData } from "@/lib/store/types"
 
@@ -21,14 +21,16 @@ interface Step1CampaignContextProps {
 
 // Channel keys used for storage (consistent across languages)
 const channelKeys = [
-  "emailMarketing",
-  "socialMedia",
-  "medicalConferences",
-  "printMaterials",
-  "digitalAdvertising",
-  "webinars",
-  "salesMaterials",
-  "vae",
+  "email",
+  "webPage",
+  "emailWebpage",
+  "materialiCartacei",
+  "graficheStand",
+  "video",
+  "loghi",
+  "slideDeck",
+  "traduzioni",
+  "iDetail",
   "whatsapp",
 ]
 
@@ -63,7 +65,10 @@ export function Step1CampaignContext({
       {/* Section 1: Informazioni Progetto */}
       <Card className="hyntelo-elevation-3">
         <CardHeader>
-          <CardTitle className="text-lg font-medium">{t("form.steps.step1.title")}</CardTitle>
+          <CardTitle className="text-lg font-medium flex items-center gap-2">
+            <FileText className="w-5 h-5" />
+            {t("form.steps.step1.title")}
+          </CardTitle>
           <p className="text-sm text-muted-foreground mt-1">
             {t("form.steps.step1.description")}
           </p>
@@ -89,7 +94,7 @@ export function Step1CampaignContext({
               <Label htmlFor="requestSummary" className="text-base font-semibold">
                 {t("form.requestSummary")} *
               </Label>
-              <div className="group relative">
+              <div className="group relative inline-flex flex-shrink-0">
                 <Lightbulb className="w-5 h-5 text-accent-violet cursor-help" />
                 <div className="absolute left-0 top-6 w-64 p-3 bg-card border border-border rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10">
                   <p className="text-xs text-muted-foreground">{t("form.aiSuggestions.requestSummary")}</p>
@@ -135,7 +140,7 @@ export function Step1CampaignContext({
 
             <div className="space-y-2">
               <Label htmlFor="therapeuticArea" className="text-sm font-medium">
-                {t("form.therapeuticArea")}
+                {t("form.therapeuticArea")} *
               </Label>
               <Select
                 value={formData.therapeuticArea || ""}
@@ -160,17 +165,9 @@ export function Step1CampaignContext({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <div className="flex items-center gap-2">
                 <Label htmlFor="specialty" className="text-sm font-medium">
-                  {t("form.specialty")} *
+                {t("form.specialty")}
                 </Label>
-                <div className="group relative">
-                  <Lightbulb className="w-4 h-4 text-accent-violet cursor-help" />
-                  <div className="absolute left-0 top-6 w-64 p-3 bg-card border border-border rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10">
-                    <p className="text-xs text-muted-foreground">{t("form.aiSuggestions.specialty")}</p>
-                  </div>
-                </div>
-              </div>
               <Select value={formData.specialty || ""} onValueChange={(value) => onInputChange("specialty", value)}>
                 <SelectTrigger
                   className={`!h-[42px] w-full ${formErrors.specialty ? "border-red-500 focus-visible:ring-red-500" : ""}`}
@@ -207,22 +204,22 @@ export function Step1CampaignContext({
         </CardContent>
       </Card>
 
-      {/* Section 2: Linee Guida del Brand */}
+      {/* Section 2: Obiettivi di Comunicazione - Stile, Target */}
       <Card className="hyntelo-elevation-3">
         <CardHeader>
           <CardTitle className="text-lg font-medium flex items-center gap-2">
             <MessageSquare className="w-5 h-5" />
-            {t("form.brandGuidelines")}
+            {t("form.communicationObjectives")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Label htmlFor="communicationPersonality" className="text-sm font-medium">
-                  {t("form.communicationStyle")}
+                  {t("form.style")}
                 </Label>
-                <div className="group relative">
+                <div className="group relative inline-flex flex-shrink-0">
                   <Lightbulb className="w-4 h-4 text-accent-violet cursor-help" />
                   <div className="absolute left-0 top-6 w-64 p-3 bg-card border border-border rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10">
                     <p className="text-xs text-muted-foreground">{t("form.aiSuggestions.communicationPersonality")}</p>
@@ -252,9 +249,9 @@ export function Step1CampaignContext({
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Label htmlFor="targetAudiencePreset" className="text-sm font-medium">
-                  {t("form.audiencePreset")}
+                  {t("form.target")}
                 </Label>
-                <div className="group relative">
+                <div className="group relative inline-flex flex-shrink-0">
                   <Lightbulb className="w-4 h-4 text-accent-violet cursor-help" />
                   <div className="absolute left-0 top-6 w-64 p-3 bg-card border border-border rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10">
                     <p className="text-xs text-muted-foreground">{t("form.aiSuggestions.targetAudiencePreset")}</p>
@@ -280,20 +277,41 @@ export function Step1CampaignContext({
                 </SelectContent>
               </Select>
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="typology" className="text-sm font-medium">
+                {t("form.typology")}
+              </Label>
+              <Select
+                value={formData.typology || ""}
+                onValueChange={(value) => onInputChange("typology", value)}
+              >
+                <SelectTrigger className="!h-[42px] w-full">
+                  <SelectValue placeholder={t("form.selectTypology")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="branded">{t("form.typologyOptions.branded")}</SelectItem>
+                  <SelectItem value="unbranded">{t("form.typologyOptions.unbranded")}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Section 3: Canali */}
+      {/* Section 3: Mezzi */}
       <Card className="hyntelo-elevation-3">
         <CardHeader>
-          <CardTitle className="text-lg font-medium">{t("form.contentFormats")}</CardTitle>
+          <CardTitle className="text-lg font-medium flex items-center gap-2">
+            <Radio className="w-5 h-5" />
+            {t("form.mezzi")}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <Label className="text-sm font-medium">{t("form.selectFormats")}*</Label>
-              <div className="group relative">
+              <Label className="text-sm font-medium">{t("form.selectMezzi")}*</Label>
+              <div className="group relative inline-flex flex-shrink-0">
                 <Lightbulb className="w-4 h-4 text-accent-violet cursor-help" />
                 <div className="absolute left-0 top-6 w-64 p-3 bg-card border border-border rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10">
                   <p className="text-xs text-muted-foreground">{t("form.aiSuggestions.channels")}</p>

@@ -144,11 +144,37 @@ export default function BriefDisplay() {
     }))
   }
 
+  // Helper to get content (handles new structure)
+  const getSectionContent = (key: string): string => {
+    const content = currentBrief.generatedContent?.[key as keyof typeof currentBrief.generatedContent]
+    if (key === "keyMessages") {
+      // Handle channel-specific key messages
+      if (typeof content === "object" && content !== null && !Array.isArray(content)) {
+        const firstChannel = currentBrief.campaignData.channels[0] || Object.keys(content as Record<string, any>)[0] || ""
+        const channelMessages = (content as Record<string, any[]>)[firstChannel] || []
+        return channelMessages.map((msg: any) => `[${msg.tag}] ${msg.description}`).join("\n\n")
+      }
+      // Fallback for old array format
+      if (Array.isArray(content)) {
+        return content.map((msg: any) => `[${msg.tag}] ${msg.description}`).join("\n\n")
+      }
+      return ""
+    }
+    if (key === "toneOfVoice" || key === "complianceNotes") {
+      // Handle channel-specific content
+      if (typeof content === "object" && content !== null && !Array.isArray(content)) {
+        const channelContent = (content as Record<string, string>)[currentBrief.campaignData.channels[0] || ""]
+        return channelContent || Object.values(content as Record<string, string>)[0] || ""
+      }
+    }
+    return typeof content === "string" ? content : ""
+  }
+
   const sections = [
     {
       key: "objectives",
       title: t("briefDisplay.campaignObjectives"),
-      content: currentBrief.generatedContent?.objectives || "",
+      content: getSectionContent("objectives"),
       icon: "🎯",
       aiTip: mockBriefAISuggestions.objectives,
       priority: "high",
@@ -156,7 +182,7 @@ export default function BriefDisplay() {
     {
       key: "keyMessages",
       title: t("briefDisplay.keyMessages"),
-      content: currentBrief.generatedContent?.keyMessages || "",
+      content: getSectionContent("keyMessages"),
       icon: "💬",
       aiTip: mockBriefAISuggestions.keyMessages,
       priority: "high",
@@ -164,7 +190,7 @@ export default function BriefDisplay() {
     {
       key: "toneOfVoice",
       title: t("briefDisplay.toneOfVoice"),
-      content: currentBrief.generatedContent?.toneOfVoice || "",
+      content: getSectionContent("toneOfVoice"),
       icon: "🎭",
       aiTip: mockBriefAISuggestions.toneOfVoice,
       priority: "medium",
@@ -172,7 +198,7 @@ export default function BriefDisplay() {
     {
       key: "complianceNotes",
       title: t("briefDisplay.complianceNotes"),
-      content: currentBrief.generatedContent?.complianceNotes || "",
+      content: getSectionContent("complianceNotes"),
       icon: "⚖️",
       aiTip: mockBriefAISuggestions.complianceNotes,
       priority: "high",

@@ -29,6 +29,7 @@ interface SearchableItemsTableProps<T> {
   emptyMessage?: string
   loading?: boolean
   className?: string
+  renderActions?: (item: T, itemId: string) => React.ReactNode
 }
 
 export function SearchableItemsTable<T>({
@@ -39,6 +40,7 @@ export function SearchableItemsTable<T>({
   emptyMessage = "Nessun elemento",
   loading = false,
   className,
+  renderActions,
 }: SearchableItemsTableProps<T>) {
   if (loading) {
     return (
@@ -71,7 +73,9 @@ export function SearchableItemsTable<T>({
                 key={column.key}
                     className={cn(
                       column.hideOnMobile && "hidden md:table-cell",
-                      "min-w-0",
+                      column.key === "documentId" || column.key === "referenceId" 
+                        ? "w-[120px] min-w-[120px] max-w-[150px]" 
+                        : "min-w-0",
                       column.className
                     )}
               >
@@ -91,7 +95,9 @@ export function SearchableItemsTable<T>({
                     key={column.key}
                         className={cn(
                           column.hideOnMobile && "hidden md:table-cell",
-                          "min-w-0 max-w-0",
+                          column.key === "documentId" || column.key === "referenceId"
+                            ? "w-[120px] min-w-[120px] max-w-[150px]"
+                            : "min-w-0 max-w-0",
                           column.className
                         )}
                   >
@@ -101,6 +107,8 @@ export function SearchableItemsTable<T>({
                   </TableCell>
                 ))}
                     <TableCell className="w-[80px] min-w-[80px] text-right whitespace-nowrap">
+                  <div className="flex items-center justify-end gap-2">
+                    {renderActions && renderActions(item, itemId)}
                   <Button
                     variant="ghost"
                     size="sm"
@@ -110,6 +118,7 @@ export function SearchableItemsTable<T>({
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             )

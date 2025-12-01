@@ -14,6 +14,7 @@ import { Step2AdditionalContext } from "@/components/sections/step-2-additional-
 import { Step3StartingDocuments } from "@/components/sections/step-3-starting-documents"
 import { Step4ScientificReferences } from "@/components/sections/step-4-scientific-references"
 import { Step2dTechnicalFields } from "@/components/sections/step-2d-technical-fields"
+import { Step6BriefRecap } from "@/components/sections/step-6-brief-recap"
 
 const TOTAL_STEPS = 6
 
@@ -77,7 +78,7 @@ export default function CampaignForm() {
         currentBrief
       ) {
         console.log("[v0] Auto-saving draft...")
-        await autoSaveDraft(currentBrief.id)
+        await autoSaveDraft()
       }
     }, 30000)
 
@@ -105,8 +106,8 @@ export default function CampaignForm() {
     if (!formData.expectedLaunchDate?.trim()) {
       newErrors.expectedLaunchDate = t("form.expectedLaunchDateRequired")
     }
-    if (!formData.specialty?.trim()) {
-      newErrors.specialty = t("form.specialtyRequired")
+    if (!formData.therapeuticArea?.trim()) {
+      newErrors.therapeuticArea = t("form.therapeuticAreaRequired")
     }
     if (!formData.requestSummary?.trim()) {
       newErrors.requestSummary = t("form.requestSummaryRequired")
@@ -309,18 +310,7 @@ export default function CampaignForm() {
       case 5:
         return <Step2dTechnicalFields />
       case 6:
-        // Step 6 - Brief generato (shows confirmation before generation)
-        return (
-          <Card className="hyntelo-elevation-3">
-            <CardContent className="p-8 text-center">
-              <h3 className="text-lg font-medium text-foreground mb-2">{t("form.steps.step6.title")}</h3>
-              <p className="text-muted-foreground mb-6">{t("form.steps.step6.description")}</p>
-              <p className="text-sm text-muted-foreground">
-                {t("form.generatingDescription")}
-              </p>
-            </CardContent>
-          </Card>
-        )
+        return <Step6BriefRecap onStepNavigate={setCurrentStep} />
       default:
         return null
     }

@@ -11,7 +11,7 @@ import type { ScientificReference, KnowledgeBaseDocument } from "@/lib/store/typ
 import type { AttachmentFile } from "@/lib/file-utils"
 import { searchKnowledgeBase, addDocumentToKnowledgeBase, extractClaimsFromFile } from "@/lib/mock-knowledge-base"
 import { ClaimsSelectionModal } from "./claims-selection-modal"
-import { ChevronDown, ChevronUp, Loader2, Sparkles, Search } from "lucide-react"
+import { ChevronDown, ChevronUp, Loader2, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -171,8 +171,8 @@ export function Step4ScientificReferences() {
     // Extract claims from file
     const claims = await extractClaimsFromFile(new File([], file.name, { type: file.type }))
 
-    // Create new reference
-    const newReference: ScientificReference = {
+    // Create knowledge base document and add to knowledge base (not to selected materials)
+    const knowledgeBaseDoc: KnowledgeBaseDocument = {
       id: `ref-${Date.now()}`,
       referenceId: `IT-${Math.floor(Math.random() * 1000000)}`,
       title: metadata?.title || file.name,
@@ -181,19 +181,16 @@ export function Step4ScientificReferences() {
       publicationDate: metadata?.publicationDate,
       claimsCount: claims.length,
       selectedClaims: [],
-    }
-
-    // Add to brief
-    handleReferencesChange([...references, newReference])
-
-    // Create knowledge base document and add to knowledge base
-    const knowledgeBaseDoc: KnowledgeBaseDocument = {
-      ...newReference,
       claims,
       uploadedAt: new Date(),
     }
 
+    // Add to knowledge base only (in reverse order - newest first)
     addDocumentToKnowledgeBase(knowledgeBaseDoc)
+    
+    // Refresh search results to show the newly uploaded document at the top
+    const updatedResults = await searchKnowledgeBase(campaignData)
+    setSearchResults(updatedResults)
 
     // Show success message (in real app, use toast)
     console.log(t("form.steps.step4.upload.addedToKnowledgeBase"))
@@ -205,7 +202,7 @@ export function Step4ScientificReferences() {
       label: t("form.steps.step4.table.referenceId"),
       render: (item) => (
         <div className="min-w-0 max-w-full">
-          <span className="font-mono text-sm truncate block whitespace-nowrap" title={item.referenceId}>
+          <span className="font-mono text-sm truncate block" title={item.referenceId}>
             {item.referenceId}
           </span>
         </div>
@@ -249,13 +246,17 @@ export function Step4ScientificReferences() {
     {
       key: "claimsCount",
       label: t("form.steps.step4.table.claimsCount"),
-      render: (item) => (
-        <div className="min-w-0 max-w-full whitespace-nowrap">
-          <span className="text-sm text-muted-foreground">
-            {item.claimsCount || item.selectedClaims?.length || 0}
-          </span>
-        </div>
-      ),
+      render: (item) => {
+        const selectedCount = item.selectedClaims?.length || 0
+        const totalCount = item.claimsCount || 0
+        return (
+          <div className="min-w-0 max-w-full whitespace-nowrap">
+            <span className="text-sm text-muted-foreground">
+              {selectedCount} of {totalCount}
+            </span>
+          </div>
+        )
+      },
       hideOnMobile: true,
     },
   ]
@@ -345,7 +346,7 @@ export function Step4ScientificReferences() {
             </CardHeader>
             {searchResults.length > 0 && isSearchResultsExpanded && (
               <CardContent className="pt-0 space-y-4">
-                {/* Search Bar and Search Again Button */}
+                {/* Search Bar */}
                 <div className="flex items-center gap-3">
                   <div className="flex-1 relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -357,24 +358,6 @@ export function Step4ScientificReferences() {
                       className="pl-9"
                     />
                   </div>
-                  <Button
-                    variant="outline"
-                    onClick={performAutoSearch}
-                    disabled={isAutoSearching}
-                    className="flex items-center gap-2"
-                  >
-                    {isAutoSearching ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>Ricerca...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-4 h-4" />
-                        <span>Cerca di nuovo</span>
-                      </>
-                    )}
-                  </Button>
                 </div>
                 
                 <div className="border rounded-lg overflow-hidden">

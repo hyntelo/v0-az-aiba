@@ -64,6 +64,10 @@ const formatChannels = (channels: string[]): string => {
   return channels.join("; ")
 }
 
+const formatChannelsForTooltip = (channels: string[], t: (key: string) => string): string => {
+  return channels.map((channel) => t(`form.channels.${channel}`) || channel).join(", ")
+}
+
 const formatDateTime = (date: Date): string => {
   const day = String(date.getDate()).padStart(2, "0")
   const month = String(date.getMonth() + 1).padStart(2, "0")
@@ -699,9 +703,16 @@ export default function Dashboard() {
                         </div>
                       </TableCell>
                       <TableCell className="hidden xl:table-cell min-w-[150px] max-w-0">
-                        <div className="min-w-0 truncate" title={formatChannels(brief.campaignData.channels)}>
+                        <TooltipPrimitive.Root>
+                          <TooltipTrigger asChild>
+                            <div className="min-w-0 truncate cursor-help">
                           {formatChannels(brief.campaignData.channels)}
                         </div>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{formatChannelsForTooltip(brief.campaignData.channels, t)}</p>
+                          </TooltipContent>
+                        </TooltipPrimitive.Root>
                       </TableCell>
                       <TableCell className="hidden md:table-cell min-w-[100px] whitespace-nowrap">
                         <TooltipPrimitive.Root>

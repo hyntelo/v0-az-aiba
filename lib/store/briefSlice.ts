@@ -255,22 +255,131 @@ export const createBriefSlice: StateCreator<BriefSlice, [], [], BriefSlice> = (s
   createdBriefs: [],
   addCreatedBrief: (brief) => set((state) => ({ createdBriefs: [brief, ...state.createdBriefs] })),
   updateBriefSection: (sectionKey, content) =>
-    set((state) => ({
-      currentBrief: state.currentBrief
-        ? {
+    set((state) => {
+      if (!state.currentBrief?.generatedContent) return state
+
+      // Handle keyMessages (channel-specific: "keyMessages.channel" or global update)
+      if (sectionKey === "keyMessages" || sectionKey.startsWith("keyMessages.")) {
+        let keyMessages = content
+        if (typeof content === "string") {
+          try {
+            keyMessages = JSON.parse(content)
+          } catch {
+            // If parsing fails, treat as regular content
+          }
+        }
+        
+        // If it's channel-specific (keyMessages.channel)
+        if (sectionKey.includes(".")) {
+          const [, channel] = sectionKey.split(".")
+          const currentKeyMessages = state.currentBrief.generatedContent.keyMessages || {}
+          return {
+            ...state,
+            currentBrief: {
+              ...state.currentBrief,
+              generatedContent: {
+                ...state.currentBrief.generatedContent,
+                keyMessages: {
+                  ...(typeof currentKeyMessages === "object" && !Array.isArray(currentKeyMessages)
+                    ? currentKeyMessages
+                    : {}),
+                  [channel]: keyMessages,
+                },
+              },
+              lastModified: new Date(),
+            },
+          }
+        }
+        
+        // Global update (replace entire keyMessages object)
+        return {
+          ...state,
+          currentBrief: {
             ...state.currentBrief,
             generatedContent: {
               ...state.currentBrief.generatedContent,
-              [sectionKey]: content,
+              keyMessages: keyMessages,
             },
             lastModified: new Date(),
+          },
+        }
+      }
+
+      // Handle channel-specific updates (format: "toneOfVoice.emailMarketing")
+      if (sectionKey.includes(".")) {
+        const [baseKey, channel] = sectionKey.split(".")
+        const currentContent = state.currentBrief.generatedContent[baseKey as keyof typeof state.currentBrief.generatedContent]
+        
+        if (typeof currentContent === "object" && currentContent !== null && !Array.isArray(currentContent)) {
+          return {
+            ...state,
+            currentBrief: {
+              ...state.currentBrief,
+              generatedContent: {
+                ...state.currentBrief.generatedContent,
+                [baseKey]: {
+                  ...(currentContent as Record<string, string>),
+                  [channel]: content,
+                },
+              },
+              lastModified: new Date(),
+            },
           }
-        : null,
-    })),
+        }
+      }
+
+      // Default update
+      return {
+        ...state,
+        currentBrief: {
+          ...state.currentBrief,
+          generatedContent: {
+            ...state.currentBrief.generatedContent,
+            [sectionKey]: content,
+          },
+          lastModified: new Date(),
+        },
+      }
+    }),
   generateBrief: async () => {
     const { campaignData } = get()
     set({ isGeneratingBrief: true })
-    const generated = demoBrief.generatedContent
+    
+    // Generate channel-specific content
+    const channels = campaignData.channels || []
+    const baseGenerated = demoBrief.generatedContent
+    
+    // Generate tone of voice, compliance notes, and key messages per channel
+    const toneOfVoice: Record<string, string> = {}
+    const complianceNotes: Record<string, string> = {}
+    const keyMessages: Record<string, any[]> = {}
+    
+    channels.forEach((channel) => {
+      // Use channel-specific content if available, otherwise use base content
+      if (baseGenerated.toneOfVoice && typeof baseGenerated.toneOfVoice === "object") {
+        const channelTone = (baseGenerated.toneOfVoice as Record<string, string>)[channel]
+        toneOfVoice[channel] = channelTone || (baseGenerated.toneOfVoice as Record<string, string>)[Object.keys(baseGenerated.toneOfVoice as Record<string, string>)[0]] || ""
+      }
+      
+      if (baseGenerated.complianceNotes && typeof baseGenerated.complianceNotes === "object") {
+        const channelCompliance = (baseGenerated.complianceNotes as Record<string, string>)[channel]
+        complianceNotes[channel] = channelCompliance || (baseGenerated.complianceNotes as Record<string, string>)[Object.keys(baseGenerated.complianceNotes as Record<string, string>)[0]] || ""
+      }
+      
+      // Generate key messages per channel
+      if (baseGenerated.keyMessages && typeof baseGenerated.keyMessages === "object" && !Array.isArray(baseGenerated.keyMessages)) {
+        const channelKeyMessages = (baseGenerated.keyMessages as Record<string, any[]>)[channel]
+        keyMessages[channel] = channelKeyMessages || (baseGenerated.keyMessages as Record<string, any[]>)[Object.keys(baseGenerated.keyMessages as Record<string, any[]>)[0]] || []
+      }
+    })
+    
+    const generated = {
+      ...baseGenerated,
+      toneOfVoice,
+      complianceNotes,
+      keyMessages,
+    }
+    
     const brief: BriefData = {
       id: `brief-${Date.now()}`,
       title: campaignData.projectName || "Untitled Brief",
@@ -339,29 +448,82 @@ export const createBriefSlice: StateCreator<BriefSlice, [], [], BriefSlice> = (s
   regenerateSection: async (sectionKey, _prompt) => {
     const state = get()
     if (!state.currentBrief?.generatedContent) return
-    const currentContent =
-      state.currentBrief.generatedContent[sectionKey as keyof typeof state.currentBrief.generatedContent]
+    
+    // Handle channel-specific sections (format: "section.channel")
+    let actualSectionKey = sectionKey
+    let channel: string | undefined
+    if (sectionKey.includes(".")) {
+      const parts = sectionKey.split(".")
+      actualSectionKey = parts[0]
+      channel = parts[1]
+    }
+    
+    let currentContent: any
+    if (channel && (actualSectionKey === "keyMessages" || actualSectionKey === "toneOfVoice" || actualSectionKey === "complianceNotes")) {
+      // Get channel-specific content
+      const sectionContent = state.currentBrief.generatedContent[actualSectionKey as keyof typeof state.currentBrief.generatedContent]
+      if (typeof sectionContent === "object" && sectionContent !== null && !Array.isArray(sectionContent)) {
+        currentContent = (sectionContent as Record<string, any>)[channel]
+      }
+    } else {
+      currentContent = state.currentBrief.generatedContent[actualSectionKey as keyof typeof state.currentBrief.generatedContent]
+    }
+    
     if (!currentContent) return
+
+    // Serialize current content for storage
+    const serializedContent = typeof currentContent === "object" 
+      ? JSON.stringify(currentContent) 
+      : String(currentContent)
 
     set({ regeneratingSection: sectionKey })
     set((s) => ({
       sectionStates: {
         ...s.sectionStates,
-        [sectionKey]: { state: "regenerating", originalContent: currentContent },
+        [sectionKey]: { state: "regenerating", originalContent: serializedContent },
       },
     }))
 
     await new Promise((resolve) => setTimeout(resolve, 1500))
-    const variations = mockRegeneratedContent[sectionKey] || []
-    const randomVariation = variations[Math.floor(Math.random() * variations.length)] || currentContent
+    
+    // Get variations based on section type
+    let variations: any[] = []
+    if (actualSectionKey === "keyMessages") {
+      // For channel-specific key messages
+      const keyMsgVariations = mockRegeneratedContent.keyMessages
+      if (keyMsgVariations && typeof keyMsgVariations === "object" && !Array.isArray(keyMsgVariations)) {
+        const channelVariations = (keyMsgVariations as Record<string, any[]>)[channel || ""] || []
+        variations = channelVariations.length > 0 ? channelVariations[0] : []
+      } else if (Array.isArray(keyMsgVariations)) {
+        variations = keyMsgVariations
+      }
+    } else if (actualSectionKey === "toneOfVoice" || actualSectionKey === "complianceNotes") {
+      // For channel-specific, get variations for the specific channel or first available
+      const channelVariations = mockRegeneratedContent[actualSectionKey]
+      if (channelVariations && typeof channelVariations === "object") {
+        const targetChannel = channel || Object.keys(channelVariations)[0]
+        variations = (channelVariations as Record<string, any[]>)[targetChannel] || []
+      }
+    } else {
+      variations = mockRegeneratedContent[actualSectionKey] || []
+    }
+    
+    const randomVariation = variations.length > 0
+      ? variations[Math.floor(Math.random() * variations.length)]
+      : currentContent
+
+    // Serialize staged content
+    const serializedStaged = typeof randomVariation === "object" 
+      ? JSON.stringify(randomVariation) 
+      : String(randomVariation)
 
     set((s) => ({
       sectionStates: {
         ...s.sectionStates,
         [sectionKey]: {
           state: "staged",
-          originalContent: currentContent,
-          stagedContent: randomVariation,
+          originalContent: serializedContent,
+          stagedContent: serializedStaged,
         },
       },
       regeneratingSection: null,
@@ -371,7 +533,19 @@ export const createBriefSlice: StateCreator<BriefSlice, [], [], BriefSlice> = (s
     const state = get()
     const sectionState = state.sectionStates[sectionKey]
     if (!sectionState?.stagedContent) return
-    state.updateBriefSection(sectionKey, sectionState.stagedContent)
+    
+    // Parse staged content if it's a JSON string
+    let contentToUpdate = sectionState.stagedContent
+    if (sectionKey === "keyMessages" || sectionKey.startsWith("keyMessages.")) {
+      try {
+        contentToUpdate = JSON.parse(sectionState.stagedContent)
+      } catch {
+        // Keep as string if parsing fails
+      }
+    }
+    
+    // Use the sectionKey as-is (it may include channel like "keyMessages.emailMarketing")
+    state.updateBriefSection(sectionKey, contentToUpdate)
     set((s) => ({
       sectionStates: {
         ...s.sectionStates,

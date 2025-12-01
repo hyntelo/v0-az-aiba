@@ -81,15 +81,32 @@ export async function searchKnowledgeBase(context: CampaignData): Promise<Knowle
   // Filter documents based on context (mock implementation)
   let results = [...knowledgeBase]
 
-  // If search terms exist, prioritize documents that might match
-  if (searchTerms) {
-    results = results.sort((a, b) => {
-      // Simple relevance scoring (mock)
+  // Sort: uploaded documents first (by uploadedAt date, newest first), then others
+  results = results.sort((a, b) => {
+    const aHasUploadedAt = !!(a as any).uploadedAt
+    const bHasUploadedAt = !!(b as any).uploadedAt
+    
+    // If one has uploadedAt and the other doesn't, prioritize the one with uploadedAt
+    if (aHasUploadedAt && !bHasUploadedAt) return -1
+    if (!aHasUploadedAt && bHasUploadedAt) return 1
+    
+    // If both have uploadedAt, sort by date (newest first)
+    if (aHasUploadedAt && bHasUploadedAt) {
+      const aDate = new Date((a as any).uploadedAt).getTime()
+      const bDate = new Date((b as any).uploadedAt).getTime()
+      return bDate - aDate
+    }
+    
+    // If search terms exist, prioritize documents that might match
+    if (searchTerms) {
       const aScore = a.title.toLowerCase().includes(searchTerms.split(" ")[0]) ? 1 : 0
       const bScore = b.title.toLowerCase().includes(searchTerms.split(" ")[0]) ? 1 : 0
       return bScore - aScore
-    })
-  }
+    }
+    
+    // Otherwise maintain original order
+    return 0
+  })
 
   // Return documents with claimsCount populated
   return results.map((doc) => ({
@@ -100,6 +117,7 @@ export async function searchKnowledgeBase(context: CampaignData): Promise<Knowle
 
 /**
  * Add document to knowledge base
+ * New documents are added at the beginning (reverse order - newest first)
  */
 export function addDocumentToKnowledgeBase(document: KnowledgeBaseDocument): void {
   // Check if document already exists
@@ -109,8 +127,8 @@ export function addDocumentToKnowledgeBase(document: KnowledgeBaseDocument): voi
     // Update existing document
     knowledgeBase[existingIndex] = document
   } else {
-    // Add new document
-    knowledgeBase.push(document)
+    // Add new document at the beginning (newest first)
+    knowledgeBase.unshift(document)
   }
 }
 

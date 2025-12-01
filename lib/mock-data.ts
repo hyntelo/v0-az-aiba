@@ -17,12 +17,44 @@ export const demoBrief = {
   generatedContent: {
     objectives:
       "Aumentare la consapevolezza tra cardiologi e nefrologi sui vantaggi clinici di Lokelma nel mantenimento della normokaliemia consentendo la continuazione della terapia RAASi, enfatizzando le evidenze degli studi di fase III.",
-    keyMessages:
-      "• Lokelma consente il mantenimento o l'up-titration della terapia RAASi nell'87% dei pazienti con iperkaliemia.\n• L'iperkaliemia rimane una barriera importante all'ottimizzazione del trattamento, ora efficacemente gestibile con Lokelma",
-    toneOfVoice:
-      "Scientifico, basato sui dati e clinicamente focalizzato. Linguaggio obiettivo che fa riferimento a risultati evidence-based e allineamento alle linee guida.",
-    complianceNotes:
-      "Materiale destinato esclusivamente agli operatori sanitari. Deve essere conforme alle normative pubblicitarie AIFA e ai processi di revisione interna dell'azienda. Includere le caratteristiche del prodotto e il riferimento al Riassunto delle Caratteristiche del Prodotto (RCP) di Lokelma. Assicurarsi che tutte le affermazioni siano supportate da evidenze peer-reviewed.",
+    keyMessages: {
+      emailMarketing: [
+        {
+          id: "km-1-email",
+          tag: "EFFICACY",
+          description: "Lokelma consente il mantenimento o l'up-titration della terapia RAASi nell'87% dei pazienti con iperkaliemia.",
+        },
+        {
+          id: "km-2-email",
+          tag: "AWARENESS",
+          description: "L'iperkaliemia rimane una barriera importante all'ottimizzazione del trattamento, ora efficacemente gestibile con Lokelma",
+        },
+      ],
+      printMaterials: [
+        {
+          id: "km-1-print",
+          tag: "EFFICACY",
+          description: "Lokelma consente il mantenimento o l'up-titration della terapia RAASi nell'87% dei pazienti con iperkaliemia.",
+        },
+        {
+          id: "km-2-print",
+          tag: "AWARENESS",
+          description: "L'iperkaliemia rimane una barriera importante all'ottimizzazione del trattamento, ora efficacemente gestibile con Lokelma",
+        },
+      ],
+    },
+    toneOfVoice: {
+      emailMarketing:
+        "Scientifico, basato sui dati e clinicamente focalizzato. Linguaggio obiettivo che fa riferimento a risultati evidence-based e allineamento alle linee guida. Adatto per comunicazioni email dirette agli operatori sanitari.",
+      printMaterials:
+        "Scientifico, basato sui dati e clinicamente focalizzato. Linguaggio obiettivo che fa riferimento a risultati evidence-based e allineamento alle linee guida. Formato strutturato per materiali stampati con riferimenti completi.",
+    },
+    complianceNotes: {
+      emailMarketing:
+        "Materiale destinato esclusivamente agli operatori sanitari. Deve essere conforme alle normative pubblicitarie AIFA e ai processi di revisione interna dell'azienda. Includere le caratteristiche del prodotto e il riferimento al Riassunto delle Caratteristiche del Prodotto (RCP) di Lokelma. Assicurarsi che tutte le affermazioni siano supportate da evidenze peer-reviewed. Per email: includere disclaimer e link al RCP.",
+      printMaterials:
+        "Materiale destinato esclusivamente agli operatori sanitari. Deve essere conforme alle normative pubblicitarie AIFA e ai processi di revisione interna dell'azienda. Includere le caratteristiche del prodotto e il riferimento al Riassunto delle Caratteristiche del Prodotto (RCP) di Lokelma. Assicurarsi che tutte le affermazioni siano supportate da evidenze peer-reviewed. Per materiali stampati: includere codice magazzino, QR code e wording AIFA completo.",
+    },
   },
 }
 
@@ -46,19 +78,66 @@ export const mockBriefAISuggestions: Record<string, string> = {
     "NA",
 }
 
-export const mockRegeneratedContent: Record<string, string[]> = {
+export const mockRegeneratedContent: Record<string, any> = {
   objectives: [
     "Educare cardiologi e nefrologi sui duplici benefici di Lokelma nel mantenimento della normokaliemia e nel consentire la continuazione della terapia RAASi, rafforzando l'aderenza alla gestione dell'iperkaliemia guidata dalle linee guida.",
   ],
-  keyMessages: [
-    "• Lokelma consente il mantenimento o l'up-titration della terapia RAASi nell'87% dei pazienti con iperkaliemia.\n• La sospensione o il dosaggio subottimale dei RAASi raddoppia il rischio di mortalità.\n• L'iperkaliemia rimane una barriera importante all'ottimizzazione del trattamento, ora efficacemente gestibile con Lokelma",
-  ],
-  toneOfVoice: [
-    "Autorevole, basato su evidenze e professionale. Il linguaggio deve enfatizzare risultati clinici comprovati e rafforzare la credibilità attraverso i dati, rimanendo accessibile agli operatori sanitari con poco tempo.",
-  ],
-  complianceNotes: [
-    "Tutti i materiali devono essere conformi alle normative AIFA per le comunicazioni dirette agli operatori sanitari e includere riferimenti al RCP di Lokelma. Le affermazioni devono rimanere bilanciate e supportate da evidenze. Assicurare la revisione medico-legale interna prima della diffusione.",
-  ],
+  keyMessages: {
+    emailMarketing: [
+      [
+        {
+          id: "km-1-email",
+          tag: "EFFICACY",
+          description: "Lokelma consente il mantenimento o l'up-titration della terapia RAASi nell'87% dei pazienti con iperkaliemia.",
+        },
+        {
+          id: "km-2-email",
+          tag: "SAFETY",
+          description: "La sospensione o il dosaggio subottimale dei RAASi raddoppia il rischio di mortalità.",
+        },
+        {
+          id: "km-3-email",
+          tag: "AWARENESS",
+          description: "L'iperkaliemia rimane una barriera importante all'ottimizzazione del trattamento, ora efficacemente gestibile con Lokelma",
+        },
+      ],
+    ],
+    printMaterials: [
+      [
+        {
+          id: "km-1-print",
+          tag: "EFFICACY",
+          description: "Lokelma consente il mantenimento o l'up-titration della terapia RAASi nell'87% dei pazienti con iperkaliemia.",
+        },
+        {
+          id: "km-2-print",
+          tag: "SAFETY",
+          description: "La sospensione o il dosaggio subottimale dei RAASi raddoppia il rischio di mortalità.",
+        },
+        {
+          id: "km-3-print",
+          tag: "AWARENESS",
+          description: "L'iperkaliemia rimane una barriera importante all'ottimizzazione del trattamento, ora efficacemente gestibile con Lokelma",
+        },
+      ],
+    ],
+  },
+  toneOfVoice: {
+    emailMarketing: [
+      "Autorevole, basato su evidenze e professionale. Il linguaggio deve enfatizzare risultati clinici comprovati e rafforzare la credibilità attraverso i dati, rimanendo accessibile agli operatori sanitari con poco tempo. Per email: tono conciso e diretto.",
+    ],
+    printMaterials: [
+      "Autorevole, basato su evidenze e professionale. Il linguaggio deve enfatizzare risultati clinici comprovati e rafforzare la credibilità attraverso i dati, rimanendo accessibile agli operatori sanitari con poco tempo. Per materiali stampati: tono più formale e dettagliato.",
+    ],
+  },
+  complianceNotes: {
+    emailMarketing: [
+      "Tutti i materiali devono essere conformi alle normative AIFA per le comunicazioni dirette agli operatori sanitari e includere riferimenti al RCP di Lokelma. Le affermazioni devono rimanere bilanciate e supportate da evidenze. Assicurare la revisione medico-legale interna prima della diffusione. Per email: disclaimer completo nel footer.",
+    ],
+    printMaterials: [
+      "Tutti i materiali devono essere conformi alle normative AIFA per le comunicazioni dirette agli operatori sanitari e includere riferimenti al RCP di Lokelma. Le affermazioni devono rimanere bilanciate e supportate da evidenze. Assicurare la revisione medico-legale interna prima della diffusione. Per materiali stampati: wording AIFA completo e codice magazzino.",
+    ],
+  },
 }
 
 export const existingBriefs = [
@@ -67,7 +146,7 @@ export const existingBriefs = [
     title: "Campagna Digitale per la Valutazione del Rischio Cardiovascolare",
     campaignData: {
       projectName: "Campagna Digitale per la Valutazione del Rischio Cardiovascolare",
-      brand: "CardioShield Plus",
+      brand: "DiabetesGaurd",
       therapeuticArea: "Cardiologia",
       expectedLaunchDate: "2025-04-15",
       specialty: "Cardiology",
@@ -123,7 +202,7 @@ export const existingBriefs = [
     title: "Serie Educativa per Pazienti sulla Gestione del Diabete",
     campaignData: {
       projectName: "Serie Educativa per Pazienti sulla Gestione del Diabete",
-      brand: "DiabetesGuard",
+      brand: "DiabetesGaurd",
       therapeuticArea: "Endocrinologia",
       expectedLaunchDate: "2025-03-30",
       specialty: "Endocrinology",
@@ -169,7 +248,7 @@ export const existingBriefs = [
     title: "Materiali per Conferenza Professionale sulla Salute Respiratoria",
     campaignData: {
       projectName: "Materiali per Conferenza Professionale sulla Salute Respiratoria",
-      brand: "RespiraClear",
+      brand: "DiabetesGaurd",
       therapeuticArea: "Malattie Respiratorie",
       expectedLaunchDate: "2025-02-28",
       specialty: "Respiratory",
@@ -225,7 +304,7 @@ export const existingBriefs = [
     title: "Campagna di Awareness per Terapia Oncologica Innovativa",
     campaignData: {
       projectName: "Campagna di Awareness per Terapia Oncologica Innovativa",
-      brand: "OncoAdvance",
+      brand: "DiabetesGaurd",
       therapeuticArea: "Oncologia",
       expectedLaunchDate: "2025-06-30",
       specialty: "Oncology",
@@ -281,7 +360,7 @@ export const existingBriefs = [
     title: "Programma Educativo per Pazienti con Malattie Rare",
     campaignData: {
       projectName: "Programma Educativo per Pazienti con Malattie Rare",
-      brand: "RareCare Solutions",
+      brand: "DiabetesGaurd",
       therapeuticArea: "Malattie Rare",
       expectedLaunchDate: "2025-05-15",
       specialty: "Rare Diseases",
@@ -327,7 +406,7 @@ export const existingBriefs = [
     title: "Materiali per Formazione Medici di Base su Gestione del Dolore",
     campaignData: {
       projectName: "Materiali per Formazione Medici di Base su Gestione del Dolore",
-      brand: "PainRelief Pro",
+      brand: "DiabetesGaurd",
       therapeuticArea: "Neurologia",
       expectedLaunchDate: "2025-07-20",
       specialty: "Pain Management",

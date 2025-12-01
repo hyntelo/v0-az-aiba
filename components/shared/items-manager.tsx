@@ -32,6 +32,7 @@ export interface TableConfig<T> {
   title: string | ((count: number) => string)
   columns: TableColumn<T>[]
   emptyMessage?: string
+  renderActions?: (item: T, itemId: string) => React.ReactNode
 }
 
 interface ItemsManagerProps<T> {
@@ -167,6 +168,7 @@ export function ItemsManager<T>({
             onDelete={handleDelete}
             getItemId={getItemId}
             emptyMessage={tableConfig.emptyMessage}
+            renderActions={tableConfig.renderActions}
           />
         </div>
       </div>

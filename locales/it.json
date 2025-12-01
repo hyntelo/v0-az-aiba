@@ -50,7 +50,7 @@
       "title": "Titolo",
       "author": "Autore",
       "brand": "Brand",
-      "channels": "Canali",
+      "channels": "Mezzi",
       "creationDate": "Creazione",
       "modificationDate": "Modifica",
       "status": "Status"
@@ -112,7 +112,7 @@
     "targetAudience": "Target Audience",
     "communicationStyle": "Stile di Comunicazione",
     "requestSummary": "Riepilogo Richiesta",
-    "channels": "Canali",
+    "channels": "Mezzi",
     "backToDashboard": "Torna alla Dashboard",
     "saveDraft": "Salva Bozza",
     "submitForAIReview": "Invia per Revisione IA",
@@ -275,10 +275,19 @@
     "campaignContext": "Contesto della Campagna",
     "campaignContextDescription": "Fornisci dettagli sulla tua campagna per aiutare la nostra IA a generare un brief completo con le tue linee guida del brand",
     "brandGuidelines": "Linee Guida del Brand",
+    "communicationObjectives": "Obiettivi di Comunicazione - Stile, Target",
     "communicationStyle": "Stile di Comunicazione",
     "selectCommunicationStyle": "Seleziona lo stile di comunicazione",
+    "style": "Stile",
+    "target": "Target",
     "audiencePreset": "Target Audience",
     "selectAudiencePreset": "Seleziona Target Audience",
+    "typology": "Tipologia",
+    "selectTypology": "Seleziona tipologia",
+    "typologyOptions": {
+      "branded": "Branded",
+      "unbranded": "Un Branded"
+    },
     "projectInformation": "Informazioni Progetto",
     "projectName": "Nome Progetto",
     "projectNamePlaceholder": "es., Campagna Educativa Iperkaliemia Q4",
@@ -294,8 +303,21 @@
     "requestSummary": "Obiettivi e descrizione",
     "requestSummaryPlaceholder": "Fornisci l'obiettivo che vorresti raggiungere con questo contenuto e un riepilogo conciso di ciò di cui hai bisogno...",
     "contentFormats": "Formati di Contenuto",
+    "mezzi": "Mezzi",
     "selectFormats": "Seleziona Formati",
+    "selectMezzi": "Seleziona Mezzi",
     "channels": {
+      "email": "Email",
+      "webPage": "Web Page",
+      "emailWebpage": "Email + Webpage",
+      "materialiCartacei": "Materiali Cartacei",
+      "graficheStand": "Grafiche per stand",
+      "video": "Video",
+      "loghi": "Loghi",
+      "slideDeck": "Slide Deck",
+      "traduzioni": "Traduzioni",
+      "iDetail": "iDetail",
+      "whatsapp": "WhatsApp",
       "emailMarketing": "Email Marketing",
       "socialMedia": "Social Media",
       "medicalConferences": "Conferenze Mediche",
@@ -303,8 +325,7 @@
       "digitalAdvertising": "Pubblicità Digitale",
       "webinars": "Webinar",
       "salesMaterials": "Materiali di Vendita",
-      "vae": "VAE",
-      "whatsapp": "WhatsApp"
+      "vae": "VAE"
     },
     "aiSuggestions": {
       "specialty": "Seleziona la specialità medica più rilevante per il focus della tua campagna",
@@ -326,6 +347,7 @@
     "departmentRequired": "Il dipartimento è obbligatorio",
     "brandRequired": "Il nome del brand è obbligatorio",
     "expectedLaunchDateRequired": "La data di lancio prevista è obbligatoria",
+    "therapeuticAreaRequired": "L'area terapeutica è obbligatoria",
     "specialtyRequired": "La specialità è obbligatoria",
     "requestSummaryRequired": "Il riepilogo della richiesta è obbligatorio",
     "atLeastOneChannelRequired": "Deve essere selezionato almeno un canale",
@@ -385,8 +407,10 @@
           "documentId": "ID Documento",
           "title": "Titolo",
           "usage": "Utilizzo",
+          "pages": "Pagine",
           "emptyMessage": "Nessun documento selezionato"
-        }
+        },
+        "viewInVvpm": "Vedi in VVPM"
       },
       "step4": {
         "title": "Reference scientifiche",
@@ -453,8 +477,32 @@
         }
       },
       "step6": {
-        "title": "Brief generato",
-        "description": "Rivedi il brief generato"
+        "title": "Riepilogo Brief",
+        "description": "Rivedi e conferma il contenuto generato",
+        "generating": "Generazione del brief in corso...",
+        "created": "Creato",
+        "draft": "BOZZA",
+        "confirmed": "Confermato",
+        "confirmAll": "Conferma Tutte le Sezioni",
+        "stepsRecap": "Riepilogo Passaggi",
+        "generatedContent": "Contenuto Generato",
+        "objectives": "Obiettivi della Campagna",
+        "keyMessages": "Messaggi Chiave",
+        "toneOfVoice": "Tono di Voce",
+        "complianceNotes": "Note di Conformità",
+        "modify": "Modifica",
+        "refine": "Raffina",
+        "confirm": "Conferma",
+        "regenerate": "Rigenera",
+        "regenerating": "Rigenerazione in corso",
+        "accept": "Accetta",
+        "reject": "Rifiuta",
+        "refinePlaceholder": "Descrivi come vuoi raffinare questa sezione",
+        "keyMessageTag": "Tag (es. EFFICACY, AWARENESS)",
+        "keyMessageDescription": "Descrizione del messaggio chiave",
+        "noContent": "Nessun contenuto",
+        "attachments": "Allegati",
+        "editingChannel": "Modificando canale"
       }
     },
     "navigation": {
