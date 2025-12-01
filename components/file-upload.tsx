@@ -2,10 +2,9 @@
 
 import { useCallback, useState } from "react"
 import { useDropzone } from "react-dropzone"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
-import { X, Upload, File, AlertCircle } from "lucide-react"
+import { Upload, File, AlertCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
   type AttachmentFile,
@@ -13,7 +12,6 @@ import {
   validateTotalSize,
   processFile,
   formatFileSize,
-  getFileIcon,
   MAX_FILE_SIZE,
   MAX_TOTAL_SIZE,
 } from "@/lib/file-utils"
@@ -82,9 +80,6 @@ export function FileUpload({ attachments, onAttachmentAdd, onAttachmentRemove, c
     maxSize: MAX_FILE_SIZE,
   })
 
-  const totalSize = attachments.reduce((total, file) => total + file.size, 0)
-  const usagePercentage = (totalSize / MAX_TOTAL_SIZE) * 100
-
   return (
     <div className={cn("space-y-4", className)}>
       {/* Upload Area */}
@@ -113,19 +108,6 @@ export function FileUpload({ attachments, onAttachmentAdd, onAttachmentRemove, c
         </CardContent>
       </Card>
 
-      {/* Storage Usage */}
-      {(attachments.length > 0 || uploading.length > 0) && (
-        <div className="space-y-2">
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>Storage used</span>
-            <span>
-              {formatFileSize(totalSize)} / {formatFileSize(MAX_TOTAL_SIZE)}
-            </span>
-          </div>
-          <Progress value={usagePercentage} className="h-2" />
-        </div>
-      )}
-
       {/* Error Messages */}
       {errors.length > 0 && (
         <div className="space-y-2">
@@ -150,40 +132,6 @@ export function FileUpload({ attachments, onAttachmentAdd, onAttachmentRemove, c
               </div>
             </div>
           ))}
-        </div>
-      )}
-
-      {/* Uploaded Files */}
-      {attachments.length > 0 && (
-        <div className="space-y-2">
-          <h4 className="text-sm font-medium text-foreground">Attached Files ({attachments.length})</h4>
-          <div className="space-y-2">
-            {attachments.map((attachment) => (
-              <div
-                key={attachment.id}
-                className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg group hover:bg-muted/50 transition-colors"
-              >
-                <span className="text-lg">{getFileIcon(attachment.type)}</span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{attachment.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {formatFileSize(attachment.size)} • {new Date(attachment.lastModified).toLocaleDateString()}
-                  </p>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onAttachmentRemove(attachment.id)
-                  }}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0 hover:bg-red-100 hover:text-red-600"
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-            ))}
-          </div>
         </div>
       )}
     </div>

@@ -506,11 +506,11 @@ export default function Dashboard() {
           ) : (
             <div className="border rounded-lg overflow-hidden">
               <TooltipProvider delayDuration={0}>
-                <div className="[&_[data-slot='table-container']]:!overflow-x-hidden">
+                <div className="overflow-x-auto">
                   <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="hidden sm:table-cell w-[100px]">
+                    <TableHead className="hidden sm:table-cell w-[100px] min-w-[100px] max-w-[100px] whitespace-nowrap">
                       <button
                         onClick={() => handleSort("id")}
                         className="flex items-center gap-2 hover:text-foreground transition-colors"
@@ -530,12 +530,12 @@ export default function Dashboard() {
                         )}
                       </button>
                     </TableHead>
-                    <TableHead className="whitespace-normal">
+                    <TableHead className="min-w-[150px] sm:min-w-[200px]">
                       <button
                         onClick={() => handleSort("title")}
-                        className="flex items-center gap-2 hover:text-foreground transition-colors"
+                        className="flex items-center gap-2 hover:text-foreground transition-colors w-full"
                       >
-                        <span>{t("dashboard.table.title")}</span>
+                        <span className="truncate">{t("dashboard.table.title")}</span>
                         {sortColumn === "title" ? (
                           sortDirection === "asc" ? (
                             <ChevronUp className="h-4 w-4 text-foreground" />
@@ -550,12 +550,12 @@ export default function Dashboard() {
                         )}
                       </button>
                     </TableHead>
-                    <TableHead className="hidden md:table-cell">
+                    <TableHead className="hidden md:table-cell min-w-[120px]">
                       <button
                         onClick={() => handleSort("author")}
                         className="flex items-center gap-2 hover:text-foreground transition-colors"
                       >
-                        <span>{t("dashboard.table.author")}</span>
+                        <span className="truncate">{t("dashboard.table.author")}</span>
                         {sortColumn === "author" ? (
                           sortDirection === "asc" ? (
                             <ChevronUp className="h-4 w-4 text-foreground" />
@@ -570,12 +570,12 @@ export default function Dashboard() {
                         )}
                       </button>
                     </TableHead>
-                    <TableHead className="hidden lg:table-cell">
+                    <TableHead className="hidden lg:table-cell min-w-[100px]">
                       <button
                         onClick={() => handleSort("brand")}
                         className="flex items-center gap-2 hover:text-foreground transition-colors"
                       >
-                        <span>{t("dashboard.table.brand")}</span>
+                        <span className="truncate">{t("dashboard.table.brand")}</span>
                         {sortColumn === "brand" ? (
                           sortDirection === "asc" ? (
                             <ChevronUp className="h-4 w-4 text-foreground" />
@@ -590,12 +590,12 @@ export default function Dashboard() {
                         )}
                       </button>
                     </TableHead>
-                    <TableHead className="hidden xl:table-cell whitespace-normal">
+                    <TableHead className="hidden xl:table-cell min-w-[150px]">
                       <button
                         onClick={() => handleSort("channels")}
                         className="flex items-center gap-2 hover:text-foreground transition-colors"
                       >
-                        <span>{t("dashboard.table.channels")}</span>
+                        <span className="truncate">{t("dashboard.table.channels")}</span>
                         {sortColumn === "channels" ? (
                           sortDirection === "asc" ? (
                             <ChevronUp className="h-4 w-4 text-foreground" />
@@ -610,7 +610,7 @@ export default function Dashboard() {
                         )}
                       </button>
                     </TableHead>
-                    <TableHead className="hidden md:table-cell">
+                    <TableHead className="hidden md:table-cell min-w-[100px] whitespace-nowrap">
                       <button
                         onClick={() => handleSort("createdAt")}
                         className="flex items-center gap-2 hover:text-foreground transition-colors"
@@ -630,7 +630,7 @@ export default function Dashboard() {
                         )}
                       </button>
                     </TableHead>
-                    <TableHead className="hidden lg:table-cell">
+                    <TableHead className="hidden lg:table-cell min-w-[100px] whitespace-nowrap">
                       <button
                         onClick={() => handleSort("lastModified")}
                         className="flex items-center gap-2 hover:text-foreground transition-colors"
@@ -650,7 +650,7 @@ export default function Dashboard() {
                         )}
                       </button>
                     </TableHead>
-                    <TableHead>
+                    <TableHead className="min-w-[100px] whitespace-nowrap">
                       <button
                         onClick={() => handleSort("status")}
                         className="flex items-center gap-2 hover:text-foreground transition-colors"
@@ -670,25 +670,40 @@ export default function Dashboard() {
                         )}
                       </button>
                     </TableHead>
-                    <TableHead className="w-[50px]"></TableHead>
+                    <TableHead className="w-[50px] min-w-[50px] max-w-[50px]"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredAndSortedBriefs.map((brief) => (
                     <TableRow key={brief.id} className="hover:bg-muted/50">
-                      <TableCell className="hidden sm:table-cell font-mono text-sm">{formatBriefId(brief.id)}</TableCell>
-                      <TableCell className="min-w-0 sm:min-w-[150px] md:min-w-[200px] whitespace-normal">
-                        <button
-                          onClick={() => handleBriefClick(brief)}
-                          className="text-left text-[#8582FC] hover:text-[#8582FC]/80 hover:underline font-medium break-words"
-                        >
-                          {brief.title}
-                        </button>
+                      <TableCell className="hidden sm:table-cell font-mono text-sm w-[100px] min-w-[100px] max-w-[100px] whitespace-nowrap">{formatBriefId(brief.id)}</TableCell>
+                      <TableCell className="min-w-[150px] sm:min-w-[200px] max-w-0">
+                        <div className="min-w-0">
+                          <button
+                            onClick={() => handleBriefClick(brief)}
+                            className="text-left text-[#8582FC] hover:text-[#8582FC]/80 hover:underline font-medium truncate block w-full"
+                            title={brief.title}
+                          >
+                            {brief.title}
+                          </button>
+                        </div>
                       </TableCell>
-                      <TableCell className="hidden md:table-cell">{getAuthorName(brief, userProfile)}</TableCell>
-                      <TableCell className="hidden lg:table-cell">{brief.campaignData.brand}</TableCell>
-                      <TableCell className="hidden xl:table-cell whitespace-normal break-words">{formatChannels(brief.campaignData.channels)}</TableCell>
-                      <TableCell className="hidden md:table-cell">
+                      <TableCell className="hidden md:table-cell min-w-[120px] max-w-0">
+                        <div className="min-w-0 truncate" title={getAuthorName(brief, userProfile)}>
+                          {getAuthorName(brief, userProfile)}
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden lg:table-cell min-w-[100px] max-w-0">
+                        <div className="min-w-0 truncate" title={brief.campaignData.brand}>
+                          {brief.campaignData.brand}
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden xl:table-cell min-w-[150px] max-w-0">
+                        <div className="min-w-0 truncate" title={formatChannels(brief.campaignData.channels)}>
+                          {formatChannels(brief.campaignData.channels)}
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell min-w-[100px] whitespace-nowrap">
                         <TooltipPrimitive.Root>
                           <TooltipTrigger asChild>
                             <span className="cursor-help">{formatDateShort(brief.createdAt)}</span>
@@ -698,7 +713,7 @@ export default function Dashboard() {
                           </TooltipContent>
                         </TooltipPrimitive.Root>
                       </TableCell>
-                      <TableCell className="hidden lg:table-cell">
+                      <TableCell className="hidden lg:table-cell min-w-[100px] whitespace-nowrap">
                         <TooltipPrimitive.Root>
                           <TooltipTrigger asChild>
                             <span className="cursor-help">{formatDateShort(brief.lastModified)}</span>
@@ -708,7 +723,7 @@ export default function Dashboard() {
                           </TooltipContent>
                         </TooltipPrimitive.Root>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="min-w-[100px] whitespace-nowrap">
                         <Badge
                           variant="secondary"
                           className={`flex items-center gap-1 w-fit ${statusColors[brief.status as keyof typeof statusColors]}`}
@@ -717,7 +732,7 @@ export default function Dashboard() {
                           {getStatusLabel(brief.status)}
                         </Badge>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="w-[50px] min-w-[50px] max-w-[50px]">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="sm" className="h-8 w-8 p-0">

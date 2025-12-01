@@ -331,26 +331,86 @@
     "launchDateMustBeFuture": "La data di lancio deve essere futura",
     "steps": {
       "step1": {
-        "title": "Contesto della campagna",
+        "title": "Informazioni",
         "description": "Fornisci dettagli sulla tua campagna"
       },
-      "step2a": {
+      "step2": {
         "title": "Contesto aggiuntivo",
-        "description": "Aggiungi informazioni aggiuntive opzionali"
+        "description": "Aggiungi informazioni aggiuntive opzionali",
+        "additionalContext": "Contesto aggiuntivo",
+        "additionalContextDescription": "Fornisci dettagli sulla tua campagna per aiutare la nostra IA a generare un brief completo con le tue linee guida del brand",
+        "additionalContextPlaceholder": "Inserisci dettagli aggiuntivi sulla campagna...",
+        "upload": {
+          "title": "Aggiungi allegato",
+          "subtitle": "Allegati (Facoltativo)"
+        },
+        "table": {
+          "title": "Lista degli allegati caricati",
+          "attachmentName": "Nome allegato",
+          "description": "Descrizione",
+          "descriptionPlaceholder": "Inserisci descrizione...",
+          "noDescription": "Nessuna descrizione",
+          "emptyMessage": "Nessun allegato caricato"
+        },
+        "editDescription": {
+          "title": "Modifica descrizione"
+        }
       },
-      "step2b": {
-        "title": "Documenti Di partenza",
-        "description": "Carica documenti di supporto"
+      "step3": {
+        "title": "Documenti di partenza",
+        "description": "Documenti global da adattare o documenti da aggiornare",
+        "search": {
+          "title": "Cerca su VVPM",
+          "button": "Cerca",
+          "fields": {
+            "text": "Testo da cercare",
+            "textPlaceholder": "Inserisci testo da cercare...",
+            "country": "Country",
+            "brand": "Brand",
+            "channel": "Canale",
+            "keyMessage": "Key message"
+          }
+        },
+        "usage": {
+          "globalAdapt": "Contenuto global da adattare",
+          "update": "Contenuto da aggiornare",
+          "inspiration": "Ispirazione per nuovo canale",
+          "other": "Altro"
+        },
+        "table": {
+          "title": "Lista dei materiali",
+          "documentId": "ID Documento",
+          "title": "Titolo",
+          "usage": "Utilizzo",
+          "emptyMessage": "Nessun documento selezionato"
+        }
       },
-      "step2c": {
-        "title": "Reference Scientifiche",
-        "description": "Aggiungi riferimenti scientifici"
+      "step4": {
+        "title": "Reference scientifiche",
+        "description": "Inserimento delle reference scientifiche da utilizzare per supportare i claim",
+        "search": {
+          "title": "Cerca su knowledge base",
+          "subtitle": "Citazioni Mediche",
+          "aiButton": "Trova con IA"
+        },
+        "upload": {
+          "title": "oppure carica un nuovo paper",
+          "subtitle": "Carica documenti di supporto, materiali di riferimento o risorse visive per fornire contesto aggiuntivo al tuo brief."
+        },
+        "table": {
+          "title": "Lista delle reference",
+          "referenceId": "ID Reference",
+          "title": "Titolo",
+          "authors": "Autori",
+          "publicationDate": "Data pubblicazione",
+          "emptyMessage": "Nessuna reference selezionata"
+        }
       },
       "step2d": {
         "title": "Campi tecnici",
         "description": "Configura i campi tecnici"
       },
-      "step3": {
+      "step6": {
         "title": "Brief generato",
         "description": "Rivedi il brief generato"
       }
@@ -465,5 +525,30 @@
       "undo": "Annulla"
     },
     "adminOnly": "Solo amministratore"
+  },
+  "shared": {
+    "search": {
+      "button": "Cerca",
+      "searching": "Ricerca...",
+      "noResults": "Nessun risultato trovato"
+    },
+    "upload": {
+      "clickToUpload": "Click to upload or drag and drop",
+      "dropFilesHere": "Drop files here",
+      "supportedFormats": "PDF, DOC, XLS, PPT, Images, ZIP (max 10 MB each)"
+    },
+    "table": {
+      "actions": "Azioni",
+      "delete": "Elimina",
+      "loading": "Caricamento...",
+      "empty": "Nessun elemento"
+    },
+    "modal": {
+      "select": "Seleziona",
+      "cancel": "Annulla",
+      "confirm": "Conferma",
+      "selectItems": "Seleziona {{count}} elemento",
+      "selectItemsPlural": "Seleziona {{count}} elementi"
+    }
   }
 }

@@ -10,9 +10,9 @@ import { demoData } from "@/lib/mock-data"
 import { useTranslation } from "@/lib/i18n"
 import { BriefStepper, type Step, type StepStatus } from "@/components/brief-stepper"
 import { Step1CampaignContext } from "@/components/sections/step-1-campaign-context"
-import { Step2aAdditionalContext } from "@/components/sections/step-2a-additional-context"
-import { Step2bStartingDocuments } from "@/components/sections/step-2b-starting-documents"
-import { Step2cScientificReferences } from "@/components/sections/step-2c-scientific-references"
+import { Step2AdditionalContext } from "@/components/sections/step-2-additional-context"
+import { Step3StartingDocuments } from "@/components/sections/step-3-starting-documents"
+import { Step4ScientificReferences } from "@/components/sections/step-4-scientific-references"
 import { Step2dTechnicalFields } from "@/components/sections/step-2d-technical-fields"
 
 const TOTAL_STEPS = 6
@@ -127,17 +127,17 @@ export default function CampaignForm() {
     return Object.keys(newErrors).length === 0
   }
 
-  const validateStep2a = (): boolean => {
+  const validateStep2 = (): boolean => {
     // Placeholder - always valid for now
     return true
   }
 
-  const validateStep2b = (): boolean => {
+  const validateStep3 = (): boolean => {
     // Placeholder - always valid for now
     return true
   }
 
-  const validateStep2c = (): boolean => {
+  const validateStep4 = (): boolean => {
     // Placeholder - always valid for now
     return true
   }
@@ -152,11 +152,11 @@ export default function CampaignForm() {
       case 1:
         return validateStep1()
       case 2:
-        return validateStep2a()
+        return validateStep2()
       case 3:
-        return validateStep2b()
+        return validateStep3()
       case 4:
-        return validateStep2c()
+        return validateStep4()
       case 5:
         return validateStep2d()
       case 6:
@@ -236,17 +236,17 @@ export default function CampaignForm() {
       },
       {
         id: 2,
-        label: t("form.steps.step2a.title"),
+        label: t("form.steps.step2.title"),
         status: getStepStatus(2),
       },
       {
         id: 3,
-        label: t("form.steps.step2b.title"),
+        label: t("form.steps.step3.title"),
         status: getStepStatus(3),
       },
       {
         id: 4,
-        label: t("form.steps.step2c.title"),
+        label: t("form.steps.step4.title"),
         status: getStepStatus(4),
       },
       {
@@ -256,7 +256,7 @@ export default function CampaignForm() {
       },
       {
         id: 6,
-        label: t("form.steps.step3.title"),
+        label: t("form.steps.step6.title"),
         status: getStepStatus(6),
       },
     ]
@@ -301,20 +301,20 @@ export default function CampaignForm() {
           />
         )
       case 2:
-        return <Step2aAdditionalContext />
+        return <Step2AdditionalContext />
       case 3:
-        return <Step2bStartingDocuments />
+        return <Step3StartingDocuments />
       case 4:
-        return <Step2cScientificReferences />
+        return <Step4ScientificReferences />
       case 5:
         return <Step2dTechnicalFields />
       case 6:
-        // Step 3 - Brief generato (shows confirmation before generation)
+        // Step 6 - Brief generato (shows confirmation before generation)
         return (
           <Card className="hyntelo-elevation-3">
             <CardContent className="p-8 text-center">
-              <h3 className="text-lg font-medium text-foreground mb-2">{t("form.steps.step3.title")}</h3>
-              <p className="text-muted-foreground mb-6">{t("form.steps.step3.description")}</p>
+              <h3 className="text-lg font-medium text-foreground mb-2">{t("form.steps.step6.title")}</h3>
+              <p className="text-muted-foreground mb-6">{t("form.steps.step6.description")}</p>
               <p className="text-sm text-muted-foreground">
                 {t("form.generatingDescription")}
               </p>
@@ -331,9 +331,6 @@ export default function CampaignForm() {
       <main className="max-w-4xl mx-auto px-6 py-8">
         <div ref={topRef} className="mb-8">
           <BriefStepper steps={buildSteps()} onStepClick={handleStepClick} />
-          
-          <h2 className="text-2xl font-medium text-foreground mb-2 mt-8">{t("form.campaignContext")}</h2>
-          <p className="text-muted-foreground">{t("form.campaignContextDescription")}</p>
         </div>
 
         <div className="mb-8">{renderStepContent()}</div>

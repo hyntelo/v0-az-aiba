@@ -1,3 +1,19 @@
+export interface StartingDocument {
+  id: string
+  documentId: string
+  title: string
+  usage: "global-adapt" | "update" | "inspiration" | "other"
+}
+
+export interface ScientificReference {
+  id: string
+  referenceId: string
+  title: string
+  authors: string
+  journal?: string
+  publicationDate?: string
+}
+
 export interface CampaignData {
   projectName: string
   brand: string
@@ -8,6 +24,8 @@ export interface CampaignData {
   channels: string[]
   additionalContext: string
   attachments: AttachmentFile[] // Added attachments field to store uploaded files
+  startingDocuments?: StartingDocument[]
+  scientificReferences?: ScientificReference[]
   communicationPersonalityId?: string
   targetAudiencePresetId?: string
 }
