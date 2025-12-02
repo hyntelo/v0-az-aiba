@@ -67,6 +67,7 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
   })
   const [refiningKeyMessageId, setRefiningKeyMessageId] = useState<string | null>(null)
   const [refineKeyMessagePrompts, setRefineKeyMessagePrompts] = useState<Record<string, string>>({})
+  const [keyMessageStagedStates, setKeyMessageStagedStates] = useState<Record<string, { originalDescription: string; stagedDescription: string }>>({})
   const [confirmedSections, setConfirmedSections] = useState<Set<string>>(new Set())
   const [showRefineField, setShowRefineField] = useState<Record<string, boolean>>({})
   const [refinePrompts, setRefinePrompts] = useState<Record<string, string>>({})
@@ -168,9 +169,70 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
   const handleKeyMessageRefine = async (messageId: string, channel: string) => {
     const refineKey = `${messageId}.${channel}`
     const prompt = refineKeyMessagePrompts[refineKey] || ""
-    // Refine the specific key message - this would need to be implemented in the store
-    // For now, we'll refine the entire keyMessages section for that channel
-    await regenerateSection(`keyMessages.${channel}`, prompt)
+    const channelMessages = generatedContent.keyMessages?.[channel] || []
+    const currentMessage = channelMessages.find((msg) => msg.id === messageId)
+    
+    if (!currentMessage) return
+    
+    // Save original description
+    const originalDescription = currentMessage.description
+    
+    // Simulate regeneration - in real app this would call an API
+    await new Promise((resolve) => setTimeout(resolve, 1500))
+    
+    // Generate a new description (mock - in real app this would come from API)
+    // For now, create a variation based on the prompt
+    let stagedDescription = currentMessage.description
+    if (prompt.trim()) {
+      // Generate refined version without indication text
+      stagedDescription = `${currentMessage.description}`
+    } else {
+      // Default enhancement without indication text
+      stagedDescription = `${currentMessage.description}`
+    }
+    
+    // Save staged state for this specific message
+    setKeyMessageStagedStates((prev) => ({
+      ...prev,
+      [refineKey]: {
+        originalDescription,
+        stagedDescription,
+      },
+    }))
+  }
+
+  const handleKeyMessageRefineCancel = (messageId: string, channel: string) => {
+    const refineKey = `${messageId}.${channel}`
+    // Only allow cancel if not staged
+    if (!keyMessageStagedStates[refineKey]) {
+      setRefiningKeyMessageId(null)
+      setRefineKeyMessagePrompts((prev) => {
+        const newPrompts = { ...prev }
+        delete newPrompts[refineKey]
+        return newPrompts
+      })
+    }
+  }
+
+  const handleKeyMessageAccept = (messageId: string, channel: string) => {
+    const refineKey = `${messageId}.${channel}`
+    const stagedState = keyMessageStagedStates[refineKey]
+    
+    if (stagedState && generatedContent.keyMessages?.[channel]) {
+      const updated = generatedContent.keyMessages[channel].map((msg) =>
+        msg.id === messageId
+          ? { ...msg, description: stagedState.stagedDescription }
+          : msg
+      )
+      updateBriefSection(`keyMessages.${channel}`, updated as any)
+    }
+    
+    // Clear staged state and exit refine mode
+    setKeyMessageStagedStates((prev) => {
+      const newStates = { ...prev }
+      delete newStates[refineKey]
+      return newStates
+    })
     setRefiningKeyMessageId(null)
     setRefineKeyMessagePrompts((prev) => {
       const newPrompts = { ...prev }
@@ -179,8 +241,15 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
     })
   }
 
-  const handleKeyMessageRefineCancel = (messageId: string, channel: string) => {
+  const handleKeyMessageReject = (messageId: string, channel: string) => {
     const refineKey = `${messageId}.${channel}`
+    
+    // Clear staged state and exit refine mode
+    setKeyMessageStagedStates((prev) => {
+      const newStates = { ...prev }
+      delete newStates[refineKey]
+      return newStates
+    })
     setRefiningKeyMessageId(null)
     setRefineKeyMessagePrompts((prev) => {
       const newPrompts = { ...prev }
@@ -475,7 +544,7 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
                       onClick={() => {
                         handleRefine(sectionKey, activeChannel)
                       }}
-                      disabled={isRefining}
+                      disabled={isRefining || !refinePrompts[fullSectionKey]?.trim()}
                       size="sm"
                       className="flex items-center gap-2"
                     >
@@ -588,7 +657,12 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
               const isRefining = refiningKeyMessageId === refiningId
               const refineKey = refiningId
               const refinePrompt = refineKeyMessagePrompts[refineKey] || ""
-              const isRefiningThisMessage = regeneratingSection === `keyMessages.${currentChannel}`
+              const stagedState = keyMessageStagedStates[refineKey]
+              const isStaged = !!stagedState
+              
+              // Disable edit/refine for other messages when one is in edit/refine mode
+              const isAnyMessageInEditOrRefine = editingKeyMessageId !== null || refiningKeyMessageId !== null
+              const isDisabled = isAnyMessageInEditOrRefine && !isEditing && !isRefining
               
               return (
                 <div
@@ -639,50 +713,99 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
                       </div>
                     </div>
                   ) : isRefining ? (
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Badge variant="secondary" className="font-semibold">
-                          {message.tag}
-                        </Badge>
-                      </div>
-                      <p className="text-gray-700 mb-3">{message.description}</p>
-                      <div className="p-3 bg-white border border-gray-200 rounded-lg">
-                        <Input
-                          type="text"
-                          placeholder={`${t("form.steps.step6.refinePlaceholder")}...`}
-                          value={refinePrompt}
-                          onChange={(e) =>
-                            setRefineKeyMessagePrompts((prev) => ({
-                              ...prev,
-                              [refineKey]: e.target.value,
-                            }))
-                          }
-                          className="mb-2"
-                        />
-                        <div className="flex gap-2 justify-end">
+                    isStaged ? (
+                      // When content is staged, show old and new proposal with accept/reject buttons
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge variant="secondary" className="font-semibold">
+                            {message.tag}
+                          </Badge>
+                        </div>
+                        <div className="relative">
+                          <pre className="whitespace-pre-wrap text-gray-400 font-sans leading-relaxed line-through opacity-60 text-sm">
+                            {stagedState.originalDescription}
+                          </pre>
+                        </div>
+                        <div className="relative">
+                          <div className="absolute -left-3 top-0 bottom-0 w-1 bg-accent-violet rounded-full"></div>
+                          <pre className="whitespace-pre-wrap text-gray-700 font-sans leading-relaxed bg-accent-violet/5 p-3 rounded-lg text-sm">
+                            {stagedState.stagedDescription}
+                          </pre>
+                        </div>
+                        <div className="flex gap-2 justify-end pt-2">
                           <Button
-                            onClick={() => handleKeyMessageRefine(message.id, currentChannel)}
-                            disabled={isRefiningThisMessage}
+                            onClick={() => handleKeyMessageAccept(message.id, currentChannel)}
                             size="sm"
                             className="flex items-center gap-2"
                           >
-                            {isRefiningThisMessage ? (
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : (
-                              <Sparkles className="w-4 h-4" />
-                            )}
+                            <Check className="w-4 h-4" />
+                            {t("form.steps.step6.accept")}
+                          </Button>
+                          <Button
+                            onClick={() => handleKeyMessageReject(message.id, currentChannel)}
+                            variant="outline"
+                            size="sm"
+                            className="flex items-center gap-2"
+                          >
+                            <X className="w-4 h-4" />
+                            {t("form.steps.step6.reject")}
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      // When not staged, show input with regenerate/cancel buttons inline
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge variant="secondary" className="font-semibold">
+                            {message.tag}
+                          </Badge>
+                        </div>
+                        <p className="text-gray-700 mb-3">{message.description}</p>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            type="text"
+                            placeholder={`${t("form.steps.step6.refinePlaceholder")}... (Press Alt+C for suggestions)`}
+                            value={refinePrompt}
+                            onChange={(e) =>
+                              setRefineKeyMessagePrompts((prev) => ({
+                                ...prev,
+                                [refineKey]: e.target.value,
+                              }))
+                            }
+                            onKeyDown={(e) => {
+                              if (e.altKey && e.key === "c") {
+                                e.preventDefault()
+                                const mockPrompt = fillMockPrompt(`keyMessages.${currentChannel}`)
+                                setRefineKeyMessagePrompts((prev) => ({
+                                  ...prev,
+                                  [refineKey]: mockPrompt,
+                                }))
+                              }
+                            }}
+                            className="flex-1"
+                          />
+                          <Button
+                            onClick={() => handleKeyMessageRefine(message.id, currentChannel)}
+                            disabled={!refinePrompt.trim()}
+                            size="sm"
+                            className="flex items-center gap-2"
+                          >
+                            <Sparkles className="w-4 h-4" />
                             {t("form.steps.step6.regenerate")}
                           </Button>
                           <Button
                             variant="outline"
                             onClick={() => handleKeyMessageRefineCancel(message.id, currentChannel)}
+                            disabled={isStaged}
                             size="sm"
+                            className="flex items-center gap-2"
                           >
+                            <X className="w-4 h-4" />
                             {t("common.cancel")}
                           </Button>
                         </div>
                       </div>
-                    </div>
+                    )
                   ) : (
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
@@ -699,8 +822,9 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleKeyMessageRefineStart(message.id, currentChannel)}
+                            disabled={isDisabled}
                             className="h-8 w-8 p-0"
-                            title={t("form.steps.step6.refine")}
+                            title={isDisabled ? t("form.steps.step6.editingChannel") || "Another message is being edited" : t("form.steps.step6.refine")}
                           >
                             <Sparkles className="w-4 h-4" />
                           </Button>
@@ -708,7 +832,9 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleKeyMessageEditStart(message, currentChannel)}
+                            disabled={isDisabled}
                             className="h-8 w-8 p-0"
+                            title={isDisabled ? t("form.steps.step6.editingChannel") || "Another message is being edited" : t("common.edit")}
                           >
                             <Edit2 className="w-4 h-4" />
                           </Button>
@@ -716,7 +842,9 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleKeyMessageDelete(message.id, currentChannel)}
+                            disabled={isDisabled}
                             className="h-8 w-8 p-0 text-destructive"
+                            title={isDisabled ? t("form.steps.step6.editingChannel") || "Another message is being edited" : t("common.delete")}
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
