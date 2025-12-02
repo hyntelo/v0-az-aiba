@@ -63,6 +63,8 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
     tag: "",
     description: "",
   })
+  const [refiningKeyMessageId, setRefiningKeyMessageId] = useState<string | null>(null)
+  const [refineKeyMessagePrompts, setRefineKeyMessagePrompts] = useState<Record<string, string>>({})
   const [confirmedSections, setConfirmedSections] = useState<Set<string>>(new Set())
   const [showRefineField, setShowRefineField] = useState<Record<string, boolean>>({})
   const [refinePrompts, setRefinePrompts] = useState<Record<string, string>>({})
@@ -147,6 +149,39 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
       // Update channel-specific key messages
       updateBriefSection(`keyMessages.${channel}`, updated as any)
     }
+  }
+
+  // Handle key message refine
+  const handleKeyMessageRefineStart = (messageId: string, channel: string) => {
+    setRefiningKeyMessageId(`${messageId}.${channel}`)
+    setRefineKeyMessagePrompts((prev) => ({
+      ...prev,
+      [`${messageId}.${channel}`]: "",
+    }))
+  }
+
+  const handleKeyMessageRefine = async (messageId: string, channel: string) => {
+    const refineKey = `${messageId}.${channel}`
+    const prompt = refineKeyMessagePrompts[refineKey] || ""
+    // Refine the specific key message - this would need to be implemented in the store
+    // For now, we'll refine the entire keyMessages section for that channel
+    await regenerateSection(`keyMessages.${channel}`, prompt)
+    setRefiningKeyMessageId(null)
+    setRefineKeyMessagePrompts((prev) => {
+      const newPrompts = { ...prev }
+      delete newPrompts[refineKey]
+      return newPrompts
+    })
+  }
+
+  const handleKeyMessageRefineCancel = (messageId: string, channel: string) => {
+    const refineKey = `${messageId}.${channel}`
+    setRefiningKeyMessageId(null)
+    setRefineKeyMessagePrompts((prev) => {
+      const newPrompts = { ...prev }
+      delete newPrompts[refineKey]
+      return newPrompts
+    })
   }
 
   // Handle refine (with channel support)
@@ -264,50 +299,6 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
             </Tabs>
           )}
 
-          {showRefine && !isConfirmed && (
-            <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
-              <div className="flex items-center gap-2">
-                <Input
-                  type="text"
-                  placeholder={`${t("form.steps.step6.refinePlaceholder")}... (Press Alt+C for suggestions)`}
-                  value={refinePrompts[sectionKey] || ""}
-                  onChange={(e) =>
-                    setRefinePrompts((prev) => ({
-                      ...prev,
-                      [sectionKey]: e.target.value,
-                    }))
-                  }
-                  onKeyDown={(e) => {
-                    if (e.altKey && e.key === "c") {
-                      e.preventDefault()
-                      const mockPrompt = fillMockPrompt(sectionKey)
-                      setRefinePrompts((prev) => ({
-                        ...prev,
-                        [sectionKey]: mockPrompt,
-                      }))
-                    }
-                  }}
-                  className="flex-1"
-                />
-                <Button
-                  onClick={() => {
-                    const channel = isChannelSpecific ? (selectedChannel[sectionKey] || channels[0] || "") : undefined
-                    handleRefine(sectionKey, channel)
-                  }}
-                  disabled={isRefining}
-                  className="flex items-center gap-2"
-                >
-                  {isRefining ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Sparkles className="w-4 h-4" />
-                  )}
-                  {t("form.steps.step6.regenerate")}
-                </Button>
-              </div>
-            </div>
-          )}
-
           {isEditing && !isConfirmed ? (
             <div>
               <Textarea
@@ -316,14 +307,6 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
                 className="w-full min-h-[150px]"
                 placeholder={title}
               />
-              <div className="flex gap-2 mt-3">
-                <Button onClick={handleEditSave} size="sm">
-                  {t("common.save")}
-                </Button>
-                <Button variant="outline" onClick={handleEditCancel} size="sm">
-                  {t("common.cancel")}
-                </Button>
-              </div>
               {isChannelSpecific && (
                 <p className="text-xs text-muted-foreground mt-2">
                   {t("form.steps.step6.editingChannel")}: {getChannelDisplayName(selectedChannel[sectionKey] || channels[0] || "")}
@@ -383,37 +366,104 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
           )}
         </CardContent>
         {!isConfirmed && (
-          <CardFooter className="flex items-center justify-end gap-2 border-t pt-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => toggleRefineField(sectionKey)}
-              className="flex items-center gap-2"
-            >
-              <Sparkles className="w-4 h-4" />
-              {t("form.steps.step6.refine")}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                const channel = isChannelSpecific ? (selectedChannel[sectionKey] || channels[0] || "") : undefined
-                handleEditStart(sectionKey, content, channel)
-              }}
-              className="flex items-center gap-2"
-            >
-              <Edit2 className="w-4 h-4" />
-              {t("form.steps.step6.modify")}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleConfirm(sectionKey)}
-              className="flex items-center gap-2"
-            >
-              <CheckCircle2 className="w-4 h-4" />
-              {t("form.steps.step6.confirm")}
-            </Button>
+          <CardFooter className="flex items-center gap-2 border-t pt-4">
+            {isEditing ? (
+              <div className="flex items-center justify-end gap-2 w-full">
+                <Button onClick={handleEditSave} size="sm" className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4" />
+                  {t("common.save")}
+                </Button>
+                <Button variant="outline" onClick={handleEditCancel} size="sm" className="flex items-center gap-2">
+                  <X className="w-4 h-4" />
+                  {t("common.cancel")}
+                </Button>
+              </div>
+            ) : showRefine ? (
+              <>
+                <Input
+                  type="text"
+                  placeholder={`${t("form.steps.step6.refinePlaceholder")}... (Press Alt+C for suggestions)`}
+                  value={refinePrompts[sectionKey] || ""}
+                  onChange={(e) =>
+                    setRefinePrompts((prev) => ({
+                      ...prev,
+                      [sectionKey]: e.target.value,
+                    }))
+                  }
+                  onKeyDown={(e) => {
+                    if (e.altKey && e.key === "c") {
+                      e.preventDefault()
+                      const mockPrompt = fillMockPrompt(sectionKey)
+                      setRefinePrompts((prev) => ({
+                        ...prev,
+                        [sectionKey]: mockPrompt,
+                      }))
+                    }
+                  }}
+                  className="flex-1"
+                />
+                <div className="flex items-center gap-2">
+                  <Button
+                    onClick={() => {
+                      const channel = isChannelSpecific ? (selectedChannel[sectionKey] || channels[0] || "") : undefined
+                      handleRefine(sectionKey, channel)
+                    }}
+                    disabled={isRefining}
+                    size="sm"
+                    className="flex items-center gap-2"
+                  >
+                    {isRefining ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Sparkles className="w-4 h-4" />
+                    )}
+                    {t("form.steps.step6.regenerate")}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => toggleRefineField(sectionKey)}
+                    size="sm"
+                    className="flex items-center gap-2"
+                  >
+                    <X className="w-4 h-4" />
+                    {t("common.cancel")}
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <div className="flex items-center justify-end gap-2 w-full">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => toggleRefineField(sectionKey)}
+                  className="flex items-center gap-2"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  {t("form.steps.step6.refine")}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const channel = isChannelSpecific ? (selectedChannel[sectionKey] || channels[0] || "") : undefined
+                    handleEditStart(sectionKey, content, channel)
+                  }}
+                  className="flex items-center gap-2"
+                >
+                  <Edit2 className="w-4 h-4" />
+                  {t("form.steps.step6.modify")}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleConfirm(sectionKey)}
+                  className="flex items-center gap-2"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  {t("form.steps.step6.confirm")}
+                </Button>
+              </div>
+            )}
           </CardFooter>
         )}
       </Card>
@@ -445,41 +495,15 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
           </div>
         </CardHeader>
         <CardContent>
-          {showRefineField["keyMessages"] && !isConfirmed && (
-            <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
-              <div className="flex items-center gap-2">
-                <Input
-                  type="text"
-                  placeholder={`${t("form.steps.step6.refinePlaceholder")}...`}
-                  value={refinePrompts["keyMessages"] || ""}
-                  onChange={(e) =>
-                    setRefinePrompts((prev) => ({
-                      ...prev,
-                      keyMessages: e.target.value,
-                    }))
-                  }
-                  className="flex-1"
-                />
-                <Button
-                  onClick={() => handleRefine(`keyMessages.${currentChannel}`)}
-                  disabled={regeneratingSection === `keyMessages.${currentChannel}`}
-                  className="flex items-center gap-2"
-                >
-                  {regeneratingSection === `keyMessages.${currentChannel}` ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Sparkles className="w-4 h-4" />
-                  )}
-                  {t("form.steps.step6.regenerate")}
-                </Button>
-              </div>
-            </div>
-          )}
-
           <div className="space-y-4">
             {keyMessages.map((message) => {
               const editingId = `${message.id}.${currentChannel}`
+              const refiningId = `${message.id}.${currentChannel}`
               const isEditing = editingKeyMessageId === editingId
+              const isRefining = refiningKeyMessageId === refiningId
+              const refineKey = refiningId
+              const refinePrompt = refineKeyMessagePrompts[refineKey] || ""
+              const isRefiningThisMessage = regeneratingSection === `keyMessages.${currentChannel}`
               
               return (
                 <div
@@ -504,7 +528,7 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
                         placeholder={t("form.steps.step6.keyMessageDescription")}
                         rows={3}
                       />
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 justify-end">
                         <Button onClick={() => handleKeyMessageEditSave(currentChannel)} size="sm">
                           {t("common.save")}
                         </Button>
@@ -518,6 +542,51 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
                         >
                           {t("common.cancel")}
                         </Button>
+                      </div>
+                    </div>
+                  ) : isRefining ? (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge variant="secondary" className="font-semibold">
+                          {message.tag}
+                        </Badge>
+                      </div>
+                      <p className="text-gray-700 mb-3">{message.description}</p>
+                      <div className="p-3 bg-white border border-gray-200 rounded-lg">
+                        <Input
+                          type="text"
+                          placeholder={`${t("form.steps.step6.refinePlaceholder")}...`}
+                          value={refinePrompt}
+                          onChange={(e) =>
+                            setRefineKeyMessagePrompts((prev) => ({
+                              ...prev,
+                              [refineKey]: e.target.value,
+                            }))
+                          }
+                          className="mb-2"
+                        />
+                        <div className="flex gap-2 justify-end">
+                          <Button
+                            onClick={() => handleKeyMessageRefine(message.id, currentChannel)}
+                            disabled={isRefiningThisMessage}
+                            size="sm"
+                            className="flex items-center gap-2"
+                          >
+                            {isRefiningThisMessage ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Sparkles className="w-4 h-4" />
+                            )}
+                            {t("form.steps.step6.regenerate")}
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => handleKeyMessageRefineCancel(message.id, currentChannel)}
+                            size="sm"
+                          >
+                            {t("common.cancel")}
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   ) : (
@@ -543,6 +612,15 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
                           <Button
                             variant="ghost"
                             size="sm"
+                            onClick={() => handleKeyMessageRefineStart(message.id, currentChannel)}
+                            className="h-8 w-8 p-0"
+                            title={t("form.steps.step6.refine")}
+                          >
+                            <Sparkles className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={() => handleKeyMessageDelete(message.id, currentChannel)}
                             className="h-8 w-8 p-0 text-destructive"
                           >
@@ -559,15 +637,6 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
         </CardContent>
         {!isConfirmed && (
           <CardFooter className="flex items-center justify-end gap-2 border-t pt-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => toggleRefineField("keyMessages")}
-              className="flex items-center gap-2"
-            >
-              <Sparkles className="w-4 h-4" />
-              {t("form.steps.step6.refine")}
-            </Button>
             <Button
               variant="outline"
               size="sm"
@@ -644,8 +713,7 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
           <Accordion type="multiple" className="w-full">
             {/* Step 1: Campaign Context */}
             <AccordionItem value="step1">
-              <AccordionTrigger className="text-base font-semibold">
-                <span className="mr-2 text-accent-violet font-bold">1.</span>
+              <AccordionTrigger className="text-base font-semibold flex items-center text-left">
                 {t("form.steps.step1.title")}
               </AccordionTrigger>
               <AccordionContent>
@@ -729,46 +797,9 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
               </AccordionContent>
             </AccordionItem>
 
-            {/* Step 2: Additional Context */}
+            {/* Step 2: Starting Documents */}
             <AccordionItem value="step2">
-              <AccordionTrigger className="text-base font-semibold">
-                <span className="mr-2 text-accent-violet font-bold">2.</span>
-                {t("form.steps.step2.title")}
-              </AccordionTrigger>
-              <AccordionContent>
-                <div>
-                  {campaignData.attachments && campaignData.attachments.length > 0 ? (
-                    <ul className="space-y-2">
-                      {campaignData.attachments.map((att) => (
-                        <li key={att.id} className="text-gray-900">
-                          {att.name}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-gray-500">{t("form.steps.step6.noContent")}</p>
-                  )}
-                </div>
-                {onStepNavigate && (
-                  <div className="mt-4">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onStepNavigate(2)}
-                      className="flex items-center gap-2"
-                    >
-                      <Edit2 className="w-4 h-4" />
-                      {t("form.steps.step6.modify")}
-                    </Button>
-                  </div>
-                )}
-              </AccordionContent>
-            </AccordionItem>
-
-            {/* Step 3: Starting Documents */}
-            <AccordionItem value="step3">
-              <AccordionTrigger className="text-base font-semibold">
-                <span className="mr-2 text-accent-violet font-bold">3.</span>
+              <AccordionTrigger className="text-base font-semibold flex items-center text-left">
                 {t("form.steps.step3.title")}
               </AccordionTrigger>
               <AccordionContent>
@@ -821,7 +852,7 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => onStepNavigate(3)}
+                      onClick={() => onStepNavigate(2)}
                       className="flex items-center gap-2"
                     >
                       <Edit2 className="w-4 h-4" />
@@ -832,10 +863,9 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
               </AccordionContent>
             </AccordionItem>
 
-            {/* Step 4: Scientific References */}
-            <AccordionItem value="step4">
-              <AccordionTrigger className="text-base font-semibold">
-                <span className="mr-2 text-accent-violet font-bold">4.</span>
+            {/* Step 3: Scientific References */}
+            <AccordionItem value="step3">
+              <AccordionTrigger className="text-base font-semibold flex items-center text-left">
                 {t("form.steps.step4.title")}
               </AccordionTrigger>
               <AccordionContent>
@@ -889,7 +919,7 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => onStepNavigate(4)}
+                      onClick={() => onStepNavigate(3)}
                       className="flex items-center gap-2"
                     >
                       <Edit2 className="w-4 h-4" />
@@ -900,10 +930,9 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
               </AccordionContent>
             </AccordionItem>
 
-            {/* Step 5: Technical Fields */}
-            <AccordionItem value="step5">
-              <AccordionTrigger className="text-base font-semibold">
-                <span className="mr-2 text-accent-violet font-bold">5.</span>
+            {/* Step 4: Technical Fields */}
+            <AccordionItem value="step4">
+              <AccordionTrigger className="text-base font-semibold flex items-center text-left">
                 {t("form.steps.step2d.title")}
               </AccordionTrigger>
               <AccordionContent>
@@ -985,7 +1014,7 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => onStepNavigate(5)}
+                      onClick={() => onStepNavigate(4)}
                       className="flex items-center gap-2"
                     >
                       <Edit2 className="w-4 h-4" />

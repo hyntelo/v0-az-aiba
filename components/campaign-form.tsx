@@ -10,14 +10,13 @@ import { demoData } from "@/lib/mock-data"
 import { useTranslation } from "@/lib/i18n"
 import { BriefStepper, type Step, type StepStatus } from "@/components/brief-stepper"
 import { Step1CampaignContext } from "@/components/sections/step-1-campaign-context"
-import { Step2AdditionalContext } from "@/components/sections/step-2-additional-context"
 import { Step3StartingDocuments } from "@/components/sections/step-3-starting-documents"
 import { Step4ScientificReferences } from "@/components/sections/step-4-scientific-references"
 import { Step2dTechnicalFields } from "@/components/sections/step-2d-technical-fields"
 import { Step6BriefRecap } from "@/components/sections/step-6-brief-recap"
 import { ExportModal } from "@/components/export-modal"
 
-const TOTAL_STEPS = 6
+const TOTAL_STEPS = 5
 
 export default function CampaignForm() {
   const { t } = useTranslation()
@@ -130,11 +129,6 @@ export default function CampaignForm() {
     return Object.keys(newErrors).length === 0
   }
 
-  const validateStep2 = (): boolean => {
-    // Placeholder - always valid for now
-    return true
-  }
-
   const validateStep3 = (): boolean => {
     // Placeholder - always valid for now
     return true
@@ -155,15 +149,13 @@ export default function CampaignForm() {
       case 1:
         return validateStep1()
       case 2:
-        return validateStep2()
-      case 3:
         return validateStep3()
-      case 4:
+      case 3:
         return validateStep4()
-      case 5:
+      case 4:
         return validateStep2d()
-      case 6:
-        return true // Step 3 (generation) doesn't need validation
+      case 5:
+        return true // Step 5 (generation) doesn't need validation
       default:
         return false
     }
@@ -191,17 +183,17 @@ export default function CampaignForm() {
       newCompletedSteps.add(currentStep)
 
       if (currentStep < TOTAL_STEPS) {
-        // If moving from step 5 to step 6, trigger AI generation
-        if (currentStep === 5) {
+        // If moving from step 4 to step 5, trigger AI generation
+        if (currentStep === 4) {
           // Set loading state first to show modal
           setIsGeneratingBrief(true)
           // Generate brief - isGeneratingBrief is controlled externally
           generateBrief().then(() => {
-            // After 3 seconds, hide modal and move to step 6
+            // After 3 seconds, hide modal and move to step 5
             setTimeout(() => {
               setIsGeneratingBrief(false)
               setCompletedSteps(newCompletedSteps)
-              setCurrentStep(6)
+              setCurrentStep(5)
               // Scroll to top to show stepper and title
               setTimeout(() => {
                 topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
@@ -235,7 +227,7 @@ export default function CampaignForm() {
     }
   }
 
-  // Removed handleGenerateBrief - generation now happens between step 5 and 6
+  // Removed handleGenerateBrief - generation now happens between step 4 and 5
 
   const handleBack = () => {
     resetApp()
@@ -251,28 +243,23 @@ export default function CampaignForm() {
       },
       {
         id: 2,
-        label: t("form.steps.step2.title"),
+        label: t("form.steps.step3.title"),
         status: getStepStatus(2),
       },
       {
         id: 3,
-        label: t("form.steps.step3.title"),
+        label: t("form.steps.step4.title"),
         status: getStepStatus(3),
       },
       {
         id: 4,
-        label: t("form.steps.step4.title"),
+        label: t("form.steps.step2d.title"),
         status: getStepStatus(4),
       },
       {
         id: 5,
-        label: t("form.steps.step2d.title"),
-        status: getStepStatus(5),
-      },
-      {
-        id: 6,
         label: t("form.steps.step6.title"),
-        status: getStepStatus(6),
+        status: getStepStatus(5),
       },
     ]
   }
@@ -284,8 +271,8 @@ export default function CampaignForm() {
     return "pending"
   }
 
-  // Show AI generation modal when transitioning from step 5 to step 6
-  if (isGeneratingBrief && currentStep === 5) {
+  // Show AI generation modal when transitioning from step 4 to step 5
+  if (isGeneratingBrief && currentStep === 4) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="w-full max-w-md hyntelo-elevation-6">
@@ -317,14 +304,12 @@ export default function CampaignForm() {
           />
         )
       case 2:
-        return <Step2AdditionalContext />
-      case 3:
         return <Step3StartingDocuments />
-      case 4:
+      case 3:
         return <Step4ScientificReferences />
-      case 5:
+      case 4:
         return <Step2dTechnicalFields />
-      case 6:
+      case 5:
         return <Step6BriefRecap onStepNavigate={setCurrentStep} />
       default:
         return null
@@ -368,7 +353,7 @@ export default function CampaignForm() {
                 onClick={handleNext}
                 className="bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-150 ease-out hover:scale-[0.97] active:scale-[0.97]"
               >
-                {currentStep === 5 ? t("form.navigation.generate") : t("form.navigation.next")}
+                {currentStep === 4 ? t("form.navigation.generate") : t("form.navigation.next")}
               </Button>
             ) : (
               <>

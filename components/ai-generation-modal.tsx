@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react"
 import { useAppStore } from "@/lib/store"
 import { useTranslation } from "@/lib/i18n"
+import { demoBrief } from "@/lib/mock-data"
 
 export function AIGenerationModal() {
   const { t } = useTranslation()
-  const { isGeneratingBrief, setIsGeneratingBrief, campaignData, setCurrentBrief, setCurrentView } = useAppStore()
+  const { isGeneratingBrief, setIsGeneratingBrief, campaignData, setCurrentBrief, setCurrentView, brandGuidelines } = useAppStore()
   const [progress, setProgress] = useState(0)
   const [currentStep, setCurrentStep] = useState("")
 
@@ -51,18 +52,55 @@ export function AIGenerationModal() {
   const generateBrief = () => {
     if (!campaignData) return
 
+    // Use demoBrief structure as base, but this function shouldn't really be called
+    // since the store's generateBrief() already handles this properly
+    // This is kept for backwards compatibility but should ideally be removed
+    const channels = campaignData.channels || []
+    const baseGenerated = demoBrief.generatedContent
+    
+    // Generate channel-specific content
+    const toneOfVoice: Record<string, string> = {}
+    const complianceNotes: Record<string, string> = {}
+    const keyMessages: Record<string, any[]> = {}
+    
+    channels.forEach((channel) => {
+      // Use channel-specific content if available, otherwise use base content
+      if (baseGenerated.toneOfVoice && typeof baseGenerated.toneOfVoice === "object") {
+        const channelTone = (baseGenerated.toneOfVoice as Record<string, string>)[channel]
+        toneOfVoice[channel] = channelTone || (baseGenerated.toneOfVoice as Record<string, string>)[Object.keys(baseGenerated.toneOfVoice as Record<string, string>)[0]] || ""
+      }
+      
+      if (baseGenerated.complianceNotes && typeof baseGenerated.complianceNotes === "object") {
+        const channelCompliance = (baseGenerated.complianceNotes as Record<string, string>)[channel]
+        complianceNotes[channel] = channelCompliance || (baseGenerated.complianceNotes as Record<string, string>)[Object.keys(baseGenerated.complianceNotes as Record<string, string>)[0]] || ""
+      }
+      
+      // Generate key messages per channel
+      if (baseGenerated.keyMessages && typeof baseGenerated.keyMessages === "object" && !Array.isArray(baseGenerated.keyMessages)) {
+        const channelKeyMessages = (baseGenerated.keyMessages as Record<string, any[]>)[channel]
+        keyMessages[channel] = channelKeyMessages || (baseGenerated.keyMessages as Record<string, any[]>)[Object.keys(baseGenerated.keyMessages as Record<string, any[]>)[0]] || []
+      }
+    })
+    
+    const generated = {
+      ...baseGenerated,
+      toneOfVoice,
+      complianceNotes,
+      keyMessages,
+    }
+
     const mockBrief = {
       id: `brief-${Date.now()}`,
-      title: `${campaignData.brand} - ${campaignData.objective}`,
+      title: campaignData.projectName || "Untitled Brief",
       campaignData,
-      generatedContent: {
-        objectives: `Primary Objective: ${campaignData.objective}\n\nSMART Goals:\n• Specific: Target ${campaignData.targetAudience} with tailored messaging\n• Measurable: Track engagement metrics across ${campaignData.channels.join(", ")}\n• Achievable: Leverage existing brand equity and market position\n• Relevant: Address current market needs and patient journey\n• Time-bound: Execute campaign within Q3-Q4 timeline`,
-        keyMessages: `Core Message: "${campaignData.brand} - Advancing Patient Care Through Innovation"\n\nSupporting Messages:\n• Proven efficacy backed by clinical data\n• Patient-centric approach to treatment\n• Healthcare provider partnership and support\n• Commitment to safety and regulatory compliance\n\nCall-to-Action: "Discover how ${campaignData.brand} can make a difference in your patients' lives"`,
-        toneOfVoice: `Professional & Empathetic\n\n• Authoritative yet approachable\n• Evidence-based and scientifically accurate\n• Patient-focused and compassionate\n• Clear and accessible language\n• Confident but not overpromising\n\nAvoid:\n• Overly technical jargon\n• Promotional or sales-heavy language\n• Unsubstantiated claims\n• Emotional manipulation`,
-        complianceNotes: `Regulatory Requirements:\n\n• All claims must be substantiated by approved clinical data\n• Include required safety information and contraindications\n• Ensure fair balance in all promotional materials\n• Obtain legal/regulatory review before publication\n• Include appropriate copyright and trademark notices\n\nGuidelines:\n• Follow FDA/EMA promotional guidelines\n• Maintain consistency with approved labeling\n• Document all claims with supporting references\n• Review with medical affairs team`,
-      },
+      generatedContent: generated,
+      references: [],
       createdAt: new Date(),
       status: "draft" as const,
+      lastModified: new Date(),
+      lastSavedAt: new Date(),
+      statusHistory: [],
+      isReadOnly: false,
     }
 
     setCurrentBrief(mockBrief)
