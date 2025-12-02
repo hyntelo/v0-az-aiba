@@ -67,7 +67,7 @@ export function AIGenerationModal() {
 
     setCurrentBrief(mockBrief)
     setIsGeneratingBrief(false)
-    setCurrentView("brief")
+    // Don't navigate away - stay in form view (step 6 will show the brief)
   }
 
   if (!isGeneratingBrief) return null

@@ -343,7 +343,7 @@ export const createBriefSlice: StateCreator<BriefSlice, [], [], BriefSlice> = (s
     }),
   generateBrief: async () => {
     const { campaignData } = get()
-    set({ isGeneratingBrief: true })
+    // isGeneratingBrief is controlled by the caller (campaign-form.tsx)
     
     // Generate channel-specific content
     const channels = campaignData.channels || []
@@ -396,7 +396,7 @@ export const createBriefSlice: StateCreator<BriefSlice, [], [], BriefSlice> = (s
     set((state) => ({
       currentBrief: brief,
       createdBriefs: [brief, ...state.createdBriefs],
-      isGeneratingBrief: false,
+      // Don't set isGeneratingBrief: false here - let the caller handle the timing
     }))
   },
   saveDraft: async (briefId) => {

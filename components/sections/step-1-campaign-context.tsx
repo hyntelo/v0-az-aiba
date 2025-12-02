@@ -204,7 +204,7 @@ export function Step1CampaignContext({
         </CardContent>
       </Card>
 
-      {/* Section 2: Obiettivi di Comunicazione - Stile, Target */}
+      {/* Section 2: Obiettivi di Comunicazione */}
       <Card className="hyntelo-elevation-3">
         <CardHeader>
           <CardTitle className="text-lg font-medium flex items-center gap-2">

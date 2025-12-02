@@ -39,6 +39,7 @@
     "allTime": "All time",
     "statusDraft": "Draft",
     "statusAiReviewed": "Completed",
+    "statusCompletato": "Completed",
     "campaignBrief": "Campaign Brief",
     "you": "You",
     "readyToCreate": "Ready to create a new brief?",
@@ -395,7 +396,8 @@
         "keyMessageDescription": "Key message description",
         "noContent": "No content",
         "attachments": "Attachments",
-        "editingChannel": "Editing channel"
+        "editingChannel": "Editing channel",
+        "completato": "Completed"
       }
     },
     "navigation": {

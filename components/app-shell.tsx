@@ -139,13 +139,11 @@ export function AppShell({ children, currentPage = "dashboard", onCreateBrief }:
       ? t("appShell.profile")
       : currentView === "form"
         ? t("appShell.newBrief")
-        : currentView === "brief"
-          ? t("appShell.generatedBrief")
-          : currentView === "brand-guidelines"
-            ? t("appShell.brand-guidelines")
-            : currentView === "settings"
-              ? t("appShell.settings")
-              : t("appShell.dashboard")
+        : currentView === "brand-guidelines"
+          ? t("appShell.brand-guidelines")
+          : currentView === "settings"
+            ? t("appShell.settings")
+            : t("appShell.dashboard")
 
   return (
     <div className="min-h-screen bg-background">

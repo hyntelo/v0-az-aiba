@@ -61,7 +61,8 @@
       "delete": "Elimina",
       "archive": "Archivia"
     },
-    "statusComplete": "Completato"
+    "statusComplete": "Completato",
+    "statusCompletato": "Completato"
   },
   "appShell": {
     "profile": "Profilo",
@@ -275,7 +276,7 @@
     "campaignContext": "Contesto della Campagna",
     "campaignContextDescription": "Fornisci dettagli sulla tua campagna per aiutare la nostra IA a generare un brief completo con le tue linee guida del brand",
     "brandGuidelines": "Linee Guida del Brand",
-    "communicationObjectives": "Obiettivi di Comunicazione - Stile, Target",
+    "communicationObjectives": "Obiettivi di Comunicazione",
     "communicationStyle": "Stile di Comunicazione",
     "selectCommunicationStyle": "Seleziona lo stile di comunicazione",
     "style": "Stile",
@@ -299,7 +300,7 @@
     "therapeuticArea": "Area terapeutica",
     "selectTherapeuticArea": "Seleziona area terapeutica",
     "specialty": "Indicazione",
-    "selectSpecialty": "Seleziona specialità medica",
+    "selectSpecialty": "Seleziona indicazione",
     "requestSummary": "Obiettivi e descrizione",
     "requestSummaryPlaceholder": "Fornisci l'obiettivo che vorresti raggiungere con questo contenuto e un riepilogo conciso di ciò di cui hai bisogno...",
     "contentFormats": "Formati di Contenuto",
@@ -504,7 +505,8 @@
         "keyMessageDescription": "Descrizione del messaggio chiave",
         "noContent": "Nessun contenuto",
         "attachments": "Allegati",
-        "editingChannel": "Modificando canale"
+        "editingChannel": "Modificando canale",
+        "completato": "Completato"
       }
     },
     "navigation": {

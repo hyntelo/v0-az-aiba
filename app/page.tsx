@@ -26,7 +26,7 @@ import {
 import * as TooltipPrimitive from "@radix-ui/react-tooltip"
 import { Plus, FileText, Calendar, User, Bell, X, Sparkles, MoreVertical, Search, ChevronUp, ChevronDown } from "lucide-react"
 import CampaignForm from "@/components/campaign-form"
-import { BriefDisplay } from "@/components/brief-display"
+// BriefDisplay removed - step 6 is now the generated brief view
 import { AIGenerationModal } from "@/components/ai-generation-modal"
 import { AppShell } from "@/components/app-shell"
 import { useAppStore } from "@/lib/store"
@@ -259,13 +259,15 @@ export default function Dashboard() {
   const handleBriefClick = (brief: BriefData) => {
     console.log("[v0] Opening brief:", brief.title)
     setCurrentBrief(brief)
-    setCurrentView("brief")
+    setCurrentView("form")
+    // Brief is now shown in step 6 of the form
   }
 
   const handleEdit = (brief: BriefData) => {
     console.log("[v0] Edit brief:", brief.id)
     setCurrentBrief(brief)
-    setCurrentView("brief")
+    setCurrentView("form")
+    // Brief is now shown in step 6 of the form
   }
 
   const handleDuplicate = (brief: BriefData) => {
@@ -289,6 +291,9 @@ export default function Dashboard() {
     }
     if (status === "ai-reviewed") {
       return t("dashboard.statusComplete")
+    }
+    if (status === "completato") {
+      return t("dashboard.statusCompletato")
     }
     return status.replace("-", " ").toUpperCase()
   }
@@ -389,17 +394,7 @@ export default function Dashboard() {
     )
   }
 
-  if (currentView === "brief") {
-    return (
-      <AppShell currentPage="briefs">
-        <div className="p-6 pt-0">
-          <div className="mb-8"></div>
-          <BriefDisplay />
-        </div>
-        <AIGenerationModal />
-      </AppShell>
-    )
-  }
+  // Removed "brief" view - step 6 is now the generated brief view
 
   return (
     <AppShell currentPage="dashboard" onCreateBrief={handleCreateBrief}>

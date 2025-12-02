@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
@@ -14,8 +14,6 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import {
-  Lightbulb,
-  FileText,
   Edit2,
   Sparkles,
   CheckCircle2,
@@ -25,9 +23,16 @@ import {
   Check,
   X,
 } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog"
 import { useTranslation } from "@/lib/i18n"
 import { useAppStore } from "@/lib/store"
-import type { KeyMessage } from "@/lib/store/types"
+import type { KeyMessage, ScientificReference, Claim } from "@/lib/store/types"
 
 interface Step6BriefRecapProps {
   onStepNavigate?: (step: number) => void
@@ -46,7 +51,8 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
     regeneratingSection,
     sectionStates,
     fillMockPrompt,
-    generateBrief,
+    updateBriefStatus,
+    setCurrentView,
   } = useAppStore()
 
   // Local state for editing
@@ -61,13 +67,8 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
   const [showRefineField, setShowRefineField] = useState<Record<string, boolean>>({})
   const [refinePrompts, setRefinePrompts] = useState<Record<string, string>>({})
   const [selectedChannel, setSelectedChannel] = useState<Record<string, string>>({})
-
-  // Generate brief if not exists
-  useEffect(() => {
-    if (!currentBrief && campaignData.projectName) {
-      generateBrief()
-    }
-  }, [currentBrief, campaignData.projectName, generateBrief])
+  const [selectedReferenceForClaims, setSelectedReferenceForClaims] = useState<ScientificReference | null>(null)
+  const [isClaimsDialogOpen, setIsClaimsDialogOpen] = useState(false)
 
   const brief = currentBrief
   if (!brief || !brief.generatedContent) {
@@ -230,47 +231,13 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Lightbulb className="w-5 h-5 text-accent-violet" />
-              <FileText className="w-5 h-5 text-accent-violet" />
+              <Sparkles className="w-5 h-5 text-accent-violet" />
               <CardTitle className="text-lg font-medium">{title}</CardTitle>
             </div>
-            {isConfirmed ? (
+            {isConfirmed && (
               <div className="flex items-center gap-1 text-green-600">
                 <Lock className="w-4 h-4" />
                 <span className="text-sm">{t("form.steps.step6.confirmed")}</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => toggleRefineField(sectionKey)}
-                  className="flex items-center gap-2"
-                >
-                  <Sparkles className="w-4 h-4" />
-                  {t("form.steps.step6.refine")}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    const channel = isChannelSpecific ? (selectedChannel[sectionKey] || channels[0] || "") : undefined
-                    handleEditStart(sectionKey, content, channel)
-                  }}
-                  className="flex items-center gap-2"
-                >
-                  <Edit2 className="w-4 h-4" />
-                  {t("form.steps.step6.modify")}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleConfirm(sectionKey)}
-                  className="flex items-center gap-2"
-                >
-                  <CheckCircle2 className="w-4 h-4" />
-                  {t("form.steps.step6.confirm")}
-                </Button>
               </div>
             )}
           </div>
@@ -415,6 +382,40 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
             </div>
           )}
         </CardContent>
+        {!isConfirmed && (
+          <CardFooter className="flex items-center justify-end gap-2 border-t pt-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => toggleRefineField(sectionKey)}
+              className="flex items-center gap-2"
+            >
+              <Sparkles className="w-4 h-4" />
+              {t("form.steps.step6.refine")}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const channel = isChannelSpecific ? (selectedChannel[sectionKey] || channels[0] || "") : undefined
+                handleEditStart(sectionKey, content, channel)
+              }}
+              className="flex items-center gap-2"
+            >
+              <Edit2 className="w-4 h-4" />
+              {t("form.steps.step6.modify")}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleConfirm(sectionKey)}
+              className="flex items-center gap-2"
+            >
+              <CheckCircle2 className="w-4 h-4" />
+              {t("form.steps.step6.confirm")}
+            </Button>
+          </CardFooter>
+        )}
       </Card>
     )
   }
@@ -430,64 +431,20 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Lightbulb className="w-5 h-5 text-accent-violet" />
-              <FileText className="w-5 h-5 text-accent-violet" />
+              <Sparkles className="w-5 h-5 text-accent-violet" />
               <CardTitle className="text-lg font-medium">
                 {t("form.steps.step6.keyMessages")}
               </CardTitle>
             </div>
-            {isConfirmed ? (
+            {isConfirmed && (
               <div className="flex items-center gap-1 text-green-600">
                 <Lock className="w-4 h-4" />
                 <span className="text-sm">{t("form.steps.step6.confirmed")}</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => toggleRefineField("keyMessages")}
-                  className="flex items-center gap-2"
-                >
-                  <Sparkles className="w-4 h-4" />
-                  {t("form.steps.step6.refine")}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleConfirm("keyMessages")}
-                  className="flex items-center gap-2"
-                >
-                  <CheckCircle2 className="w-4 h-4" />
-                  {t("form.steps.step6.confirm")}
-                </Button>
               </div>
             )}
           </div>
         </CardHeader>
         <CardContent>
-          {/* Channel tabs for key messages */}
-          {channels.length > 1 && (
-            <Tabs
-              value={currentChannel}
-              onValueChange={(value) =>
-                setSelectedChannel((prev) => ({ ...prev, keyMessages: value }))
-              }
-              className="mb-4"
-            >
-              <TabsList>
-                {channels.map((channel) => (
-                  <TabsTrigger key={channel} value={channel}>
-                    {getChannelDisplayName(channel)}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-              {channels.map((channel) => (
-                <TabsContent key={channel} value={channel} />
-              ))}
-            </Tabs>
-          )}
-
           {showRefineField["keyMessages"] && !isConfirmed && (
             <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
               <div className="flex items-center gap-2">
@@ -600,6 +557,28 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
             })}
           </div>
         </CardContent>
+        {!isConfirmed && (
+          <CardFooter className="flex items-center justify-end gap-2 border-t pt-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => toggleRefineField("keyMessages")}
+              className="flex items-center gap-2"
+            >
+              <Sparkles className="w-4 h-4" />
+              {t("form.steps.step6.refine")}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleConfirm("keyMessages")}
+              className="flex items-center gap-2"
+            >
+              <CheckCircle2 className="w-4 h-4" />
+              {t("form.steps.step6.confirm")}
+            </Button>
+          </CardFooter>
+        )}
       </Card>
     )
   }
@@ -627,15 +606,15 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-medium text-primary mb-2">{brief.title}</h1>
+              <h1 className="text-2xl font-medium text-primary mb-2">{campaignData.projectName || brief.title}</h1>
               <div className="flex items-center gap-4 text-sm text-gray-600">
+                <Badge variant="outline" className="bg-yellow-100 text-yellow-800">
+                  {t("form.steps.step6.draft")}
+                </Badge>
                 <span>
                   {t("form.steps.step6.created")}:{" "}
                   {new Date(brief.createdAt).toLocaleDateString("it-IT")}
                 </span>
-                <Badge variant="outline" className="bg-yellow-100 text-yellow-800">
-                  {t("form.steps.step6.draft")}
-                </Badge>
                 <span className="flex items-center gap-1 text-accent-violet">
                   <CheckCircle2 className="w-4 h-4" />
                   {confirmationCount}/{totalSections} {t("form.steps.step6.confirmed")}
@@ -666,15 +645,44 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
             {/* Step 1: Campaign Context */}
             <AccordionItem value="step1">
               <AccordionTrigger className="text-base font-semibold">
+                <span className="mr-2 text-accent-violet font-bold">1.</span>
                 {t("form.steps.step1.title")}
               </AccordionTrigger>
               <AccordionContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium text-gray-700">
+                      {t("form.projectName")}
+                    </label>
+                    <p className="text-gray-900">{campaignData.projectName || "-"}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">
                       {t("form.brandProduct")}
                     </label>
-                    <p className="text-gray-900">{campaignData.brand}</p>
+                    <p className="text-gray-900">{campaignData.brand || "-"}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">
+                      {t("form.therapeuticArea")}
+                    </label>
+                    <p className="text-gray-900">{campaignData.therapeuticArea || "-"}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">
+                      {t("form.specialty")}
+                    </label>
+                    <p className="text-gray-900">{campaignData.specialty || "-"}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">
+                      {t("form.expectedLaunchDate")}
+                    </label>
+                    <p className="text-gray-900">
+                      {campaignData.expectedLaunchDate
+                        ? new Date(campaignData.expectedLaunchDate).toLocaleDateString("it-IT")
+                        : "-"}
+                    </p>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-700">
@@ -690,17 +698,19 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-700">
-                      {t("form.requestSummary")}
-                    </label>
-                    <p className="text-gray-900">{campaignData.requestSummary}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-700">
                       {t("form.contentFormats")}
                     </label>
                     <p className="text-gray-900">
-                      {channels.map((c) => getChannelDisplayName(c)).join(", ")}
+                      {channels.length > 0
+                        ? channels.map((c) => getChannelDisplayName(c)).join(", ")
+                        : "-"}
                     </p>
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="text-sm font-medium text-gray-700">
+                      {t("form.requestSummary")}
+                    </label>
+                    <p className="text-gray-900 whitespace-pre-wrap">{campaignData.requestSummary || "-"}</p>
                   </div>
                 </div>
                 {onStepNavigate && (
@@ -722,6 +732,7 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
             {/* Step 2: Additional Context */}
             <AccordionItem value="step2">
               <AccordionTrigger className="text-base font-semibold">
+                <span className="mr-2 text-accent-violet font-bold">2.</span>
                 {t("form.steps.step2.title")}
               </AccordionTrigger>
               <AccordionContent>
@@ -757,15 +768,47 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
             {/* Step 3: Starting Documents */}
             <AccordionItem value="step3">
               <AccordionTrigger className="text-base font-semibold">
+                <span className="mr-2 text-accent-violet font-bold">3.</span>
                 {t("form.steps.step3.title")}
               </AccordionTrigger>
               <AccordionContent>
                 <div>
                   {campaignData.startingDocuments && campaignData.startingDocuments.length > 0 ? (
-                    <ul className="space-y-2">
+                    <ul className="space-y-3">
                       {campaignData.startingDocuments.map((doc) => (
-                        <li key={doc.id} className="text-gray-900">
-                          <span className="font-mono text-sm">{doc.documentId}</span> - {doc.title}
+                        <li key={doc.id} className="text-gray-900 border-b pb-2 last:border-0">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1">
+                              <div className="font-medium">
+                                <span className="font-mono text-sm">{doc.documentId}</span> - {doc.title}
+                              </div>
+                              <div className="text-sm text-gray-600 mt-1">
+                                {doc.usage && doc.pages && (
+                                  <div className="inline-flex items-center gap-2">
+                                    <span>
+                                      <span className="font-medium">{t("form.steps.step3.table.usage")}:</span>{" "}
+                                      {t(`form.steps.step3.usage.${doc.usage === "global-adapt" ? "globalAdapt" : doc.usage}`)}
+                                    </span>
+                                    <span className="text-gray-400">•</span>
+                                    <span>
+                                      <span className="font-medium">{t("form.steps.step3.table.pages")}:</span> {doc.pages}
+                                    </span>
+                                  </div>
+                                )}
+                                {doc.usage && !doc.pages && (
+                                  <div>
+                                    <span className="font-medium">{t("form.steps.step3.table.usage")}:</span>{" "}
+                                    {t(`form.steps.step3.usage.${doc.usage === "global-adapt" ? "globalAdapt" : doc.usage}`)}
+                                  </div>
+                                )}
+                                {!doc.usage && doc.pages && (
+                                  <div>
+                                    <span className="font-medium">{t("form.steps.step3.table.pages")}:</span> {doc.pages}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
                         </li>
                       ))}
                     </ul>
@@ -792,17 +835,50 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
             {/* Step 4: Scientific References */}
             <AccordionItem value="step4">
               <AccordionTrigger className="text-base font-semibold">
+                <span className="mr-2 text-accent-violet font-bold">4.</span>
                 {t("form.steps.step4.title")}
               </AccordionTrigger>
               <AccordionContent>
                 <div>
                   {campaignData.scientificReferences && campaignData.scientificReferences.length > 0 ? (
-                    <ul className="space-y-2">
-                      {campaignData.scientificReferences.map((ref) => (
-                        <li key={ref.id} className="text-gray-900">
-                          <span className="font-mono text-sm">{ref.referenceId}</span> - {ref.title}
-                        </li>
-                      ))}
+                    <ul className="space-y-3">
+                      {campaignData.scientificReferences.map((ref) => {
+                        const selectedCount = ref.selectedClaims?.length || 0
+                        const totalCount = ref.claimsCount || ref.claims?.length || 0
+                        const hasSelectedClaims = selectedCount > 0 && ref.claims && ref.claims.length > 0
+
+                        return (
+                          <li key={ref.id} className="text-gray-900 border-b pb-2 last:border-0">
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex-1">
+                                <div className="font-medium">
+                                  <span className="font-mono text-sm">{ref.referenceId}</span> - {ref.title}
+                                </div>
+                                {totalCount > 0 && (
+                                  <div className="text-sm text-gray-600 mt-1">
+                                    <button
+                                      onClick={() => {
+                                        if (hasSelectedClaims) {
+                                          setSelectedReferenceForClaims(ref)
+                                          setIsClaimsDialogOpen(true)
+                                        }
+                                      }}
+                                      className={`${
+                                        hasSelectedClaims
+                                          ? "text-accent-violet hover:underline cursor-pointer"
+                                          : "text-gray-500 cursor-default"
+                                      }`}
+                                    >
+                                      <span className="font-medium">{t("form.steps.step4.table.claimsCount")}:</span>{" "}
+                                      {selectedCount} di {totalCount}
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </li>
+                        )
+                      })}
                     </ul>
                   ) : (
                     <p className="text-gray-500">{t("form.steps.step6.noContent")}</p>
@@ -827,29 +903,75 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
             {/* Step 5: Technical Fields */}
             <AccordionItem value="step5">
               <AccordionTrigger className="text-base font-semibold">
+                <span className="mr-2 text-accent-violet font-bold">5.</span>
                 {t("form.steps.step2d.title")}
               </AccordionTrigger>
               <AccordionContent>
                 <div>
                   {campaignData.technicalFields &&
                   Object.keys(campaignData.technicalFields).length > 0 ? (
-                    <div className="space-y-4">
+                    <div className="space-y-6">
                       {Object.entries(campaignData.technicalFields).map(([channel, fields]: [string, any]) => (
-                        <div key={channel}>
-                          <label className="text-sm font-medium text-gray-700">
+                        <div key={channel} className="border-b pb-4 last:border-0">
+                          <h4 className="font-medium text-gray-900 mb-3">
                             {getChannelDisplayName(channel)}
-                          </label>
-                          <div className="mt-2 space-y-1 text-sm text-gray-600">
-                            {Object.entries(fields).map(([key, value]: [string, any]) => {
-                              if (Array.isArray(value)) {
-                                return null // Skip arrays for now
-                              }
-                              return (
-                                <div key={key}>
-                                  <span className="font-medium">{key}:</span> {String(value)}
-                                </div>
-                              )
-                            })}
+                          </h4>
+                          <div className="space-y-3 text-sm">
+                            {fields.vvpmPlaceholderId && (
+                              <div>
+                                <span className="font-medium text-gray-700">
+                                  {channel === "email" || channel === "whatsapp"
+                                    ? t(`form.steps.step2d.${channel}.vvpmPlaceholderId`)
+                                    : "VVPM Placeholder ID"}
+                                  :
+                                </span>{" "}
+                                <span className="text-gray-900">{fields.vvpmPlaceholderId}</span>
+                              </div>
+                            )}
+                            {fields.utmCode && (
+                              <div>
+                                <span className="font-medium text-gray-700">
+                                  {t(`form.steps.step2d.${channel}.utmCode`)}:
+                                </span>{" "}
+                                <span className="text-gray-900">{fields.utmCode}</span>
+                              </div>
+                            )}
+                            {fields.warehouseCode && (
+                              <div>
+                                <span className="font-medium text-gray-700">Warehouse Code:</span>{" "}
+                                <span className="text-gray-900">{fields.warehouseCode}</span>
+                              </div>
+                            )}
+                            {fields.qrCodeLink && (
+                              <div>
+                                <span className="font-medium text-gray-700">QR Code Link:</span>{" "}
+                                <span className="text-gray-900">{fields.qrCodeLink}</span>
+                              </div>
+                            )}
+                            {fields.rcp && (
+                              <div>
+                                <span className="font-medium text-gray-700">RCP:</span>{" "}
+                                <span className="text-gray-900">{fields.rcp}</span>
+                              </div>
+                            )}
+                            {fields.aifaWording && (
+                              <div>
+                                <span className="font-medium text-gray-700">AIFA Wording:</span>{" "}
+                                <span className="text-gray-900">{fields.aifaWording}</span>
+                              </div>
+                            )}
+                            {fields.ctas && fields.ctas.length > 0 && (
+                              <div>
+                                <span className="font-medium text-gray-700">CTAs:</span>
+                                <ul className="mt-1 space-y-1 ml-4">
+                                  {fields.ctas.map((cta: any) => (
+                                    <li key={cta.id} className="text-gray-900">
+                                      <span className="font-medium">{cta.name}:</span> {cta.link}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
                           </div>
                         </div>
                       ))}
@@ -895,6 +1017,68 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
         {/* Compliance Notes Card */}
         {renderContentCard(t("form.steps.step6.complianceNotes"), "complianceNotes", true)}
       </div>
+
+      {/* Giallature Dialog */}
+      <Dialog open={isClaimsDialogOpen} onOpenChange={setIsClaimsDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedReferenceForClaims && (
+                <>
+                  {t("form.steps.step4.table.claimsCount")} - {selectedReferenceForClaims.title}
+                </>
+              )}
+            </DialogTitle>
+            <DialogDescription>
+              {selectedReferenceForClaims && (
+                <>
+                  {selectedReferenceForClaims.referenceId} - {selectedReferenceForClaims.selectedClaims?.length || 0} di{" "}
+                  {selectedReferenceForClaims.claimsCount || selectedReferenceForClaims.claims?.length || 0}{" "}
+                  {t("form.steps.step4.table.claimsCount").toLowerCase()}
+                </>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          {selectedReferenceForClaims && selectedReferenceForClaims.claims && (
+            <div className="space-y-4">
+              {(() => {
+                // Group claims by page and filter to only selected claims
+                const selectedClaimIds = new Set(selectedReferenceForClaims.selectedClaims || [])
+                const claimsByPage = selectedReferenceForClaims.claims
+                  .filter((claim) => selectedClaimIds.has(claim.id))
+                  .reduce((acc, claim) => {
+                    if (!acc[claim.pageNumber]) {
+                      acc[claim.pageNumber] = []
+                    }
+                    acc[claim.pageNumber].push(claim)
+                    return acc
+                  }, {} as Record<number, Claim[]>)
+
+                const sortedPages = Object.keys(claimsByPage)
+                  .map(Number)
+                  .sort((a, b) => a - b)
+
+                return sortedPages.map((pageNumber) => (
+                  <div key={pageNumber} className="border rounded-lg p-4">
+                    <h4 className="font-medium text-gray-900 mb-2">
+                      {t("form.steps.step4.claimsModal.page", { page: pageNumber })}
+                    </h4>
+                    <ul className="space-y-2">
+                      {claimsByPage[pageNumber]
+                        .sort((a, b) => a.id.localeCompare(b.id))
+                        .map((claim) => (
+                          <li key={claim.id} className="text-sm text-gray-700 pl-4 border-l-2 border-accent-violet/30">
+                            {claim.text}
+                          </li>
+                        ))}
+                    </ul>
+                  </div>
+                ))
+              })()}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

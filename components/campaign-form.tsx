@@ -15,6 +15,7 @@ import { Step3StartingDocuments } from "@/components/sections/step-3-starting-do
 import { Step4ScientificReferences } from "@/components/sections/step-4-scientific-references"
 import { Step2dTechnicalFields } from "@/components/sections/step-2d-technical-fields"
 import { Step6BriefRecap } from "@/components/sections/step-6-brief-recap"
+import { ExportModal } from "@/components/export-modal"
 
 const TOTAL_STEPS = 6
 
@@ -22,6 +23,7 @@ export default function CampaignForm() {
   const { t } = useTranslation()
   const [currentStep, setCurrentStep] = useState(1)
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set())
+  const [showExportModal, setShowExportModal] = useState(false)
   const topRef = useRef<HTMLDivElement>(null)
 
   const {
@@ -32,12 +34,12 @@ export default function CampaignForm() {
     clearFormErrors,
     isGeneratingBrief,
     setIsGeneratingBrief,
-    setCurrentView,
     resetApp,
     generateBrief,
     currentBrief,
     autoSaveDraft,
     brandGuidelines,
+    saveDraft,
   } = useAppStore()
 
   const formData = campaignData
@@ -189,13 +191,33 @@ export default function CampaignForm() {
       newCompletedSteps.add(currentStep)
 
       if (currentStep < TOTAL_STEPS) {
-        setCompletedSteps(newCompletedSteps)
-        setCurrentStep(currentStep + 1)
-        // Scroll to top to show stepper and title
-        setTimeout(() => {
-          topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
-          window.scrollTo({ top: 0, behavior: "smooth" })
-        }, 0)
+        // If moving from step 5 to step 6, trigger AI generation
+        if (currentStep === 5) {
+          // Set loading state first to show modal
+          setIsGeneratingBrief(true)
+          // Generate brief - isGeneratingBrief is controlled externally
+          generateBrief().then(() => {
+            // After 3 seconds, hide modal and move to step 6
+            setTimeout(() => {
+              setIsGeneratingBrief(false)
+              setCompletedSteps(newCompletedSteps)
+              setCurrentStep(6)
+              // Scroll to top to show stepper and title
+              setTimeout(() => {
+                topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+                window.scrollTo({ top: 0, behavior: "smooth" })
+              }, 0)
+            }, 3000)
+          })
+        } else {
+          setCompletedSteps(newCompletedSteps)
+          setCurrentStep(currentStep + 1)
+          // Scroll to top to show stepper and title
+          setTimeout(() => {
+            topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+            window.scrollTo({ top: 0, behavior: "smooth" })
+          }, 0)
+        }
       }
     }
   }
@@ -213,15 +235,7 @@ export default function CampaignForm() {
     }
   }
 
-  const handleGenerateBrief = async () => {
-    setIsGeneratingBrief(true)
-
-    setTimeout(() => {
-      generateBrief()
-      setIsGeneratingBrief(false)
-      setCurrentView("brief")
-    }, 3000)
-  }
+  // Removed handleGenerateBrief - generation now happens between step 5 and 6
 
   const handleBack = () => {
     resetApp()
@@ -270,7 +284,8 @@ export default function CampaignForm() {
     return "pending"
   }
 
-  if (isGeneratingBrief) {
+  // Show AI generation modal when transitioning from step 5 to step 6
+  if (isGeneratingBrief && currentStep === 5) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="w-full max-w-md hyntelo-elevation-6">
@@ -353,20 +368,41 @@ export default function CampaignForm() {
                 onClick={handleNext}
                 className="bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-150 ease-out hover:scale-[0.97] active:scale-[0.97]"
               >
-                {t("form.navigation.next")}
+                {currentStep === 5 ? t("form.navigation.generate") : t("form.navigation.next")}
               </Button>
             ) : (
-              <Button
-                type="button"
-                onClick={handleGenerateBrief}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-150 ease-out hover:scale-[0.97] active:scale-[0.97]"
-              >
-                {t("form.navigation.generate")}
-              </Button>
+              <>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={async () => {
+                    if (currentBrief) {
+                      await saveDraft(currentBrief.id)
+                    }
+                  }}
+                  className="border-primary text-primary hover:bg-primary/6 bg-transparent"
+                >
+                  {t("common.save")}
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => setShowExportModal(true)}
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-150 ease-out hover:scale-[0.97] active:scale-[0.97]"
+                >
+                  {t("common.export")}
+                </Button>
+              </>
             )}
           </div>
         </div>
       </main>
+      {showExportModal && currentBrief && (
+        <ExportModal
+          isOpen={showExportModal}
+          onClose={() => setShowExportModal(false)}
+          briefTitle={currentBrief.title}
+        />
+      )}
     </div>
   )
 }

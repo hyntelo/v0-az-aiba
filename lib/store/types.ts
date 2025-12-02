@@ -99,7 +99,7 @@ export interface MedicalCitation extends Reference {
 
 export type StudyType = "RCT" | "Meta-analysis" | "Clinical Trial" | "Systematic Review" | "Case Study"
 
-export type BriefStatus = "draft" | "ai-reviewed"
+export type BriefStatus = "draft" | "ai-reviewed" | "completato"
 
 export interface StatusChange {
   id: string
