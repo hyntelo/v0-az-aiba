@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   Accordion,
   AccordionContent,
@@ -22,6 +23,7 @@ import {
   Loader2,
   Check,
   X,
+  Undo2,
 } from "lucide-react"
 import {
   Dialog,
@@ -86,6 +88,9 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
 
   const generatedContent = brief.generatedContent
   const channels = campaignData.channels || []
+
+  // Available key message tags
+  const keyMessageTags = ["EFFICACY", "AWARENESS", "SAFETY", "QUALITY", "INNOVATION", "PATIENT_CARE", "CLINICAL_EVIDENCE"]
 
   // Get channel display name
   const getChannelDisplayName = (channelKey: string): string => {
@@ -199,6 +204,13 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
     setConfirmedSections(newConfirmed)
   }
 
+  // Handle unconfirm (undo confirmation)
+  const handleUnconfirm = (sectionKey: string) => {
+    const newConfirmed = new Set(confirmedSections)
+    newConfirmed.delete(sectionKey)
+    setConfirmedSections(newConfirmed)
+  }
+
   // Handle confirm all
   const handleConfirmAll = () => {
     const allSections = ["objectives", "keyMessages", "toneOfVoice", "complianceNotes"]
@@ -254,12 +266,17 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
     sectionKey: string,
     isChannelSpecific: boolean = false
   ) => {
-    const isEditing = editingSection === sectionKey
-    const isRefining = regeneratingSection === sectionKey
+    // Get the active channel for this section
+    const activeChannel = isChannelSpecific ? (selectedChannel[sectionKey] || channels[0] || "") : undefined
+    // Use channel-specific section key for channel-specific sections
+    const fullSectionKey = activeChannel ? `${sectionKey}.${activeChannel}` : sectionKey
+    
+    const isEditing = editingSection === fullSectionKey
+    const isRefining = regeneratingSection === fullSectionKey
     const isConfirmed = isSectionConfirmed(sectionKey)
-    const sectionState = sectionStates[sectionKey] || { state: "original" }
+    const sectionState = sectionStates[fullSectionKey] || { state: "original" }
     const showRefine = showRefineField[sectionKey]
-    const content = getSectionContent(sectionKey)
+    const content = getSectionContent(sectionKey, activeChannel)
 
     return (
       <Card className="hyntelo-elevation-3">
@@ -270,9 +287,21 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
               <CardTitle className="text-lg font-medium">{title}</CardTitle>
             </div>
             {isConfirmed && (
-              <div className="flex items-center gap-1 text-green-600">
-                <Lock className="w-4 h-4" />
-                <span className="text-sm">{t("form.steps.step6.confirmed")}</span>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 text-green-600">
+                  <Lock className="w-4 h-4" />
+                  <span className="text-sm">{t("form.steps.step6.confirmed")}</span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleUnconfirm(sectionKey)}
+                  className="flex items-center gap-1 text-muted-foreground hover:text-foreground"
+                  title={t("form.steps.step6.undoConfirm") || "Annulla conferma"}
+                >
+                  <Undo2 className="w-4 h-4" />
+                  <span className="text-sm">{t("form.steps.step6.undo") || "Annulla"}</span>
+                </Button>
               </div>
             )}
           </div>
@@ -281,17 +310,39 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
           {isChannelSpecific && channels.length > 1 && (
             <Tabs
               value={selectedChannel[sectionKey] || channels[0]}
-              onValueChange={(value) =>
-                setSelectedChannel((prev) => ({ ...prev, [sectionKey]: value }))
-              }
+              onValueChange={(value) => {
+                // Prevent tab change when editing or refining
+                if (!isEditing && !isRefining && !showRefine) {
+                  setSelectedChannel((prev) => ({ ...prev, [sectionKey]: value }))
+                }
+              }}
               className="mb-4"
             >
               <TabsList>
-                {channels.map((channel) => (
-                  <TabsTrigger key={channel} value={channel}>
-                    {getChannelDisplayName(channel)}
-                  </TabsTrigger>
-                ))}
+                {channels.map((channel) => {
+                  const isActiveChannel = channel === activeChannel
+                  const isEditingThisChannel = isActiveChannel && isEditing
+                  const isRefiningThisChannel = isActiveChannel && (isRefining || showRefine)
+                  // Only disable non-active tabs when editing/refining
+                  const shouldDisable = (isEditing || isRefining || showRefine) && !isActiveChannel
+                  
+                  return (
+                    <TabsTrigger 
+                      key={channel} 
+                      value={channel}
+                      disabled={shouldDisable}
+                      className="flex items-center gap-1.5"
+                    >
+                      {isEditingThisChannel && (
+                        <Edit2 className="w-3.5 h-3.5" />
+                      )}
+                      {isRefiningThisChannel && !isEditingThisChannel && (
+                        <Sparkles className="w-3.5 h-3.5" />
+                      )}
+                      {getChannelDisplayName(channel)}
+                    </TabsTrigger>
+                  )
+                })}
               </TabsList>
               {channels.map((channel) => (
                 <TabsContent key={channel} value={channel} />
@@ -307,11 +358,6 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
                 className="w-full min-h-[150px]"
                 placeholder={title}
               />
-              {isChannelSpecific && (
-                <p className="text-xs text-muted-foreground mt-2">
-                  {t("form.steps.step6.editingChannel")}: {getChannelDisplayName(selectedChannel[sectionKey] || channels[0] || "")}
-                </p>
-              )}
             </div>
           ) : (
             <div>
@@ -334,25 +380,6 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
                     <pre className="whitespace-pre-wrap text-gray-700 font-sans leading-relaxed bg-accent-violet/5 p-3 rounded-lg">
                       {sectionState.stagedContent}
                     </pre>
-                  </div>
-                  <div className="flex gap-2 pt-2">
-                    <Button
-                      onClick={() => acceptRegeneration(sectionKey)}
-                      className="flex items-center gap-1"
-                      size="sm"
-                    >
-                      <Check className="w-4 h-4" />
-                      {t("form.steps.step6.accept")}
-                    </Button>
-                    <Button
-                      onClick={() => rejectRegeneration(sectionKey)}
-                      variant="outline"
-                      className="flex items-center gap-1"
-                      size="sm"
-                    >
-                      <X className="w-4 h-4" />
-                      {t("form.steps.step6.reject")}
-                    </Button>
                   </div>
                 </div>
               )}
@@ -379,57 +406,104 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
                 </Button>
               </div>
             ) : showRefine ? (
-              <>
-                <Input
-                  type="text"
-                  placeholder={`${t("form.steps.step6.refinePlaceholder")}... (Press Alt+C for suggestions)`}
-                  value={refinePrompts[sectionKey] || ""}
-                  onChange={(e) =>
-                    setRefinePrompts((prev) => ({
-                      ...prev,
-                      [sectionKey]: e.target.value,
-                    }))
-                  }
-                  onKeyDown={(e) => {
-                    if (e.altKey && e.key === "c") {
-                      e.preventDefault()
-                      const mockPrompt = fillMockPrompt(sectionKey)
-                      setRefinePrompts((prev) => ({
-                        ...prev,
-                        [sectionKey]: mockPrompt,
-                      }))
-                    }
-                  }}
-                  className="flex-1"
-                />
-                <div className="flex items-center gap-2">
+              sectionState.state === "staged" && !isRefining ? (
+                // When content is staged, show only accept/reject buttons
+                <div className="flex items-center justify-end gap-2 w-full">
                   <Button
                     onClick={() => {
-                      const channel = isChannelSpecific ? (selectedChannel[sectionKey] || channels[0] || "") : undefined
-                      handleRefine(sectionKey, channel)
+                      acceptRegeneration(fullSectionKey)
+                      toggleRefineField(sectionKey)
+                      // Clear the prompt
+                      setRefinePrompts((prev) => {
+                        const newPrompts = { ...prev }
+                        delete newPrompts[fullSectionKey]
+                        return newPrompts
+                      })
                     }}
-                    disabled={isRefining}
                     size="sm"
                     className="flex items-center gap-2"
                   >
-                    {isRefining ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Sparkles className="w-4 h-4" />
-                    )}
-                    {t("form.steps.step6.regenerate")}
+                    <Check className="w-4 h-4" />
+                    {t("form.steps.step6.accept")}
                   </Button>
                   <Button
+                    onClick={() => {
+                      rejectRegeneration(fullSectionKey)
+                      toggleRefineField(sectionKey)
+                      // Clear the prompt
+                      setRefinePrompts((prev) => {
+                        const newPrompts = { ...prev }
+                        delete newPrompts[fullSectionKey]
+                        return newPrompts
+                      })
+                    }}
                     variant="outline"
-                    onClick={() => toggleRefineField(sectionKey)}
                     size="sm"
                     className="flex items-center gap-2"
                   >
                     <X className="w-4 h-4" />
-                    {t("common.cancel")}
+                    {t("form.steps.step6.reject")}
                   </Button>
                 </div>
-              </>
+              ) : (
+                // When not staged, show input with regenerate/cancel buttons
+                <>
+                  <Input
+                    type="text"
+                    placeholder={`${t("form.steps.step6.refinePlaceholder")}... (Press Alt+C for suggestions)`}
+                    value={refinePrompts[fullSectionKey] || ""}
+                    onChange={(e) =>
+                      setRefinePrompts((prev) => ({
+                        ...prev,
+                        [fullSectionKey]: e.target.value,
+                      }))
+                    }
+                    onKeyDown={(e) => {
+                      if (e.altKey && e.key === "c") {
+                        e.preventDefault()
+                        const mockPrompt = fillMockPrompt(fullSectionKey)
+                        setRefinePrompts((prev) => ({
+                          ...prev,
+                          [fullSectionKey]: mockPrompt,
+                        }))
+                      }
+                    }}
+                    className="flex-1"
+                  />
+                  <div className="flex items-center gap-2">
+                    <Button
+                      onClick={() => {
+                        handleRefine(sectionKey, activeChannel)
+                      }}
+                      disabled={isRefining}
+                      size="sm"
+                      className="flex items-center gap-2"
+                    >
+                      {isRefining ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Sparkles className="w-4 h-4" />
+                      )}
+                      {t("form.steps.step6.regenerate")}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        // Only allow cancel if not staged
+                        if (sectionState.state !== "staged") {
+                          toggleRefineField(sectionKey)
+                        }
+                      }}
+                      disabled={sectionState.state === "staged"}
+                      size="sm"
+                      className="flex items-center gap-2"
+                    >
+                      <X className="w-4 h-4" />
+                      {t("common.cancel")}
+                    </Button>
+                  </div>
+                </>
+              )
             ) : (
               <div className="flex items-center justify-end gap-2 w-full">
                 <Button
@@ -445,8 +519,7 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
                   variant="outline"
                   size="sm"
                   onClick={() => {
-                    const channel = isChannelSpecific ? (selectedChannel[sectionKey] || channels[0] || "") : undefined
-                    handleEditStart(sectionKey, content, channel)
+                    handleEditStart(sectionKey, content, activeChannel)
                   }}
                   className="flex items-center gap-2"
                 >
@@ -487,9 +560,21 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
               </CardTitle>
             </div>
             {isConfirmed && (
-              <div className="flex items-center gap-1 text-green-600">
-                <Lock className="w-4 h-4" />
-                <span className="text-sm">{t("form.steps.step6.confirmed")}</span>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 text-green-600">
+                  <Lock className="w-4 h-4" />
+                  <span className="text-sm">{t("form.steps.step6.confirmed")}</span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleUnconfirm("keyMessages")}
+                  className="flex items-center gap-1 text-muted-foreground hover:text-foreground"
+                  title={t("form.steps.step6.undoConfirm") || "Annulla conferma"}
+                >
+                  <Undo2 className="w-4 h-4" />
+                  <span className="text-sm">{t("form.steps.step6.undo") || "Annulla"}</span>
+                </Button>
               </div>
             )}
           </div>
@@ -512,14 +597,23 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
                 >
                   {isEditing ? (
                     <div className="space-y-3">
-                      <Input
+                      <Select
                         value={editKeyMessage.tag}
-                        onChange={(e) =>
-                          setEditKeyMessage((prev) => ({ ...prev, tag: e.target.value }))
+                        onValueChange={(value) =>
+                          setEditKeyMessage((prev) => ({ ...prev, tag: value }))
                         }
-                        placeholder={t("form.steps.step6.keyMessageTag")}
-                        className="font-semibold"
-                      />
+                      >
+                        <SelectTrigger className="font-semibold">
+                          <SelectValue placeholder={t("form.steps.step6.keyMessageTag")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {keyMessageTags.map((tag) => (
+                            <SelectItem key={tag} value={tag}>
+                              {tag}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <Textarea
                         value={editKeyMessage.description}
                         onChange={(e) =>
@@ -604,19 +698,19 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleKeyMessageEditStart(message, currentChannel)}
-                            className="h-8 w-8 p-0"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
                             onClick={() => handleKeyMessageRefineStart(message.id, currentChannel)}
                             className="h-8 w-8 p-0"
                             title={t("form.steps.step6.refine")}
                           >
                             <Sparkles className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleKeyMessageEditStart(message, currentChannel)}
+                            className="h-8 w-8 p-0"
+                          >
+                            <Edit2 className="w-4 h-4" />
                           </Button>
                           <Button
                             variant="ghost"

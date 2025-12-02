@@ -46,6 +46,8 @@ export default function CampaignForm() {
   const fillDemoData = () => {
     const demoDataWithChannels = {
       ...demoData,
+      brand: "Wainzua",
+      therapeuticArea: "BBU",
       channels: ["whatsapp", "email", "materialiCartacei"],
     }
     setCampaignData(demoDataWithChannels)
@@ -140,8 +142,57 @@ export default function CampaignForm() {
   }
 
   const validateStep2d = (): boolean => {
-    // Placeholder - always valid for now
-    return true
+    const newErrors: Record<string, string> = {}
+    const { technicalFields, channels } = formData
+
+    if (!channels || channels.length === 0) {
+      // No channels selected, so no validation needed
+      setFormErrors(newErrors)
+      return true
+    }
+
+    // Channel mapping (same as in Step2dTechnicalFields)
+    const channelMap: Record<string, string> = {
+      email: "email",
+      whatsapp: "whatsapp",
+      printMaterials: "printMaterials",
+      materialiCartacei: "printMaterials",
+    }
+
+    // Validate fields for each selected channel
+    channels.forEach((channel) => {
+      const mappedChannel = channelMap[channel] || channel
+      const channelData = technicalFields?.[mappedChannel as keyof typeof technicalFields] as any
+
+      // Email and WhatsApp have the same required fields
+      if (channel === "email" || channel === "whatsapp") {
+        if (!channelData?.vvpmPlaceholderId?.trim()) {
+          newErrors[`${channel}.vvpmPlaceholderId`] = t("form.steps.step2d.validation.vvpmPlaceholderIdRequired", { channel: t(`form.channels.${channel}`) })
+        }
+        if (!channelData?.utmCode?.trim()) {
+          newErrors[`${channel}.utmCode`] = t("form.steps.step2d.validation.utmCodeRequired", { channel: t(`form.channels.${channel}`) })
+        }
+      }
+
+      // Print Materials (materialiCartacei maps to printMaterials)
+      if (channel === "printMaterials" || channel === "materialiCartacei") {
+        if (!channelData?.warehouseCode?.trim()) {
+          newErrors["printMaterials.warehouseCode"] = t("form.steps.step2d.validation.warehouseCodeRequired")
+        }
+        if (!channelData?.qrCodeLink?.trim()) {
+          newErrors["printMaterials.qrCodeLink"] = t("form.steps.step2d.validation.qrCodeLinkRequired")
+        }
+        if (!channelData?.rcp?.trim()) {
+          newErrors["printMaterials.rcp"] = t("form.steps.step2d.validation.rcpRequired")
+        }
+        if (!channelData?.aifaWording?.trim()) {
+          newErrors["printMaterials.aifaWording"] = t("form.steps.step2d.validation.aifaWordingRequired")
+        }
+      }
+    })
+
+    setFormErrors(newErrors)
+    return Object.keys(newErrors).length === 0
   }
 
   const validateCurrentStep = (): boolean => {

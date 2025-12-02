@@ -215,8 +215,10 @@ export function Step3StartingDocuments() {
                 label: t("form.steps.step3.search.fields.brand"),
                 type: "select",
                 options: [
-                  { label: "Brand A", value: "brand-a" },
-                  { label: "Brand B", value: "brand-b" },
+                  { label: "Lynparza", value: "lynparza" },
+                  { label: "Wainzua", value: "wainzua" },
+                  { label: "Tezspire", value: "tezspire" },
+                  { label: "Imfinzi", value: "imfinzi" },
                 ],
               },
               {
@@ -225,7 +227,9 @@ export function Step3StartingDocuments() {
                 type: "select",
                 options: [
                   { label: "Email", value: "email" },
-                  { label: "Social", value: "social" },
+                  { label: "Webpage", value: "webpage" },
+                  { label: "Slide deck", value: "slideDeck" },
+                  { label: "iDetail", value: "iDetail" },
                 ],
               },
               {
@@ -233,8 +237,9 @@ export function Step3StartingDocuments() {
                 label: t("form.steps.step3.search.fields.keyMessage"),
                 type: "select",
                 options: [
-                  { label: "Messaggio 1", value: "msg1" },
-                  { label: "Messaggio 2", value: "msg2" },
+                  { label: "Efficacy", value: "efficacy" },
+                  { label: "Safety", value: "safety" },
+                  { label: "Overall survival", value: "overall-survival" },
                 ],
               },
             ],

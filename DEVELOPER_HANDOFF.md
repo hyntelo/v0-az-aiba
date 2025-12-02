@@ -479,7 +479,7 @@ setNetworkStatus(isOnline: boolean)
 
 **Count:** 3 briefs
 1. CardioShield Plus (AI-Reviewed) - 5 days old
-2. DiabetesGuard (Draft) - 8 days old
+2. Wainzua (Draft) - 8 days old
 3. RespiraClear (AI-Reviewed) - 12 days old
 
 **Each includes:**

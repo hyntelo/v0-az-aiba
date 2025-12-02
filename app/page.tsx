@@ -60,8 +60,8 @@ const formatBriefId = (id: string): string => {
   return `IT-${id.slice(-5).padStart(5, "0")}`
 }
 
-const formatChannels = (channels: string[]): string => {
-  return channels.join("; ")
+const formatChannels = (channels: string[], t: (key: string) => string): string => {
+  return channels.map((channel) => t(`form.channels.${channel}`) || channel).join("; ")
 }
 
 const formatChannelsForTooltip = (channels: string[], t: (key: string) => string): string => {
@@ -118,7 +118,7 @@ interface CampaignData {
   additionalContext: string
 }
 
-type SortColumn = "id" | "title" | "author" | "brand" | "channels" | "createdAt" | "lastModified" | "status" | null
+type SortColumn = "id" | "title" | "author" | "brand" | "channels" | "createdAt" | "status" | null
 type SortDirection = "asc" | "desc"
 
 export default function Dashboard() {
@@ -198,16 +198,12 @@ export default function Dashboard() {
           bValue = b.campaignData.brand.toLowerCase()
           break
         case "channels":
-          aValue = formatChannels(a.campaignData.channels).toLowerCase()
-          bValue = formatChannels(b.campaignData.channels).toLowerCase()
+          aValue = formatChannels(a.campaignData.channels, t).toLowerCase()
+          bValue = formatChannels(b.campaignData.channels, t).toLowerCase()
           break
         case "createdAt":
           aValue = a.createdAt.getTime()
           bValue = b.createdAt.getTime()
-          break
-        case "lastModified":
-          aValue = a.lastModified.getTime()
-          bValue = b.lastModified.getTime()
           break
         case "status":
           aValue = a.status
@@ -629,26 +625,6 @@ export default function Dashboard() {
                         )}
                       </button>
                     </TableHead>
-                    <TableHead className="hidden lg:table-cell min-w-[100px] whitespace-nowrap">
-                      <button
-                        onClick={() => handleSort("lastModified")}
-                        className="flex items-center gap-2 hover:text-foreground transition-colors"
-                      >
-                        <span>{t("dashboard.table.modificationDate")}</span>
-                        {sortColumn === "lastModified" ? (
-                          sortDirection === "asc" ? (
-                            <ChevronUp className="h-4 w-4 text-foreground" />
-                          ) : (
-                            <ChevronDown className="h-4 w-4 text-foreground" />
-                          )
-                        ) : (
-                          <div className="h-4 w-4 flex flex-col items-center justify-center opacity-30">
-                            <ChevronUp className="h-2 w-2" />
-                            <ChevronDown className="h-2 w-2 -mt-0.5" />
-                          </div>
-                        )}
-                      </button>
-                    </TableHead>
                     <TableHead className="min-w-[100px] whitespace-nowrap">
                       <button
                         onClick={() => handleSort("status")}
@@ -701,7 +677,7 @@ export default function Dashboard() {
                         <TooltipPrimitive.Root>
                           <TooltipTrigger asChild>
                             <div className="min-w-0 truncate cursor-help">
-                          {formatChannels(brief.campaignData.channels)}
+                          {formatChannels(brief.campaignData.channels, t)}
                         </div>
                           </TooltipTrigger>
                           <TooltipContent>
@@ -716,16 +692,6 @@ export default function Dashboard() {
                           </TooltipTrigger>
                           <TooltipContent>
                             <p>{formatDateTime(brief.createdAt)}</p>
-                          </TooltipContent>
-                        </TooltipPrimitive.Root>
-                      </TableCell>
-                      <TableCell className="hidden lg:table-cell min-w-[100px] whitespace-nowrap">
-                        <TooltipPrimitive.Root>
-                          <TooltipTrigger asChild>
-                            <span className="cursor-help">{formatDateShort(brief.lastModified)}</span>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>{formatDateTime(brief.lastModified)}</p>
                           </TooltipContent>
                         </TooltipPrimitive.Root>
                       </TableCell>

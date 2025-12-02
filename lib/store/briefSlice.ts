@@ -198,40 +198,28 @@ const initialBrandGuidelines: BrandGuidelinesSettings = {
   ],
   productBrandGuidelines: [
     {
-      id: "oncoadvance-pro",
-      productName: "OncoAdvance Pro",
+      id: "lynparza",
+      productName: "Lynparza",
       guidelines:
-        "Enfatizzare l'innovazione oncologica rivoluzionaria, i dati degli studi clinici e i miglioramenti degli outcome dei pazienti. Concentrarsi sull'approccio di medicina di precisione e sui meccanismi terapeutici avanzati.",
+        "Linee guida per il brand Lynparza.",
     },
     {
-      id: "cardioshield-plus",
-      productName: "CardioShield Plus",
+      id: "wainzua",
+      productName: "Wainzua",
       guidelines:
-        "Evidenziare la protezione cardiovascolare, il profilo di sicurezza comprovato e i benefici a lungo termine per la salute del cuore. Enfatizzare la messaggistica sulla cura preventiva e la riduzione del rischio.",
+        "Linee guida per il brand Wainzua.",
     },
     {
-      id: "diabetesguard",
-      productName: "DiabetesGuard",
+      id: "tezspire",
+      productName: "Tezspire",
       guidelines:
-        "Sottolineare il controllo glicemico efficace, la gestione del diabete a lungo termine e il miglioramento della qualità della vita. Enfatizzare la facilità d'uso e l'aderenza terapeutica.",
+        "Linee guida per il brand Tezspire.",
     },
     {
-      id: "immunodefend",
-      productName: "ImmunoDefend",
+      id: "imfinzi",
+      productName: "Imfinzi",
       guidelines:
-        "Evidenziare il supporto immunitario avanzato, la protezione contro le infezioni e il rafforzamento delle difese naturali. Concentrarsi sulla prevenzione e sul benessere generale.",
-    },
-    {
-      id: "respiraclear",
-      productName: "RespiraClear",
-      guidelines:
-        "Enfatizzare il miglioramento della funzione respiratoria, il sollievo dai sintomi e la gestione delle patologie respiratorie croniche. Sottolineare la rapidità d'azione e il profilo di sicurezza.",
-    },
-    {
-      id: "lokelma",
-      productName: "Lokelma",
-      guidelines:
-        "Evidenziare l'efficacia nel trattamento dell'iperkaliemia, la rapidità d'azione e il profilo di sicurezza comprovato. Concentrarsi sulla gestione dei livelli di potassio e sulla prevenzione delle complicanze cardiovascolari.",
+        "Linee guida per il brand Imfinzi.",
     },
   ],
 }

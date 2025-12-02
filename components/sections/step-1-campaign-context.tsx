@@ -23,7 +23,6 @@ interface Step1CampaignContextProps {
 const channelKeys = [
   "email",
   "webPage",
-  "emailWebpage",
   "materialiCartacei",
   "graficheStand",
   "video",
@@ -35,20 +34,12 @@ const channelKeys = [
 ]
 
 const therapeuticAreaOptions = [
-  "Cardiologia",
-  "Oncologia",
-  "Endocrinologia",
-  "Immunologia",
-  "Neurologia",
-  "Malattie Rare",
-  "Malattie Respiratorie",
-  "Nefrologia",
-  "Gastroenterologia",
-  "Reumatologia",
+  "OBU",
+  "BBU",
 ]
 
 const specialtyOptions: Record<string, string[]> = {
-  default: ["Oncology", "Cardiology", "Endocrinology", "Immunology", "Respiratory"],
+  default: ["GynGU", "Lung", "Mel", "HCC", "BTC", "DCC"],
 }
 
 export function Step1CampaignContext({
@@ -88,7 +79,7 @@ export function Step1CampaignContext({
             {formErrors.projectName && <p className="text-sm text-red-600">{formErrors.projectName}</p>}
           </div>
 
-          {/* Obiettivi e descrizione - PROMINENT */}
+          {/* Descrizione del Brief - PROMINENT */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Label htmlFor="requestSummary" className="text-base font-semibold">
@@ -291,7 +282,7 @@ export function Step1CampaignContext({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="branded">{t("form.typologyOptions.branded")}</SelectItem>
-                  <SelectItem value="unbranded">{t("form.typologyOptions.unbranded")}</SelectItem>
+                  <SelectItem value="diseaseAwareness">{t("form.typologyOptions.diseaseAwareness")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>

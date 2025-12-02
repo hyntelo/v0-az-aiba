@@ -249,7 +249,7 @@
     "selectTypology": "Select typology",
     "typologyOptions": {
       "branded": "Branded",
-      "unbranded": "Un Branded"
+      "diseaseAwareness": "Disease awareness"
     },
     "projectInformation": "Project Information",
     "projectName": "Project Name",
@@ -263,7 +263,7 @@
     "selectTherapeuticArea": "Select therapeutic area",
     "specialty": "Indication",
     "selectSpecialty": "Select medical specialty",
-    "requestSummary": "Objectives and Description",
+    "requestSummary": "Brief Description",
     "requestSummaryPlaceholder": "Provide the objective you would like to achieve with this content and a concise summary of what you need...",
     "contentFormats": "Content Formats",
     "mezzi": "Mezzi",
@@ -272,7 +272,6 @@
     "channels": {
       "email": "Email",
       "webPage": "Web Page",
-      "emailWebpage": "Email + Webpage",
       "materialiCartacei": "Materiali Cartacei",
       "graficheStand": "Grafiche per stand",
       "video": "Video",
@@ -363,11 +362,47 @@
         "ctaTable": {
           "name": "CTA name",
           "link": "link"
+        },
+        "noTechnicalFields": "No technical fields available for this channel.",
+        "validation": {
+          "vvpmPlaceholderIdRequired": "VVPM Placeholder ID is required for {{channel}}",
+          "utmCodeRequired": "UTM Code is required for {{channel}}",
+          "warehouseCodeRequired": "Warehouse code is required",
+          "qrCodeLinkRequired": "QR code link is required",
+          "rcpRequired": "RCP is required",
+          "aifaWordingRequired": "AIFA wording is required"
         }
       },
       "step3": {
-        "title": "Generated Brief",
-        "description": "Review the generated brief",
+        "title": "Starting Documents",
+        "description": "Global documents to adapt or documents to update",
+        "search": {
+          "title": "Search on VVPM",
+          "button": "Search",
+          "fields": {
+            "text": "Search text or keyword",
+            "textPlaceholder": "search...",
+            "country": "Country",
+            "brand": "Brand",
+            "channel": "Channel",
+            "keyMessage": "Key message"
+          }
+        },
+        "usage": {
+          "globalAdapt": "Global content to adapt",
+          "update": "Content to update",
+          "inspiration": "Inspiration for new channel",
+          "other": "Other"
+        },
+        "table": {
+          "title": "Materials list",
+          "titleWithCount": "{{count}} Materials Selected",
+          "documentId": "Document ID",
+          "title": "Title",
+          "usage": "Usage",
+          "pages": "Pages",
+          "emptyMessage": "No documents selected"
+        },
         "viewInVvpm": "View in VVPM"
       },
       "step6": {
@@ -391,6 +426,8 @@
         "regenerating": "Regenerating",
         "accept": "Accept",
         "reject": "Reject",
+        "undo": "Undo",
+        "undoConfirm": "Undo confirmation",
         "refinePlaceholder": "Describe how you want to refine this section",
         "keyMessageTag": "Tag (e.g. EFFICACY, AWARENESS)",
         "keyMessageDescription": "Key message description",

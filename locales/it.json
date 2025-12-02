@@ -287,7 +287,7 @@
     "selectTypology": "Seleziona tipologia",
     "typologyOptions": {
       "branded": "Branded",
-      "unbranded": "Un Branded"
+      "diseaseAwareness": "Disease awareness"
     },
     "projectInformation": "Informazioni Progetto",
     "projectName": "Nome Progetto",
@@ -301,7 +301,7 @@
     "selectTherapeuticArea": "Seleziona area terapeutica",
     "specialty": "Indicazione",
     "selectSpecialty": "Seleziona indicazione",
-    "requestSummary": "Obiettivi e descrizione",
+    "requestSummary": "Descrizione del Brief",
     "requestSummaryPlaceholder": "Fornisci l'obiettivo che vorresti raggiungere con questo contenuto e un riepilogo conciso di ciò di cui hai bisogno...",
     "contentFormats": "Formati di Contenuto",
     "mezzi": "Mezzi",
@@ -310,7 +310,6 @@
     "channels": {
       "email": "Email",
       "webPage": "Web Page",
-      "emailWebpage": "Email + Webpage",
       "materialiCartacei": "Materiali Cartacei",
       "graficheStand": "Grafiche per stand",
       "video": "Video",
@@ -388,8 +387,8 @@
           "title": "Cerca su VVPM",
           "button": "Cerca",
           "fields": {
-            "text": "Testo da cercare",
-            "textPlaceholder": "Inserisci testo da cercare...",
+            "text": "Cerca testo o keyword",
+            "textPlaceholder": "cerca...",
             "country": "Country",
             "brand": "Brand",
             "channel": "Canale",
@@ -477,7 +476,15 @@
           "name": "CTA name",
           "link": "link"
         },
-        "noTechnicalFields": "Nessun campo tecnico disponibile per questo canale."
+        "noTechnicalFields": "Nessun campo tecnico disponibile per questo canale.",
+        "validation": {
+          "vvpmPlaceholderIdRequired": "L'ID Placeholder su VVPM è obbligatorio per {{channel}}",
+          "utmCodeRequired": "Il codice UTM è obbligatorio per {{channel}}",
+          "warehouseCodeRequired": "Il codice magazzino è obbligatorio",
+          "qrCodeLinkRequired": "Il link per QR code è obbligatorio",
+          "rcpRequired": "L'RCP è obbligatorio",
+          "aifaWordingRequired": "La dicitura AIFA è obbligatoria"
+        }
       },
       "step6": {
         "title": "Riepilogo Brief",
@@ -500,6 +507,8 @@
         "regenerating": "Rigenerazione in corso",
         "accept": "Accetta",
         "reject": "Rifiuta",
+        "undo": "Annulla",
+        "undoConfirm": "Annulla conferma",
         "refinePlaceholder": "Descrivi come vuoi raffinare questa sezione",
         "keyMessageTag": "Tag (es. EFFICACY, AWARENESS)",
         "keyMessageDescription": "Descrizione del messaggio chiave",

@@ -26,7 +26,7 @@ import type { TechnicalFields } from "@/lib/store/types"
 
 export function Step2dTechnicalFields() {
   const { t } = useTranslation()
-  const { campaignData, setCampaignData } = useAppStore()
+  const { campaignData, setCampaignData, formErrors, setFormErrors } = useAppStore()
 
   // Initialize technical fields from campaign data or empty object
   const [technicalFields, setTechnicalFields] = useState<TechnicalFields>(
@@ -42,6 +42,41 @@ export function Step2dTechnicalFields() {
 
   // Local state for CTA inputs
   const [ctaInputs, setCtaInputs] = useState<Record<string, { name: string; link: string }>>({})
+
+  const [openAccordionItems, setOpenAccordionItems] = useState<string[]>([])
+
+  // Update open accordion items when errors change - expand sections with errors
+  useEffect(() => {
+    const selectedChannels = campaignData.channels || []
+    const itemsWithErrors: string[] = []
+    
+    selectedChannels.forEach((channel) => {
+      // Check if this channel has any errors
+      const hasError = Object.keys(formErrors).some((errorKey) => {
+        // Check for channel-specific errors (e.g., "email.vvpmPlaceholderId", "whatsapp.utmCode")
+        if (errorKey.startsWith(`${channel}.`)) {
+          return true
+        }
+        // For printMaterials errors, check if this channel maps to printMaterials
+        if (errorKey.startsWith("printMaterials.")) {
+          return channel === "printMaterials" || channel === "materialiCartacei"
+        }
+        return false
+      })
+      
+      if (hasError) {
+        itemsWithErrors.push(channel)
+      }
+    })
+    
+    if (itemsWithErrors.length > 0) {
+      // Merge with existing open items to preserve user's manual expansions
+      setOpenAccordionItems((prev) => {
+        const merged = new Set([...prev, ...itemsWithErrors])
+        return Array.from(merged)
+      })
+    }
+  }, [formErrors, campaignData.channels])
 
   // Get selected channels from step 1
   const selectedChannels = campaignData.channels || []
@@ -62,6 +97,14 @@ export function Step2dTechnicalFields() {
     }
     setTechnicalFields(updatedFields)
     setCampaignData({ ...campaignData, technicalFields: updatedFields })
+    
+    // Clear error for this field if it exists
+    const errorKey = `${channel}.${field}`
+    if (formErrors[errorKey]) {
+      const newErrors = { ...formErrors }
+      delete newErrors[errorKey]
+      setFormErrors(newErrors)
+    }
   }
 
   // Handle adding CTA for Email or WhatsApp
@@ -143,7 +186,7 @@ export function Step2dTechnicalFields() {
         {/* VVPM Placeholder ID with Search/Create buttons */}
         <div className="space-y-2">
           <Label htmlFor={`${channel}-vvpm`} className="text-sm font-medium">
-            {t(`form.steps.step2d.${channel}.vvpmPlaceholderId`)}
+            {t(`form.steps.step2d.${channel}.vvpmPlaceholderId`)} *
           </Label>
           <div className="flex gap-2">
             <Input
@@ -151,7 +194,8 @@ export function Step2dTechnicalFields() {
               value={channelData.vvpmPlaceholderId || ""}
               onChange={(e) => handleChannelFieldChange(channel, "vvpmPlaceholderId", e.target.value)}
               placeholder={t(`form.steps.step2d.${channel}.vvpmPlaceholderId`)}
-              className="flex-1"
+              className={`flex-1 ${formErrors[`${channel}.vvpmPlaceholderId`] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+              required
             />
             <Button
               type="button"
@@ -163,19 +207,27 @@ export function Step2dTechnicalFields() {
               {t(`form.steps.step2d.${channel}.search`)}
             </Button>
           </div>
+          {formErrors[`${channel}.vvpmPlaceholderId`] && (
+            <p className="text-sm text-red-600">{formErrors[`${channel}.vvpmPlaceholderId`]}</p>
+          )}
         </div>
 
         {/* UTM Code */}
         <div className="space-y-2">
           <Label htmlFor={`${channel}-utm`} className="text-sm font-medium">
-            {t(`form.steps.step2d.${channel}.utmCode`)}
+            {t(`form.steps.step2d.${channel}.utmCode`)} *
           </Label>
           <Input
             id={`${channel}-utm`}
             value={channelData.utmCode || ""}
             onChange={(e) => handleChannelFieldChange(channel, "utmCode", e.target.value)}
             placeholder={t(`form.steps.step2d.${channel}.utmCode`)}
+            className={formErrors[`${channel}.utmCode`] ? "border-red-500 focus-visible:ring-red-500" : ""}
+            required
           />
+          {formErrors[`${channel}.utmCode`] && (
+            <p className="text-sm text-red-600">{formErrors[`${channel}.utmCode`]}</p>
+          )}
         </div>
 
         {/* CTA Management */}
@@ -251,7 +303,7 @@ export function Step2dTechnicalFields() {
       <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="print-warehouse" className="text-sm font-medium">
-            {t("form.steps.step2d.printMaterials.warehouseCode")}
+            {t("form.steps.step2d.printMaterials.warehouseCode")} *
           </Label>
           <Input
             id="print-warehouse"
@@ -260,12 +312,17 @@ export function Step2dTechnicalFields() {
               handleChannelFieldChange("printMaterials", "warehouseCode", e.target.value)
             }
             placeholder={t("form.steps.step2d.printMaterials.warehouseCode")}
+            className={formErrors["printMaterials.warehouseCode"] ? "border-red-500 focus-visible:ring-red-500" : ""}
+            required
           />
+          {formErrors["printMaterials.warehouseCode"] && (
+            <p className="text-sm text-red-600">{formErrors["printMaterials.warehouseCode"]}</p>
+          )}
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="print-qr" className="text-sm font-medium">
-            {t("form.steps.step2d.printMaterials.qrCodeLink")}
+            {t("form.steps.step2d.printMaterials.qrCodeLink")} *
           </Label>
           <Input
             id="print-qr"
@@ -274,24 +331,34 @@ export function Step2dTechnicalFields() {
               handleChannelFieldChange("printMaterials", "qrCodeLink", e.target.value)
             }
             placeholder={t("form.steps.step2d.printMaterials.qrCodeLink")}
+            className={formErrors["printMaterials.qrCodeLink"] ? "border-red-500 focus-visible:ring-red-500" : ""}
+            required
           />
+          {formErrors["printMaterials.qrCodeLink"] && (
+            <p className="text-sm text-red-600">{formErrors["printMaterials.qrCodeLink"]}</p>
+          )}
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="print-rcp" className="text-sm font-medium">
-            {t("form.steps.step2d.printMaterials.rcp")}
+            {t("form.steps.step2d.printMaterials.rcp")} *
           </Label>
           <Input
             id="print-rcp"
             value={channelData.rcp || ""}
             onChange={(e) => handleChannelFieldChange("printMaterials", "rcp", e.target.value)}
             placeholder={t("form.steps.step2d.printMaterials.rcp")}
+            className={formErrors["printMaterials.rcp"] ? "border-red-500 focus-visible:ring-red-500" : ""}
+            required
           />
+          {formErrors["printMaterials.rcp"] && (
+            <p className="text-sm text-red-600">{formErrors["printMaterials.rcp"]}</p>
+          )}
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="print-aifa" className="text-sm font-medium">
-            {t("form.steps.step2d.printMaterials.aifaWording")}
+            {t("form.steps.step2d.printMaterials.aifaWording")} *
           </Label>
           <Input
             id="print-aifa"
@@ -300,7 +367,12 @@ export function Step2dTechnicalFields() {
               handleChannelFieldChange("printMaterials", "aifaWording", e.target.value)
             }
             placeholder={t("form.steps.step2d.printMaterials.aifaWording")}
+            className={formErrors["printMaterials.aifaWording"] ? "border-red-500 focus-visible:ring-red-500" : ""}
+            required
           />
+          {formErrors["printMaterials.aifaWording"] && (
+            <p className="text-sm text-red-600">{formErrors["printMaterials.aifaWording"]}</p>
+          )}
         </div>
       </div>
     )
@@ -345,7 +417,12 @@ export function Step2dTechnicalFields() {
             {t("form.steps.step2d.noChannelsSelected") || "No channels selected. Please select channels in step 1."}
           </p>
         ) : (
-          <Accordion type="multiple" className="w-full">
+          <Accordion 
+            type="multiple" 
+            className="w-full"
+            value={openAccordionItems}
+            onValueChange={setOpenAccordionItems}
+          >
             {channelsToRender.map((channelKey) => {
               const mappedChannel = channelMap[channelKey] || channelKey
               const displayName = getChannelDisplayName(channelKey)

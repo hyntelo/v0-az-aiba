@@ -146,7 +146,7 @@ export const existingBriefs = [
     title: "Campagna Digitale per la Valutazione del Rischio Cardiovascolare",
     campaignData: {
       projectName: "Campagna Digitale per la Valutazione del Rischio Cardiovascolare",
-      brand: "DiabetesGaurd",
+      brand: "Wainzua",
       therapeuticArea: "Cardiologia",
       expectedLaunchDate: "2025-04-15",
       specialty: "Cardiology",
@@ -202,7 +202,7 @@ export const existingBriefs = [
     title: "Serie Educativa per Pazienti sulla Gestione del Diabete",
     campaignData: {
       projectName: "Serie Educativa per Pazienti sulla Gestione del Diabete",
-      brand: "DiabetesGaurd",
+      brand: "Wainzua",
       therapeuticArea: "Endocrinologia",
       expectedLaunchDate: "2025-03-30",
       specialty: "Endocrinology",
@@ -248,7 +248,7 @@ export const existingBriefs = [
     title: "Materiali per Conferenza Professionale sulla Salute Respiratoria",
     campaignData: {
       projectName: "Materiali per Conferenza Professionale sulla Salute Respiratoria",
-      brand: "DiabetesGaurd",
+      brand: "Wainzua",
       therapeuticArea: "Malattie Respiratorie",
       expectedLaunchDate: "2025-02-28",
       specialty: "Respiratory",
@@ -304,7 +304,7 @@ export const existingBriefs = [
     title: "Campagna di Awareness per Terapia Oncologica Innovativa",
     campaignData: {
       projectName: "Campagna di Awareness per Terapia Oncologica Innovativa",
-      brand: "DiabetesGaurd",
+      brand: "Wainzua",
       therapeuticArea: "Oncologia",
       expectedLaunchDate: "2025-06-30",
       specialty: "Oncology",
@@ -360,7 +360,7 @@ export const existingBriefs = [
     title: "Programma Educativo per Pazienti con Malattie Rare",
     campaignData: {
       projectName: "Programma Educativo per Pazienti con Malattie Rare",
-      brand: "DiabetesGaurd",
+      brand: "Wainzua",
       therapeuticArea: "Malattie Rare",
       expectedLaunchDate: "2025-05-15",
       specialty: "Rare Diseases",
@@ -406,7 +406,7 @@ export const existingBriefs = [
     title: "Materiali per Formazione Medici di Base su Gestione del Dolore",
     campaignData: {
       projectName: "Materiali per Formazione Medici di Base su Gestione del Dolore",
-      brand: "DiabetesGaurd",
+      brand: "Wainzua",
       therapeuticArea: "Neurologia",
       expectedLaunchDate: "2025-07-20",
       specialty: "Pain Management",
