@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Upload, File, AlertCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useTranslation } from "@/lib/i18n"
 import {
   type AttachmentFile,
   validateFile,
@@ -24,6 +25,7 @@ interface FileUploadProps {
 }
 
 export function FileUpload({ attachments, onAttachmentAdd, onAttachmentRemove, className }: FileUploadProps) {
+  const { t } = useTranslation()
   const [uploading, setUploading] = useState<string[]>([])
   const [errors, setErrors] = useState<string[]>([])
 
@@ -62,7 +64,7 @@ export function FileUpload({ attachments, onAttachmentAdd, onAttachmentRemove, c
 
           setUploading((prev) => prev.filter((id) => id !== fileId))
         } catch (error) {
-          newErrors.push(`${file.name}: Failed to process file`)
+          newErrors.push(`${file.name}: ${t("shared.upload.failedToProcess")}`)
           setUploading((prev) => prev.filter((id) => id !== fileId))
         }
       }
@@ -71,13 +73,16 @@ export function FileUpload({ attachments, onAttachmentAdd, onAttachmentRemove, c
         setErrors(newErrors)
       }
     },
-    [attachments, onAttachmentAdd],
+    [attachments, onAttachmentAdd, t],
   )
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     multiple: true,
     maxSize: MAX_FILE_SIZE,
+    accept: {
+      "application/pdf": [".pdf"],
+    },
   })
 
   return (
@@ -98,10 +103,10 @@ export function FileUpload({ attachments, onAttachmentAdd, onAttachmentRemove, c
             </div>
             <div>
               <p className="text-sm font-medium text-foreground">
-                {isDragActive ? "Drop files here" : "Click to upload or drag and drop"}
+                {isDragActive ? t("shared.upload.dropFilesHere") : t("shared.upload.clickToUpload")}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                PDF, DOC, XLS, PPT, Images, ZIP (max {formatFileSize(MAX_FILE_SIZE)} each)
+                {t("shared.upload.supportedFormats", { maxSize: formatFileSize(MAX_FILE_SIZE) })}
               </p>
             </div>
           </div>
@@ -127,7 +132,7 @@ export function FileUpload({ attachments, onAttachmentAdd, onAttachmentRemove, c
             <div key={fileId} className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
               <File className="w-4 h-4 text-muted-foreground" />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground">Uploading...</p>
+                <p className="text-sm font-medium text-foreground">{t("shared.upload.uploading")}</p>
                 <Progress value={75} className="h-1 mt-1" />
               </div>
             </div>

@@ -335,7 +335,7 @@
         "title": "Technical Fields",
         "description": "Configure technical fields",
         "subtitle": "Insert tracking information necessary for each channel",
-        "vae": {
+        "email": {
           "vvpmPlaceholderId": "ID Placeholder on VVPM",
           "utmCode": "UTM Code",
           "ctaName": "name",

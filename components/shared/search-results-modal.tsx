@@ -21,6 +21,7 @@ export interface ResultColumn<T> {
   label: string
   render: (item: T) => React.ReactNode
   className?: string
+  hideOnMobile?: boolean
 }
 
 interface SearchResultsModalProps<T> {
@@ -101,7 +102,13 @@ export function SearchResultsModal<T>({
                 <TableRow>
                   {multiSelect && <TableHead className="w-[50px]"></TableHead>}
                   {columns.map((column) => (
-                    <TableHead key={column.key} className={column.className}>
+                    <TableHead 
+                      key={column.key} 
+                      className={cn(
+                        column.hideOnMobile && "hidden md:table-cell",
+                        column.className
+                      )}
+                    >
                       {column.label}
                     </TableHead>
                   ))}
@@ -145,7 +152,13 @@ export function SearchResultsModal<T>({
                         </TableCell>
                       )}
                       {columns.map((column) => (
-                        <TableCell key={column.key} className={column.className}>
+                        <TableCell 
+                          key={column.key} 
+                          className={cn(
+                            column.hideOnMobile && "hidden md:table-cell",
+                            column.className
+                          )}
+                        >
                           {column.render(item)}
                         </TableCell>
                       ))}

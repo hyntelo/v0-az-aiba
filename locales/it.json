@@ -423,10 +423,10 @@
         "table": {
           "title": "Lista delle reference",
           "titleWithCount": "{{count}} Materiali Selezionati",
-          "referenceId": "ID Reference",
+          "referenceId": "ID",
           "title": "Titolo",
           "authors": "Autori",
-          "publicationDate": "Data pubblicazione",
+          "publicationDate": "pubblicazione",
           "emptyMessage": "Nessuna reference selezionata",
           "claimsCount": "Giallature"
         },
@@ -440,14 +440,15 @@
         "upload": {
           "title": "oppure carica un nuovo paper",
           "subtitle": "Carica documenti di supporto, materiali di riferimento o risorse visive per fornire contesto aggiuntivo al tuo brief.",
-          "addedToKnowledgeBase": "Documento aggiunto alla knowledge base"
+          "addedToKnowledgeBase": "Documento aggiunto alla knowledge base",
+          "disclaimer": "Accetto la responsabilità di caricare o aggiornare un file nella knowledge base condivisa. Comprendo che questo documento sarà visibile e utilizzabile da altri utenti del sistema."
         }
       },
       "step2d": {
         "title": "Campi tecnici",
         "description": "Configura i campi tecnici",
         "subtitle": "Inserimento delle informazioni di tracciamento necessarie per ogni canale",
-        "vae": {
+        "email": {
           "vvpmPlaceholderId": "ID Placeholder su VVPM",
           "utmCode": "Codice UTM",
           "ctaName": "name",
@@ -474,7 +475,8 @@
         "ctaTable": {
           "name": "CTA name",
           "link": "link"
-        }
+        },
+        "noTechnicalFields": "Nessun campo tecnico disponibile per questo canale."
       },
       "step6": {
         "title": "Riepilogo Brief",
@@ -623,9 +625,11 @@
       "noResults": "Nessun risultato trovato"
     },
     "upload": {
-      "clickToUpload": "Click to upload or drag and drop",
-      "dropFilesHere": "Drop files here",
-      "supportedFormats": "PDF, DOC, XLS, PPT, Images, ZIP (max 10 MB each)"
+      "clickToUpload": "Clicca per caricare o trascina qui",
+      "dropFilesHere": "Rilascia i file qui",
+      "supportedFormats": "PDF (max {{maxSize}} ciascuno)",
+      "uploading": "Caricamento in corso...",
+      "failedToProcess": "Errore durante l'elaborazione del file"
     },
     "table": {
       "actions": "Azioni",

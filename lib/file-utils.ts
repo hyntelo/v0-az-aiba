@@ -11,17 +11,9 @@ export interface AttachmentFile {
 export const ALLOWED_FILE_TYPES = {
   documents: [
     "application/pdf",
-    "application/msword",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    "application/vnd.ms-excel",
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    "application/vnd.ms-powerpoint",
-    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-    "text/plain",
-    "text/csv",
   ],
-  images: ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp", "image/svg+xml"],
-  archives: ["application/zip", "application/x-rar-compressed", "application/x-7z-compressed"],
+  images: [],
+  archives: [],
 }
 
 export const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
@@ -49,18 +41,12 @@ export function getFileIcon(type: string): string {
 export function validateFile(file: File): { valid: boolean; error?: string } {
   // Check file size
   if (file.size > MAX_FILE_SIZE) {
-    return { valid: false, error: `File size exceeds ${formatFileSize(MAX_FILE_SIZE)} limit` }
+    return { valid: false, error: `La dimensione del file supera il limite di ${formatFileSize(MAX_FILE_SIZE)}` }
   }
 
-  // Check file type
-  const allAllowedTypes = [
-    ...ALLOWED_FILE_TYPES.documents,
-    ...ALLOWED_FILE_TYPES.images,
-    ...ALLOWED_FILE_TYPES.archives,
-  ]
-
-  if (!allAllowedTypes.includes(file.type)) {
-    return { valid: false, error: "File type not supported" }
+  // Check file type - only PDF allowed
+  if (file.type !== "application/pdf") {
+    return { valid: false, error: "Solo file PDF sono supportati" }
   }
 
   return { valid: true }
@@ -71,7 +57,7 @@ export function validateTotalSize(files: AttachmentFile[], newFiles: File[]): { 
   const newSize = newFiles.reduce((total, file) => total + file.size, 0)
 
   if (currentSize + newSize > MAX_TOTAL_SIZE) {
-    return { valid: false, error: `Total file size exceeds ${formatFileSize(MAX_TOTAL_SIZE)} limit` }
+    return { valid: false, error: `La dimensione totale dei file supera il limite di ${formatFileSize(MAX_TOTAL_SIZE)}` }
   }
 
   return { valid: true }
@@ -93,7 +79,7 @@ export async function processFile(file: File): Promise<AttachmentFile> {
       resolve(attachment)
     }
 
-    reader.onerror = () => reject(new Error("Failed to read file"))
+    reader.onerror = () => reject(new Error("Errore durante la lettura del file"))
     reader.readAsDataURL(file)
   })
 }

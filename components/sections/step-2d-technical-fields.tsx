@@ -19,7 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Search, Plus, Trash2 } from "lucide-react"
+import { Search, Trash2 } from "lucide-react"
 import { useTranslation } from "@/lib/i18n"
 import { useAppStore } from "@/lib/store"
 import type { TechnicalFields } from "@/lib/store/types"
@@ -64,7 +64,7 @@ export function Step2dTechnicalFields() {
     setCampaignData({ ...campaignData, technicalFields: updatedFields })
   }
 
-  // Handle adding CTA for VAE or WhatsApp
+  // Handle adding CTA for Email or WhatsApp
   const handleAddCta = (channel: string) => {
     const input = ctaInputs[channel] || { name: "", link: "" }
     if (!input.name.trim() || !input.link.trim()) {
@@ -132,8 +132,8 @@ export function Step2dTechnicalFields() {
     // TODO: Implement create functionality
   }
 
-  // Render VAE or WhatsApp section (same structure)
-  const renderVaeWhatsappSection = (channel: "vae" | "whatsapp") => {
+  // Render Email or WhatsApp section (same structure)
+  const renderEmailWhatsappSection = (channel: "email" | "whatsapp") => {
     const channelData = technicalFields[channel] || {}
     const ctaInput = ctaInputs[channel] || { name: "", link: "" }
     const ctas = channelData.ctas || []
@@ -161,15 +161,6 @@ export function Step2dTechnicalFields() {
             >
               <Search className="w-4 h-4" />
               {t(`form.steps.step2d.${channel}.search`)}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => handleCreatePlaceholder(channel)}
-              className="flex items-center gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              {t(`form.steps.step2d.${channel}.create`)}
             </Button>
           </div>
         </div>
@@ -317,24 +308,28 @@ export function Step2dTechnicalFields() {
 
   // Map channel keys to their internal representation
   const channelMap: Record<string, string> = {
-    vae: "vae",
+    email: "email",
     whatsapp: "whatsapp",
     printMaterials: "printMaterials",
-    salesMaterials: "printMaterials", // Sales materials also use print materials section
+    materialiCartacei: "printMaterials", // Materiali Cartacei also use print materials section
     // Handle legacy channel names
     "Print Materials": "printMaterials",
-    "Sales Materials": "printMaterials",
+    "Materiali Cartacei": "printMaterials",
   }
 
-  // Determine which channels need accordions (only channels that have technical fields)
-  const channelsToRender = selectedChannels.filter(
-    (channel) =>
-      channel === "vae" ||
-      channel === "whatsapp" ||
-      channel === "printMaterials" ||
-      channel === "salesMaterials" ||
-      channelMap[channel] !== undefined
-  )
+  // Render empty placeholder for channels without specific technical fields
+  const renderEmptyPlaceholder = (channelKey: string) => {
+    return (
+      <div className="space-y-4 py-4">
+        <p className="text-sm text-muted-foreground">
+          {t("form.steps.step2d.noTechnicalFields") || "Nessun campo tecnico disponibile per questo canale."}
+        </p>
+      </div>
+    )
+  }
+
+  // Include all selected channels in the accordion
+  const channelsToRender = selectedChannels.length > 0 ? selectedChannels : []
 
   return (
     <Card className="hyntelo-elevation-3">
@@ -361,9 +356,10 @@ export function Step2dTechnicalFields() {
                     {displayName}
                   </AccordionTrigger>
                   <AccordionContent>
-                    {mappedChannel === "vae" && renderVaeWhatsappSection("vae")}
-                    {mappedChannel === "whatsapp" && renderVaeWhatsappSection("whatsapp")}
+                    {mappedChannel === "email" && renderEmailWhatsappSection("email")}
+                    {mappedChannel === "whatsapp" && renderEmailWhatsappSection("whatsapp")}
                     {mappedChannel === "printMaterials" && renderPrintMaterialsSection()}
+                    {mappedChannel !== "email" && mappedChannel !== "whatsapp" && mappedChannel !== "printMaterials" && renderEmptyPlaceholder(channelKey)}
                   </AccordionContent>
                 </AccordionItem>
               )

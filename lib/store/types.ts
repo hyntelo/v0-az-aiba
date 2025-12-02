@@ -31,7 +31,7 @@ export interface KnowledgeBaseDocument extends ScientificReference {
 }
 
 export interface TechnicalFields {
-  vae?: {
+  email?: {
     vvpmPlaceholderId?: string
     utmCode?: string
     ctas?: Array<{ id: string; name: string; link: string }>

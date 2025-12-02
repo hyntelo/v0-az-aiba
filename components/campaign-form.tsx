@@ -45,7 +45,7 @@ export default function CampaignForm() {
   const fillDemoData = () => {
     const demoDataWithChannels = {
       ...demoData,
-      channels: ["vae", "whatsapp", "salesMaterials"],
+      channels: ["whatsapp", "email", "materialiCartacei"],
     }
     setCampaignData(demoDataWithChannels)
     clearFormErrors()

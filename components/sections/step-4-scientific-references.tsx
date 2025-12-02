@@ -11,7 +11,7 @@ import type { ScientificReference, KnowledgeBaseDocument } from "@/lib/store/typ
 import type { AttachmentFile } from "@/lib/file-utils"
 import { searchKnowledgeBase, addDocumentToKnowledgeBase, extractClaimsFromFile } from "@/lib/mock-knowledge-base"
 import { ClaimsSelectionModal } from "./claims-selection-modal"
-import { ChevronDown, ChevronUp, Loader2, Search } from "lucide-react"
+import { ChevronDown, ChevronUp, Loader2, Search, Upload } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -252,7 +252,7 @@ export function Step4ScientificReferences() {
         return (
           <div className="min-w-0 max-w-full whitespace-nowrap">
             <span className="text-sm text-muted-foreground">
-              {selectedCount} of {totalCount}
+              {selectedCount} di {totalCount}
             </span>
           </div>
         )
@@ -266,32 +266,40 @@ export function Step4ScientificReferences() {
       key: "referenceId",
       label: t("form.steps.step4.table.referenceId"),
       render: (item) => <span className="font-mono text-sm">{item.referenceId}</span>,
+      className: "w-[120px]",
+      hideOnMobile: true,
     },
     {
       key: "title",
       label: t("form.steps.step4.table.title"),
-      render: (item) => <span>{item.title}</span>,
+      render: (item) => <span className="truncate block" title={item.title}>{item.title}</span>,
     },
     {
       key: "authors",
       label: t("form.steps.step4.table.authors"),
-      render: (item) => <span>{item.authors}</span>,
+      render: (item) => <span className="truncate block" title={item.authors}>{item.authors}</span>,
     },
     {
       key: "publicationDate",
       label: t("form.steps.step4.table.publicationDate"),
       render: (item) => (
-        <span>{item.publicationDate ? new Date(item.publicationDate).toLocaleDateString("it-IT") : "-"}</span>
+        <span className="whitespace-nowrap">
+          {item.publicationDate ? new Date(item.publicationDate).toLocaleDateString("it-IT") : "-"}
+        </span>
       ),
+      className: "w-[120px]",
+      hideOnMobile: true,
     },
     {
       key: "claimsCount",
       label: t("form.steps.step4.table.claimsCount"),
       render: (item) => (
-        <span className="text-sm font-medium">
+        <span className="text-sm font-medium whitespace-nowrap">
           {item.claimsCount || 0}
         </span>
       ),
+      className: "w-[100px] text-center",
+      hideOnMobile: true,
     },
   ]
 
@@ -361,53 +369,90 @@ export function Step4ScientificReferences() {
                 </div>
                 
                 <div className="border rounded-lg overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
+                  <Table className="table-fixed" style={{ tableLayout: "fixed" }}>
+                    <TableHeader>
+                      <TableRow>
+                        {resultColumns.map((column) => (
+                          <TableHead 
+                            key={column.key} 
+                            className={cn(
+                              column.hideOnMobile && "hidden md:table-cell",
+                              column.className
+                            )}
+                          >
+                            {column.label}
+                          </TableHead>
+                        ))}
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredSearchResults.length === 0 ? (
                         <TableRow>
-                          {resultColumns.map((column) => (
-                            <TableHead key={column.key} className={column.className}>
-                              {column.label}
-                            </TableHead>
-                          ))}
+                          <TableCell colSpan={resultColumns.length} className="text-center py-8 text-muted-foreground">
+                            Nessun documento trovato per "{searchQuery}"
+                          </TableCell>
                         </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {filteredSearchResults.length === 0 ? (
-                          <TableRow>
-                            <TableCell colSpan={resultColumns.length} className="text-center py-8 text-muted-foreground">
-                              Nessun documento trovato per "{searchQuery}"
-                            </TableCell>
-                          </TableRow>
-                        ) : (
-                          filteredSearchResults.map((doc) => {
-                            const item: ScientificReference = {
-                              id: doc.id,
-                              referenceId: doc.referenceId,
-                              title: doc.title,
-                              authors: doc.authors,
-                              journal: doc.journal,
-                              publicationDate: doc.publicationDate,
-                              claimsCount: doc.claimsCount,
-                            }
-                            return (
-                              <TableRow
-                                key={doc.id}
-                                className="cursor-pointer hover:bg-accent-violet/5"
-                                onClick={() => handleDocumentClick(item)}
-                              >
-                                {resultColumns.map((column) => (
-                                  <TableCell key={column.key} className={column.className}>
-                                    {column.render(item)}
+                      ) : (
+                        filteredSearchResults.map((doc) => {
+                          const item: ScientificReference = {
+                            id: doc.id,
+                            referenceId: doc.referenceId,
+                            title: doc.title,
+                            authors: doc.authors,
+                            journal: doc.journal,
+                            publicationDate: doc.publicationDate,
+                            claimsCount: doc.claimsCount,
+                          }
+                          return (
+                            <TableRow
+                              key={doc.id}
+                              className="cursor-pointer hover:bg-accent-violet/5"
+                              onClick={() => handleDocumentClick(item)}
+                            >
+                              {resultColumns.map((column) => {
+                                // Special handling for title column to show upload icon
+                                if (column.key === "title") {
+                                  return (
+                                    <TableCell 
+                                      key={column.key} 
+                                      className={cn(
+                                        column.hideOnMobile && "hidden md:table-cell",
+                                        column.className,
+                                        "min-w-0"
+                                      )}
+                                    >
+                                      <div className="flex items-center gap-2 min-w-0">
+                                        {doc.uploadedAt && (
+                                          <Upload className="w-4 h-4 text-accent-violet flex-shrink-0" title="Documento caricato" />
+                                        )}
+                                        <span className="truncate block" title={item.title}>
+                                          {item.title}
+                                        </span>
+                                      </div>
+                                    </TableCell>
+                                  )
+                                }
+                                return (
+                                  <TableCell 
+                                    key={column.key} 
+                                    className={cn(
+                                      column.hideOnMobile && "hidden md:table-cell",
+                                      column.className,
+                                      "min-w-0"
+                                    )}
+                                  >
+                                    <div className="min-w-0">
+                                      {column.render(item)}
+                                    </div>
                                   </TableCell>
-                                ))}
-                              </TableRow>
-                            )
-                          })
-                        )}
-                      </TableBody>
-                    </Table>
-                  </div>
+                                )
+                              })}
+                            </TableRow>
+                          )
+                        })
+                      )}
+                    </TableBody>
+                  </Table>
                 </div>
                 {searchResults.length > 5 && (
                   <p className="text-xs text-muted-foreground text-center">
@@ -442,6 +487,8 @@ export function Step4ScientificReferences() {
                 journal: true,
                 publicationDate: true,
               },
+              showDisclaimer: true,
+              disclaimerText: t("form.steps.step4.upload.disclaimer"),
             }}
             tableConfig={{
               title: (count: number) => t("form.steps.step4.table.titleWithCount", { count }),
