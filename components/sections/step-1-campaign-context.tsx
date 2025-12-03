@@ -91,9 +91,9 @@ export function Step1CampaignContext({
               <Label htmlFor="requestSummary" className="text-base font-semibold">
                 {t("form.requestSummary")} *
               </Label>
-              <div className="group relative inline-flex flex-shrink-0">
+              <div className="group relative inline-flex flex-shrink-0 w-5 h-5 items-center justify-center">
                 <Lightbulb className="w-5 h-5 text-accent-violet cursor-help" />
-                <div className="absolute left-0 top-6 w-64 p-3 bg-card border border-border rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10">
+                <div className="absolute left-0 top-6 w-64 p-3 bg-card border border-border rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10 pointer-events-none">
                   <p className="text-xs text-muted-foreground">{t("form.aiSuggestions.requestSummary")}</p>
                 </div>
               </div>
@@ -216,9 +216,9 @@ export function Step1CampaignContext({
                 <Label htmlFor="communicationPersonality" className="text-sm font-medium">
                   {t("form.style")}
                 </Label>
-                <div className="group relative inline-flex flex-shrink-0">
+                <div className="group relative inline-flex flex-shrink-0 w-4 h-4 items-center justify-center">
                   <Lightbulb className="w-4 h-4 text-accent-violet cursor-help" />
-                  <div className="absolute left-0 top-6 w-64 p-3 bg-card border border-border rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10">
+                  <div className="absolute left-0 top-6 w-64 p-3 bg-card border border-border rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10 pointer-events-none">
                     <p className="text-xs text-muted-foreground">{t("form.aiSuggestions.communicationPersonality")}</p>
                   </div>
                 </div>
@@ -248,9 +248,9 @@ export function Step1CampaignContext({
                 <Label htmlFor="targetAudiencePreset" className="text-sm font-medium">
                   {t("form.target")}
                 </Label>
-                <div className="group relative inline-flex flex-shrink-0">
+                <div className="group relative inline-flex flex-shrink-0 w-4 h-4 items-center justify-center">
                   <Lightbulb className="w-4 h-4 text-accent-violet cursor-help" />
-                  <div className="absolute left-0 top-6 w-64 p-3 bg-card border border-border rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10">
+                  <div className="absolute left-0 top-6 w-64 p-3 bg-card border border-border rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10 pointer-events-none">
                     <p className="text-xs text-muted-foreground">{t("form.aiSuggestions.targetAudiencePreset")}</p>
                   </div>
                 </div>
@@ -308,9 +308,9 @@ export function Step1CampaignContext({
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Label className="text-sm font-medium">{t("form.selectMezzi")}*</Label>
-              <div className="group relative inline-flex flex-shrink-0">
+              <div className="group relative inline-flex flex-shrink-0 w-4 h-4 items-center justify-center">
                 <Lightbulb className="w-4 h-4 text-accent-violet cursor-help" />
-                <div className="absolute left-0 top-6 w-64 p-3 bg-card border border-border rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10">
+                <div className="absolute left-0 top-6 w-64 p-3 bg-card border border-border rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10 pointer-events-none">
                   <p className="text-xs text-muted-foreground">{t("form.aiSuggestions.channels")}</p>
                 </div>
               </div>

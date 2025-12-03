@@ -43,34 +43,46 @@ export default function CampaignForm() {
 
   const formData = campaignData
 
-  const fillDemoData = () => {
-    const demoDataWithChannels = {
-      ...demoData,
-      brand: "Wainzua",
-      therapeuticArea: "BBU",
-      channels: ["whatsapp", "email", "materialiCartacei"],
-    }
-    setCampaignData(demoDataWithChannels)
-    clearFormErrors()
-    console.log("[v0] Demo data filled via keyboard shortcut")
-  }
-
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       const isAltOrOption = event.altKey || (event.getModifierState && event.getModifierState("Alt"))
       const isCKey = event.key.toLowerCase() === "c" || event.code === "KeyC"
 
       if (isAltOrOption && isCKey) {
-        console.log("[v0] Keyboard shortcut detected - filling demo data")
+        // Only fill if we're on step 1
+        if (currentStep !== 1) {
+          return
+        }
+
+        console.log("[v0] Keyboard shortcut detected - filling step 1 MMR data")
         event.preventDefault()
         event.stopPropagation()
-        fillDemoData()
+
+        // Get current campaign data from store
+        const currentData = useAppStore.getState().campaignData
+
+        const mmrData = {
+          ...currentData,
+          projectName: "Email su test MMR",
+          requestSummary: "Approfondimento su classificazione. Modalità effettuazione del test. Linee guida ESGO. Cosa è MMR. Differenze tra dMMR e pMMR.",
+          brand: "Lynparza",
+          therapeuticArea: "Gyn/GU",
+          specialty: "Ovaio",
+          expectedLaunchDate: "2025-12-30",
+          communicationPersonalityId: "scientific-communication",
+          targetAudiencePresetId: "hcp",
+          typology: "branded",
+          channels: ["whatsapp", "email", "materialiCartacei"],
+        }
+        setCampaignData(mmrData)
+        clearFormErrors()
+        console.log("[v0] Step 1 MMR data filled via keyboard shortcut")
       }
     }
 
     document.addEventListener("keydown", handleKeyDown, true)
     return () => document.removeEventListener("keydown", handleKeyDown, true)
-  }, [])
+  }, [currentStep, setCampaignData, clearFormErrors])
 
   useEffect(() => {
     const autoSaveInterval = setInterval(async () => {
