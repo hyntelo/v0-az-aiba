@@ -252,7 +252,7 @@ export function AppShell({ children, currentPage = "dashboard", onCreateBrief }:
                 "text-xs font-semibold text-muted-foreground",
                 sidebarCollapsed && "text-[10px]"
               )}>
-                #{getBuildNumber()}
+                v{getBuildNumber()}
               </span>
             </div>
           </div>
