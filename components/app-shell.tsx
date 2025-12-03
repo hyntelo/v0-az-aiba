@@ -30,6 +30,7 @@ import Image from "next/image"
 import { cn } from "@/lib/utils"
 import { useAppStore } from "@/lib/store"
 import { useTranslation } from "@/lib/i18n"
+import { getBuildNumber } from "@/lib/version"
 
 interface AppShellProps {
   children: React.ReactNode
@@ -242,6 +243,18 @@ export function AppShell({ children, currentPage = "dashboard", onCreateBrief }:
                 </div>
               )}
             </button>
+          </div>
+
+          {/* Build Number */}
+          <div className="border-t border-sidebar-border p-3">
+            <div className="flex items-center justify-center">
+              <span className={cn(
+                "text-xs font-semibold text-muted-foreground",
+                sidebarCollapsed && "text-[10px]"
+              )}>
+                #{getBuildNumber()}
+              </span>
+            </div>
           </div>
         </div>
       </aside>
