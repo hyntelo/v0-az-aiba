@@ -34,12 +34,18 @@ const channelKeys = [
 ]
 
 const therapeuticAreaOptions = [
-  "OBU",
-  "BBU",
+  "Lung",
+  "Gyn/GU",
+  "Breast",
+  "Haemato",
+  "GI",
+  "CVRM",
+  "V&I",
+  "R&I",
 ]
 
 const specialtyOptions: Record<string, string[]> = {
-  default: ["GynGU", "Lung", "Mel", "HCC", "BTC", "DCC"],
+  default: ["Polmone", "Mammella", "Ovaio", "Prostata", "Endometrio", "Sangue", "HCC", "BTC"],
 }
 
 export function Step1CampaignContext({

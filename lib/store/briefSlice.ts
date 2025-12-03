@@ -136,64 +136,24 @@ const initialBrandGuidelines: BrandGuidelinesSettings = {
         "Utilizzare terminologia clinica e fare riferimento a evidenze peer-reviewed mantenendo un tono obiettivo.",
     },
     {
-      id: "marketing",
-      name: "Marketing",
-      description: "Linguaggio di marketing coinvolgente e focalizzato sul brand",
-      guidelines:
-        "Evidenziare le proposte di valore con messaggistica persuasiva ma conforme che supporta gli obiettivi del brand.",
-    },
-    {
-      id: "awareness",
-      name: "Awareness",
+      id: "general-public",
+      name: "General Public",
       description: "Messaggistica accessibile per un pubblico ampio",
       guidelines: "Semplificare concetti complessi e concentrarsi sulla comprensione generale senza claim di prodotto.",
-    },
-    {
-      id: "educational",
-      name: "Educazionale",
-      description: "Messaggistica istruttiva focalizzata sul trasferimento di conoscenze",
-      guidelines:
-        "Chiarire argomenti complessi con spiegazioni strutturate, visual e obiettivi di apprendimento adatti per formazione o ECM.",
-    },
-    {
-      id: "patient-engagement",
-      name: "Coinvolgimento Pazienti",
-      description: "Messaggistica empatica e di supporto centrata sui pazienti",
-      guidelines:
-        "Utilizzare un linguaggio chiaro e non tecnico che enfatizza la qualità della vita, il supporto all'aderenza e l'accessibilità.",
-    },
-    {
-      id: "internal-communication",
-      name: "Comunicazione Interna",
-      description: "Messaggistica chiara e concisa per team interni e stakeholder",
-      guidelines:
-        "Concentrarsi su allineamento, aggiornamenti di progetto e insight azionabili utilizzando un linguaggio professionale ma accessibile.",
     },
   ],
   targetAudiencePresets: [
     {
-      id: "tech-savvy-young-professional",
-      name: "Professionista Giovane e Tecnologico",
-      description: "Professionista digitalmente connesso che abbraccia l'innovazione",
-      guidelines: "Utilizzare un tono informale e dinamico con riferimenti tecnologici.",
+      id: "hcp",
+      name: "HCP",
+      description: "Healthcare Professionals",
+      guidelines: "Messaggistica professionale e basata sull'evidenza per operatori sanitari.",
     },
     {
-      id: "datadriven-clinician",
-      name: "Clinico Data-Driven",
-      description: "Cerca evidenze solide e rilevanza clinica",
-      guidelines: "Messaggistica: enfatizzare dati, outcome comprovati e allineamento alle linee guida.",
-    },
-    {
-      id: "innovative-researcher",
-      name: "Ricercatore Innovativo",
-      description: "Attratto da metodi all'avanguardia e terapie innovative",
-      guidelines: "Messaggistica: sottolineare innovazione, unicità e potenziale impatto futuro.",
-    },
-    {
-      id: "patientcentered-advocate",
-      name: "Sostenitore Patient-Centered",
-      description: "Prioritizza esperienza del paziente, accessibilità e qualità della vita",
-      guidelines: "Messaggistica: evidenziare empatia, usabilità e outcome positivi per i pazienti.",
+      id: "general-public",
+      name: "General Public",
+      description: "Pubblico generale",
+      guidelines: "Messaggistica chiara e accessibile per il pubblico generale.",
     },
   ],
   productBrandGuidelines: [

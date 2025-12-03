@@ -16,30 +16,30 @@ export const demoBrief = {
   },
   generatedContent: {
     objectives:
-      "Aumentare la consapevolezza tra cardiologi e nefrologi sui vantaggi clinici di Lokelma nel mantenimento della normokaliemia consentendo la continuazione della terapia RAASi, enfatizzando le evidenze degli studi di fase III.",
+      "Aumentare la consapevolezza degli oncologi sulla rilevanza del biomarcatori (MMRd/non-MMRd, p53abn, NSMP, POLEmut) nella scelta terapeutica e sul ruolo delle combinazioni terapeutiche Indicate dalle linee guida ESGO-ESTRO-ESP 2025. La campagna supporta una corretta identificazione dei pazienti per cui le linee guida prevedono l'integrazione di immunoterapia e, nei protocolli selezionati, l'impiego di PARP inibitori come parte delle strategie di mantenimento.",
     keyMessages: {
       emailMarketing: [
         {
           id: "km-1-email",
           tag: "EFFICACY",
-          description: "Lokelma consente il mantenimento o l'up-titration della terapia RAASi nell'87% dei pazienti con iperkaliemia.",
+          description: "Le linee guida 2025 prevedono, in pazienti selezionati, mantenimento con immunoterapia e PARP inibitori per migliorare il controllo di malattia.",
         },
         {
           id: "km-2-email",
           tag: "AWARENESS",
-          description: "L'iperkaliemia rimane una barriera importante all'ottimizzazione del trattamento, ora efficacemente gestibile con Lokelma",
+          description: "La classificazione molecolare guida le scelte terapeutiche e identifica i pazienti candidabili a strategie Integrate, incluse combinazioni con PARP inibitori.",
         },
       ],
       printMaterials: [
         {
           id: "km-1-print",
           tag: "EFFICACY",
-          description: "Lokelma consente il mantenimento o l'up-titration della terapia RAASi nell'87% dei pazienti con iperkaliemia.",
+          description: "Le linee guida 2025 prevedono, in pazienti selezionati, mantenimento con immunoterapia e PARP inibitori per migliorare il controllo di malattia.",
         },
         {
           id: "km-2-print",
           tag: "AWARENESS",
-          description: "L'iperkaliemia rimane una barriera importante all'ottimizzazione del trattamento, ora efficacemente gestibile con Lokelma",
+          description: "La classificazione molecolare guida le scelte terapeutiche e identifica i pazienti candidabili a strategie Integrate, incluse combinazioni con PARP inibitori.",
         },
       ],
     },
@@ -51,9 +51,9 @@ export const demoBrief = {
     },
     complianceNotes: {
       emailMarketing:
-        "Materiale destinato esclusivamente agli operatori sanitari. Deve essere conforme alle normative pubblicitarie AIFA e ai processi di revisione interna dell'azienda. Includere le caratteristiche del prodotto e il riferimento al Riassunto delle Caratteristiche del Prodotto (RCP) di Lokelma. Assicurarsi che tutte le affermazioni siano supportate da evidenze peer-reviewed. Per email: includere disclaimer e link al RCP.",
+        "Materiale destinato esclusivamente agli operatori sanitari. Deve essere conforme alle normative pubblicitarie AIFA e al processi di revisione interna dell'azienda. Includere le caratteristiche del prodotto e il riferimento al Riassunto delle Caratteristiche del Prodotto (RCP) di Lynparza. Assicurarsi che tutte le affermazioni siano supportate da evidenze peer-reviewed. Per email: includere disclaimer e link al RCP.",
       printMaterials:
-        "Materiale destinato esclusivamente agli operatori sanitari. Deve essere conforme alle normative pubblicitarie AIFA e ai processi di revisione interna dell'azienda. Includere le caratteristiche del prodotto e il riferimento al Riassunto delle Caratteristiche del Prodotto (RCP) di Lokelma. Assicurarsi che tutte le affermazioni siano supportate da evidenze peer-reviewed. Per materiali stampati: includere codice magazzino, QR code e wording AIFA completo.",
+        "Materiale destinato esclusivamente agli operatori sanitari. Deve essere conforme alle normative pubblicitarie AIFA e al processi di revisione interna dell'azienda. Includere le caratteristiche del prodotto e il riferimento al Riassunto delle Caratteristiche del Prodotto (RCP) di Lynparza. Assicurarsi che tutte le affermazioni siano supportate da evidenze peer-reviewed. Per materiali stampati: includere codice magazzino, QR code e wording AIFA completo.",
     },
   },
 }
