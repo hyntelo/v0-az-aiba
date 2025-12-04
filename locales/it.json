@@ -417,6 +417,10 @@
       "step4": {
         "title": "Reference scientifiche",
         "description": "Inserimento delle reference scientifiche da utilizzare per supportare i claim",
+        "buttons": {
+          "search": "Cerca",
+          "upload": "Carica"
+        },
         "search": {
           "title": "Cerca su knowledge base",
           "subtitle": "Questi risultati sono stati generati sulla base dei dati compilati nel precedente step, informazioni",

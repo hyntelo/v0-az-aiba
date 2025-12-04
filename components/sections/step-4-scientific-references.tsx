@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect, useRef, useMemo } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ItemsManager } from "@/components/shared/items-manager"
 import { type TableColumn } from "@/components/shared/searchable-items-table"
@@ -8,21 +8,11 @@ import { type ResultColumn } from "@/components/shared/search-results-modal"
 import { useTranslation } from "@/lib/i18n"
 import { useAppStore } from "@/lib/store"
 import type { ScientificReference, KnowledgeBaseDocument } from "@/lib/store/types"
-import type { AttachmentFile } from "@/lib/file-utils"
-import { searchKnowledgeBase, addDocumentToKnowledgeBase, extractClaimsFromFile } from "@/lib/mock-knowledge-base"
-import { ClaimsSelectionModal } from "./claims-selection-modal"
-import { ChevronDown, ChevronUp, Loader2, Search, Upload } from "lucide-react"
+import { searchKnowledgeBase, addDocumentToKnowledgeBase } from "@/lib/mock-knowledge-base"
+import { KnowledgeBaseModal } from "./knowledge-base-modal"
+import { UploadPaperModal } from "./upload-paper-modal"
+import { Search, Upload } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import { cn } from "@/lib/utils"
 
 export function Step4ScientificReferences() {
   const { t } = useTranslation()
@@ -32,30 +22,11 @@ export function Step4ScientificReferences() {
   )
   const [isAutoSearching, setIsAutoSearching] = useState(false)
   const [searchResults, setSearchResults] = useState<KnowledgeBaseDocument[]>([])
-  const [isClaimsModalOpen, setIsClaimsModalOpen] = useState(false)
-  const [selectedDocument, setSelectedDocument] = useState<KnowledgeBaseDocument | null>(null)
-  const [isSearchResultsExpanded, setIsSearchResultsExpanded] = useState(true)
-  const [searchQuery, setSearchQuery] = useState("")
+  const [isKnowledgeBaseModalOpen, setIsKnowledgeBaseModalOpen] = useState(false)
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
   
   // Track last searched context to avoid redundant searches
   const lastSearchedContextRef = useRef<string>("")
-  
-  // Filter search results based on search query
-  const filteredSearchResults = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return searchResults
-    }
-    
-    const query = searchQuery.toLowerCase()
-    return searchResults.filter((doc) => {
-      return (
-        doc.title.toLowerCase().includes(query) ||
-        doc.authors.toLowerCase().includes(query) ||
-        doc.journal?.toLowerCase().includes(query) ||
-        doc.referenceId.toLowerCase().includes(query)
-      )
-    })
-  }, [searchResults, searchQuery])
 
   const handleReferencesChange = (newReferences: ScientificReference[]) => {
     setReferences(newReferences)
@@ -101,24 +72,10 @@ export function Step4ScientificReferences() {
   }
 
 
-  // Handle clicking on a document in search results
-  const handleDocumentClick = (item: ScientificReference) => {
-    // Find the full document with claims from search results
-    const fullDocument = searchResults.find((doc) => doc.id === item.id)
-    if (fullDocument && fullDocument.claims && fullDocument.claims.length > 0) {
-      setSelectedDocument(fullDocument)
-      setIsClaimsModalOpen(true)
-    } else {
-      // If no claims, just add directly
-      handleAddDocumentToBrief(item, [])
-    }
-  }
-
-  // Handle claims selection confirmation
-  const handleClaimsConfirm = (document: KnowledgeBaseDocument, selectedClaimIds: string[]) => {
+  // Handle document selection from modal
+  const handleDocumentSelect = (document: KnowledgeBaseDocument, selectedClaimIds: string[]) => {
     handleAddDocumentToBrief(document, selectedClaimIds)
-    setIsClaimsModalOpen(false)
-    setSelectedDocument(null)
+    setIsKnowledgeBaseModalOpen(false)
   }
 
   // Add document to brief with selected claims
@@ -143,54 +100,48 @@ export function Step4ScientificReferences() {
     }
   }
 
-  // Mock regular search function
-  const handleSearch = async (values: Record<string, string>): Promise<ScientificReference[]> => {
-    await new Promise((resolve) => setTimeout(resolve, 500))
-    return searchResults.map((doc) => ({
-      id: doc.id,
-      referenceId: doc.referenceId,
-      title: doc.title,
-      authors: doc.authors,
-      journal: doc.journal,
-      publicationDate: doc.publicationDate,
-      claimsCount: doc.claimsCount,
-    }))
+  // Handle opening the knowledge base modal
+  const handleOpenKnowledgeBaseModal = async () => {
+    // If we don't have search results yet, perform search
+    if (searchResults.length === 0 && !isAutoSearching) {
+      await performAutoSearch()
+    }
+    setIsKnowledgeBaseModalOpen(true)
   }
 
-  const handleFileAdd = async (file: AttachmentFile, metadata?: Record<string, string>) => {
+  // Handle opening the upload modal
+  const handleOpenUploadModal = () => {
+    setIsUploadModalOpen(true)
+  }
+
+  // Handle upload completion - adds to both knowledge base and selected materials
+  const handleUploadComplete = async (
+    document: KnowledgeBaseDocument,
+    selectedClaimIds: string[]
+  ) => {
     // Check for duplicates
     const existingRef = references.find(
-      (ref) => ref.title === metadata?.title && ref.authors === metadata?.authors
+      (ref) => ref.title === document.title && ref.authors === document.authors
     )
 
     if (existingRef) {
       console.warn("Reference already exists")
+      setIsUploadModalOpen(false)
       return
     }
 
-    // Extract claims from file
-    const claims = await extractClaimsFromFile(new File([], file.name, { type: file.type }))
+    // Add to knowledge base
+    addDocumentToKnowledgeBase(document)
 
-    // Create knowledge base document and add to knowledge base (not to selected materials)
-    const knowledgeBaseDoc: KnowledgeBaseDocument = {
-      id: `ref-${Date.now()}`,
-      referenceId: `IT-${Math.floor(Math.random() * 1000000)}`,
-      title: metadata?.title || file.name,
-      authors: metadata?.authors || "Unknown",
-      journal: metadata?.journal,
-      publicationDate: metadata?.publicationDate,
-      claimsCount: claims.length,
-      selectedClaims: [],
-      claims,
-      uploadedAt: new Date(),
-    }
+    // Add to selected materials with selected claims
+    handleAddDocumentToBrief(document, selectedClaimIds)
 
-    // Add to knowledge base only (in reverse order - newest first)
-    addDocumentToKnowledgeBase(knowledgeBaseDoc)
-    
     // Refresh search results to show the newly uploaded document at the top
     const updatedResults = await searchKnowledgeBase(campaignData)
     setSearchResults(updatedResults)
+
+    // Close modal
+    setIsUploadModalOpen(false)
 
     // Show success message (in real app, use toast)
     console.log(t("form.steps.step4.upload.addedToKnowledgeBase"))
@@ -318,177 +269,32 @@ export function Step4ScientificReferences() {
           )}
         </CardHeader>
         <CardContent>
-          {/* Inline Search Results Section */}
-          <Card className="hyntelo-elevation-1 mb-6">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-lg font-medium">{t("form.steps.step4.search.title")}</CardTitle>
-                  {t("form.steps.step4.search.subtitle") && (
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {t("form.steps.step4.search.subtitle")}
-                    </p>
-                  )}
-                </div>
-                {searchResults.length > 0 && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setIsSearchResultsExpanded(!isSearchResultsExpanded)}
-                    className="h-8"
-                  >
-                    {isSearchResultsExpanded ? (
-                      <ChevronUp className="w-4 h-4" />
-                    ) : (
-                      <ChevronDown className="w-4 h-4" />
-                    )}
-                  </Button>
-                )}
-              </div>
-              {isAutoSearching && (
-                <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>{t("citationSearch.aiSearching")}</span>
-                </div>
-              )}
-            </CardHeader>
-            {searchResults.length > 0 && isSearchResultsExpanded && (
-              <CardContent className="pt-0 space-y-4">
-                {/* Search Bar */}
-                <div className="flex items-center gap-3">
-                  <div className="flex-1 relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      type="text"
-                      placeholder="Cerca tra i documenti..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-9"
-                    />
-                  </div>
-                </div>
-                
-                <div className="border rounded-lg overflow-hidden">
-                  <Table className="table-fixed" style={{ tableLayout: "fixed" }}>
-                    <TableHeader>
-                      <TableRow>
-                        {resultColumns.map((column) => (
-                          <TableHead 
-                            key={column.key} 
-                            className={cn(
-                              column.hideOnMobile && "hidden md:table-cell",
-                              column.className
-                            )}
-                          >
-                            {column.label}
-                          </TableHead>
-                        ))}
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredSearchResults.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={resultColumns.length} className="text-center py-8 text-muted-foreground">
-                            Nessun documento trovato per "{searchQuery}"
-                          </TableCell>
-                        </TableRow>
-                      ) : (
-                        filteredSearchResults.map((doc) => {
-                          const item: ScientificReference = {
-                            id: doc.id,
-                            referenceId: doc.referenceId,
-                            title: doc.title,
-                            authors: doc.authors,
-                            journal: doc.journal,
-                            publicationDate: doc.publicationDate,
-                            claimsCount: doc.claimsCount,
-                          }
-                          return (
-                            <TableRow
-                              key={doc.id}
-                              className="cursor-pointer hover:bg-accent-violet/5"
-                              onClick={() => handleDocumentClick(item)}
-                            >
-                              {resultColumns.map((column) => {
-                                // Special handling for title column to show upload icon
-                                if (column.key === "title") {
-                                  return (
-                                    <TableCell 
-                                      key={column.key} 
-                                      className={cn(
-                                        column.hideOnMobile && "hidden md:table-cell",
-                                        column.className,
-                                        "min-w-0"
-                                      )}
-                                    >
-                                      <div className="flex items-center gap-2 min-w-0">
-                                        {doc.uploadedAt && (
-                                          <Upload className="w-4 h-4 text-accent-violet flex-shrink-0" title="Documento caricato" />
-                                        )}
-                                        <span className="truncate block" title={item.title}>
-                                          {item.title}
-                                        </span>
-                                      </div>
-                                    </TableCell>
-                                  )
-                                }
-                                return (
-                                  <TableCell 
-                                    key={column.key} 
-                                    className={cn(
-                                      column.hideOnMobile && "hidden md:table-cell",
-                                      column.className,
-                                      "min-w-0"
-                                    )}
-                                  >
-                                    <div className="min-w-0">
-                                      {column.render(item)}
-                                    </div>
-                                  </TableCell>
-                                )
-                              })}
-                            </TableRow>
-                          )
-                        })
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-                {searchResults.length > 5 && (
-                  <p className="text-xs text-muted-foreground text-center">
-                    {filteredSearchResults.length === searchResults.length
-                      ? `${searchResults.length} documenti trovati. Clicca su un documento per selezionare le giallature.`
-                      : `${filteredSearchResults.length} di ${searchResults.length} documenti mostrati.`}
-                  </p>
-                )}
-              </CardContent>
-            )}
-            {searchResults.length === 0 && !isAutoSearching && (
-              <CardContent className="pt-0">
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  I risultati della ricerca verranno mostrati qui quando disponibili.
-                </p>
-              </CardContent>
-            )}
-          </Card>
+          {/* Action Buttons */}
+          <div className="flex gap-3 mb-6">
+            <Button
+              onClick={handleOpenKnowledgeBaseModal}
+              variant="default"
+              className="flex items-center gap-2"
+            >
+              <Search className="w-4 h-4" />
+              {t("form.steps.step4.buttons.search")}
+            </Button>
+            <Button
+              onClick={handleOpenUploadModal}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Upload className="w-4 h-4" />
+              {t("form.steps.step4.buttons.upload")}
+            </Button>
+          </div>
 
           <ItemsManager
             searchConfig={{
-              enabled: false, // Disable search section since we show results inline
+              enabled: false, // Disable search section since we show results in modal
             }}
             uploadConfig={{
-              enabled: true,
-              title: t("form.steps.step4.upload.title"),
-              subtitle: t("form.steps.step4.upload.subtitle"),
-              showMetadataForm: true,
-              metadataFields: {
-                title: true,
-                authors: true,
-                journal: true,
-                publicationDate: true,
-              },
-              showDisclaimer: true,
-              disclaimerText: t("form.steps.step4.upload.disclaimer"),
+              enabled: false, // Disable upload section since we use the upload modal
             }}
             tableConfig={{
               title: (count: number) => t("form.steps.step4.table.titleWithCount", { count }),
@@ -498,20 +304,25 @@ export function Step4ScientificReferences() {
             items={references}
             onItemsChange={handleReferencesChange}
             getItemId={(item) => item.id}
-            onFileAdd={handleFileAdd}
           />
         </CardContent>
       </Card>
 
-      {/* Claims Selection Modal */}
-      <ClaimsSelectionModal
-        isOpen={isClaimsModalOpen}
-        onClose={() => {
-          setIsClaimsModalOpen(false)
-          setSelectedDocument(null)
-        }}
-        document={selectedDocument}
-        onConfirm={handleClaimsConfirm}
+      {/* Knowledge Base Modal */}
+      <KnowledgeBaseModal
+        isOpen={isKnowledgeBaseModalOpen}
+        onClose={() => setIsKnowledgeBaseModalOpen(false)}
+        documents={searchResults}
+        isLoading={isAutoSearching}
+        onDocumentSelect={handleDocumentSelect}
+        resultColumns={resultColumns}
+      />
+
+      {/* Upload Paper Modal */}
+      <UploadPaperModal
+        isOpen={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+        onComplete={handleUploadComplete}
       />
     </>
   )

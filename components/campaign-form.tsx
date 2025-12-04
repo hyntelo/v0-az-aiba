@@ -252,16 +252,23 @@ export default function CampaignForm() {
           setIsGeneratingBrief(true)
           // Generate brief - isGeneratingBrief is controlled externally
           generateBrief().then(() => {
-            // After 3 seconds, hide modal and move to step 5
+            // After 3 seconds, move to step 5 first, then hide modal
+            // This prevents the flash of step 4 content
             setTimeout(() => {
-              setIsGeneratingBrief(false)
               setCompletedSteps(newCompletedSteps)
               setCurrentStep(5)
-              // Scroll to top to show stepper and title
-              setTimeout(() => {
-                topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
-                window.scrollTo({ top: 0, behavior: "smooth" })
-              }, 0)
+              // Use requestAnimationFrame to ensure step 5 is painted before hiding loader
+              // Double RAF ensures the browser has painted the new step before we clear the loading state
+              requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                  setIsGeneratingBrief(false)
+                  // Scroll to top to show stepper and title
+                  setTimeout(() => {
+                    topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+                    window.scrollTo({ top: 0, behavior: "smooth" })
+                  }, 0)
+                })
+              })
             }, 3000)
           })
         } else {
@@ -334,8 +341,9 @@ export default function CampaignForm() {
     return "pending"
   }
 
-  // Show AI generation modal when transitioning from step 4 to step 5
-  if (isGeneratingBrief && currentStep === 4) {
+  // Show AI generation modal when generating brief
+  // Keep showing while isGeneratingBrief is true to prevent flash of step 4 content during transition
+  if (isGeneratingBrief) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="w-full max-w-md hyntelo-elevation-6">

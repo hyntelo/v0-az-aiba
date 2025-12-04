@@ -742,7 +742,7 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
                   <Switch
                     checked={isUnified}
                     onCheckedChange={(checked) => handleToggleMode(sectionKey, checked)}
-                    disabled={isEditing || isRefining || showRefine}
+                    disabled={isEditing || isRefining || showRefine || isConfirmed}
                   />
                 </div>
               )}

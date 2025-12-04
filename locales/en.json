@@ -408,6 +408,10 @@
       "step4": {
         "title": "Scientific References",
         "description": "Insert scientific references to support claims",
+        "buttons": {
+          "search": "Search",
+          "upload": "Upload"
+        },
         "search": {
           "title": "Search knowledge base",
           "subtitle": "These results were generated based on data compiled in the previous step, information",
