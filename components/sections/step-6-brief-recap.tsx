@@ -357,9 +357,21 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
       setEditingSection(null)
       setEditContent("")
     }
+    // Clear refine field for both possible keys (unified and per-channel)
+    const unifiedKey = `${sectionKey}.all`
     if (showRefineField[sectionKey]) {
       toggleRefineField(sectionKey)
     }
+    if (showRefineField[unifiedKey]) {
+      toggleRefineField(unifiedKey)
+    }
+    // Also clear any channel-specific refine fields
+    channels.forEach((channel) => {
+      const channelKey = `${sectionKey}.${channel}`
+      if (showRefineField[channelKey]) {
+        toggleRefineField(channelKey)
+      }
+    })
   }
 
   // Get section content (handles channel-specific and unified modes)
@@ -1008,7 +1020,7 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
                       onClick={() => {
                         // Only allow cancel if not staged
                         if (sectionState.state !== "staged") {
-                          toggleRefineField(sectionKey)
+                          toggleRefineField(fullSectionKey)
                         }
                       }}
                       disabled={sectionState.state === "staged"}
@@ -1026,7 +1038,7 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => toggleRefineField(sectionKey)}
+                  onClick={() => toggleRefineField(fullSectionKey)}
                   className="flex items-center gap-2"
                 >
                   <Sparkles className="w-4 h-4" />
