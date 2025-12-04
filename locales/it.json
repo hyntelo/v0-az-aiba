@@ -517,7 +517,10 @@
         "noContent": "Nessun contenuto",
         "attachments": "Allegati",
         "editingChannel": "Modificando canale",
-        "completato": "Completato"
+        "completato": "Completato",
+        "unifiedMode": "Uno per tutti",
+        "perChannelMode": "Uno per mezzo",
+        "confirmAllChannels": "Conferma Tutti"
       }
     },
     "navigation": {

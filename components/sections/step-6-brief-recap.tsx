@@ -12,7 +12,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
 import {
   Edit2,
@@ -69,11 +69,23 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
   const [refineKeyMessagePrompts, setRefineKeyMessagePrompts] = useState<Record<string, string>>({})
   const [keyMessageStagedStates, setKeyMessageStagedStates] = useState<Record<string, { originalDescription: string; stagedDescription: string }>>({})
   const [confirmedSections, setConfirmedSections] = useState<Set<string>>(new Set())
+  // Track confirmed channels per section (for per-channel mode)
+  const [confirmedChannels, setConfirmedChannels] = useState<Record<string, Set<string>>>({})
   const [showRefineField, setShowRefineField] = useState<Record<string, boolean>>({})
   const [refinePrompts, setRefinePrompts] = useState<Record<string, string>>({})
   const [selectedChannel, setSelectedChannel] = useState<Record<string, string>>({})
   const [selectedReferenceForClaims, setSelectedReferenceForClaims] = useState<ScientificReference | null>(null)
   const [isClaimsDialogOpen, setIsClaimsDialogOpen] = useState(false)
+  // State for unified mode (single for all channels) vs per-channel mode
+  const [isUnifiedMode, setIsUnifiedMode] = useState<Record<string, boolean>>({
+    toneOfVoice: true, // Default to unified mode
+    complianceNotes: true,
+  })
+  // State for accordion open/close (only used in per-channel mode)
+  const [openAccordionItems, setOpenAccordionItems] = useState<Record<string, string[]>>({
+    toneOfVoice: [],
+    complianceNotes: [],
+  })
 
   const brief = currentBrief
   if (!brief || !brief.generatedContent) {
@@ -100,8 +112,11 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
 
   // Handle edit start (with channel support)
   const handleEditStart = (section: string, content: string, channel?: string) => {
-    // For channel-specific sections, include channel in the section key
-    const sectionKey = channel ? `${section}.${channel}` : section
+    // For channel-specific sections in unified mode, use "section.all"
+    // For per-channel mode, use "section.channel"
+    // For non-channel-specific sections, use just "section"
+    const isUnified = (section === "toneOfVoice" || section === "complianceNotes") && (isUnifiedMode[section] ?? true)
+    const sectionKey = channel ? `${section}.${channel}` : (isUnified && (section === "toneOfVoice" || section === "complianceNotes") ? `${section}.all` : section)
     setEditingSection(sectionKey)
     setEditContent(content)
   }
@@ -260,9 +275,11 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
 
   // Handle refine (with channel support)
   const handleRefine = async (sectionKey: string, channel?: string) => {
-    const prompt = refinePrompts[sectionKey] || ""
-    // For channel-specific sections, include channel in the section key
-    const fullSectionKey = channel ? `${sectionKey}.${channel}` : sectionKey
+    // For channel-specific sections in unified mode, use "sectionKey.all"
+    // For per-channel mode, use "sectionKey.channel"
+    const isUnified = (sectionKey === "toneOfVoice" || sectionKey === "complianceNotes") && (isUnifiedMode[sectionKey] ?? true)
+    const fullSectionKey = channel ? `${sectionKey}.${channel}` : (isUnified && (sectionKey === "toneOfVoice" || sectionKey === "complianceNotes") ? `${sectionKey}.all` : sectionKey)
+    const prompt = refinePrompts[fullSectionKey] || ""
     await regenerateSection(fullSectionKey, prompt)
   }
 
@@ -294,17 +311,89 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
     }))
   }
 
-  // Get section content (handles channel-specific)
-  const getSectionContent = (sectionKey: string, channel?: string): string => {
-    const targetChannel = channel || selectedChannel[sectionKey] || channels[0] || ""
+  // Handle toggle between unified and per-channel mode
+  const handleToggleMode = (sectionKey: string, newUnifiedMode: boolean) => {
+    const content = generatedContent[sectionKey as keyof typeof generatedContent]
     
-    if (sectionKey === "toneOfVoice" || sectionKey === "complianceNotes") {
-      const content = generatedContent[sectionKey as keyof typeof generatedContent]
+    if (newUnifiedMode) {
+      // Switching to unified mode: use first channel's content as the unified content
       if (typeof content === "object" && content !== null && !Array.isArray(content)) {
-        return (content as Record<string, string>)[targetChannel] || ""
+        const contentObj = content as Record<string, string>
+        const firstChannel = channels[0] || ""
+        const unifiedContent = contentObj[firstChannel] || ""
+        if (unifiedContent) {
+          // Store as "all" key
+          updateBriefSection(`${sectionKey}.all`, unifiedContent)
+        }
+      }
+    } else {
+      // Switching to per-channel mode: copy unified content to all channels if it exists
+      if (typeof content === "object" && content !== null && !Array.isArray(content)) {
+        const contentObj = content as Record<string, string>
+        const unifiedContent = contentObj.all
+        if (unifiedContent) {
+          // Copy to all channels
+          channels.forEach((channel) => {
+            if (!contentObj[channel]) {
+              updateBriefSection(`${sectionKey}.${channel}`, unifiedContent)
+            }
+          })
+        }
+      } else if (typeof content === "string" && content) {
+        // If it's a string, copy to all channels
+        channels.forEach((channel) => {
+          updateBriefSection(`${sectionKey}.${channel}`, content)
+        })
       }
     }
     
+    setIsUnifiedMode((prev) => ({
+      ...prev,
+      [sectionKey]: newUnifiedMode,
+    }))
+    
+    // Clear any editing/refining state when switching modes
+    if (editingSection?.startsWith(sectionKey)) {
+      setEditingSection(null)
+      setEditContent("")
+    }
+    if (showRefineField[sectionKey]) {
+      toggleRefineField(sectionKey)
+    }
+  }
+
+  // Get section content (handles channel-specific and unified modes)
+  const getSectionContent = (sectionKey: string, channel?: string): string => {
+    if (sectionKey === "toneOfVoice" || sectionKey === "complianceNotes") {
+      const content = generatedContent[sectionKey as keyof typeof generatedContent]
+      const isUnified = isUnifiedMode[sectionKey] ?? true
+      
+      if (isUnified) {
+        // Unified mode: check for "all" key first, then fallback to string or first channel
+        if (typeof content === "object" && content !== null && !Array.isArray(content)) {
+          const contentObj = content as Record<string, string>
+          if (contentObj.all) {
+            return contentObj.all
+          }
+          // Fallback to first channel if "all" doesn't exist
+          const firstChannel = channels[0] || ""
+          return contentObj[firstChannel] || ""
+        }
+        // If it's a string, return it directly
+        if (typeof content === "string") {
+          return content
+        }
+        return ""
+      } else {
+        // Per-channel mode: get content for specific channel
+        const targetChannel = channel || selectedChannel[sectionKey] || channels[0] || ""
+        if (typeof content === "object" && content !== null && !Array.isArray(content)) {
+          return (content as Record<string, string>)[targetChannel] || ""
+        }
+      }
+    }
+    
+    // For non-channel-specific sections
     const content = generatedContent[sectionKey as keyof typeof generatedContent]
     if (typeof content === "string") {
       return content
@@ -322,7 +411,53 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
 
   // Check if section is confirmed
   const isSectionConfirmed = (sectionKey: string): boolean => {
-    return confirmedSections.has(sectionKey)
+    // In unified mode, check if section is confirmed
+    if (isUnifiedMode[sectionKey] ?? true) {
+      return confirmedSections.has(sectionKey)
+    }
+    // In per-channel mode, check if all channels are confirmed
+    const sectionChannels = confirmedChannels[sectionKey] || new Set()
+    return channels.length > 0 && sectionChannels.size === channels.length
+  }
+
+  // Check if a specific channel is confirmed
+  const isChannelConfirmed = (sectionKey: string, channel: string): boolean => {
+    const sectionChannels = confirmedChannels[sectionKey] || new Set()
+    return sectionChannels.has(channel)
+  }
+
+  // Handle confirm for a specific channel
+  const handleConfirmChannel = (sectionKey: string, channel: string) => {
+    setConfirmedChannels((prev) => {
+      const sectionChannels = prev[sectionKey] || new Set()
+      const newSet = new Set(sectionChannels)
+      newSet.add(channel)
+      return {
+        ...prev,
+        [sectionKey]: newSet,
+      }
+    })
+  }
+
+  // Handle unconfirm for a specific channel
+  const handleUnconfirmChannel = (sectionKey: string, channel: string) => {
+    setConfirmedChannels((prev) => {
+      const sectionChannels = prev[sectionKey] || new Set()
+      const newSet = new Set(sectionChannels)
+      newSet.delete(channel)
+      return {
+        ...prev,
+        [sectionKey]: newSet,
+      }
+    })
+  }
+
+  // Handle confirm all channels for a section
+  const handleConfirmAllChannels = (sectionKey: string) => {
+    setConfirmedChannels((prev) => ({
+      ...prev,
+      [sectionKey]: new Set(channels),
+    }))
   }
 
   // Get confirmation count
@@ -335,17 +470,260 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
     sectionKey: string,
     isChannelSpecific: boolean = false
   ) => {
-    // Get the active channel for this section
-    const activeChannel = isChannelSpecific ? (selectedChannel[sectionKey] || channels[0] || "") : undefined
+    const isUnified = isChannelSpecific ? (isUnifiedMode[sectionKey] ?? true) : true
+    const activeChannel = isChannelSpecific && !isUnified ? (selectedChannel[sectionKey] || channels[0] || "") : undefined
     // Use channel-specific section key for channel-specific sections
-    const fullSectionKey = activeChannel ? `${sectionKey}.${activeChannel}` : sectionKey
+    const fullSectionKey = activeChannel ? `${sectionKey}.${activeChannel}` : (isUnified && isChannelSpecific ? `${sectionKey}.all` : sectionKey)
     
     const isEditing = editingSection === fullSectionKey
     const isRefining = regeneratingSection === fullSectionKey
     const isConfirmed = isSectionConfirmed(sectionKey)
     const sectionState = sectionStates[fullSectionKey] || { state: "original" }
-    const showRefine = showRefineField[sectionKey]
+    const showRefine = showRefineField[fullSectionKey] || false
     const content = getSectionContent(sectionKey, activeChannel)
+
+    // Render content for a specific channel (used in accordion)
+    const renderChannelContent = (channel: string) => {
+      const channelSectionKey = `${sectionKey}.${channel}`
+      const channelIsEditing = editingSection === channelSectionKey
+      const channelIsRefining = regeneratingSection === channelSectionKey
+      const channelSectionState = sectionStates[channelSectionKey] || { state: "original" }
+      const channelShowRefine = showRefineField[channelSectionKey]
+      const channelContent = getSectionContent(sectionKey, channel)
+      const channelFullSectionKey = channelSectionKey
+      const channelIsConfirmed = isChannelConfirmed(sectionKey, channel)
+
+      return (
+        <div>
+          {channelIsEditing && !channelIsConfirmed ? (
+            <div>
+              <Textarea
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                className="w-full min-h-[150px]"
+                placeholder={title}
+              />
+            </div>
+          ) : (
+            <div>
+              {channelIsRefining && (
+                <div className="flex items-center gap-2 text-gray-500 py-8">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>{t("form.steps.step6.regenerating")}...</span>
+                </div>
+              )}
+
+              {channelSectionState.state === "staged" && !channelIsRefining && (
+                <div className="space-y-4">
+                  <div className="relative">
+                    <pre className="whitespace-pre-wrap text-gray-400 font-sans leading-relaxed line-through opacity-60">
+                      {channelSectionState.originalContent}
+                    </pre>
+                  </div>
+                  <div className="relative">
+                    <div className="absolute -left-3 top-0 bottom-0 w-1 bg-accent-violet rounded-full"></div>
+                    <pre className="whitespace-pre-wrap text-gray-700 font-sans leading-relaxed bg-accent-violet/5 p-3 rounded-lg">
+                      {channelSectionState.stagedContent}
+                    </pre>
+                  </div>
+                </div>
+              )}
+
+              {(channelSectionState.state === "original" || channelSectionState.state === "confirmed") && (
+                <pre className="whitespace-pre-wrap text-gray-700 font-sans leading-relaxed">
+                  {channelContent}
+                </pre>
+              )}
+            </div>
+          )}
+          
+          {!channelIsConfirmed && (
+            <div className="flex items-center justify-end gap-2 mt-4 pt-4 border-t">
+              {channelIsEditing ? (
+                <div className="flex items-center justify-end gap-2 w-full">
+                  <Button 
+                    onClick={() => {
+                      if (channelIsEditing) {
+                        handleEditSave()
+                      }
+                    }} 
+                    size="sm" 
+                    className="flex items-center gap-2"
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    {t("common.save")}
+                  </Button>
+                  <Button variant="outline" onClick={handleEditCancel} size="sm" className="flex items-center gap-2">
+                    <X className="w-4 h-4" />
+                    {t("common.cancel")}
+                  </Button>
+                </div>
+              ) : channelShowRefine ? (
+                channelSectionState.state === "staged" && !channelIsRefining ? (
+                  <div className="flex items-center justify-end gap-2 w-full">
+                    <Button
+                      onClick={() => {
+                        acceptRegeneration(channelFullSectionKey)
+                        setShowRefineField((prev) => {
+                          const newFields = { ...prev }
+                          delete newFields[channelSectionKey]
+                          return newFields
+                        })
+                        setRefinePrompts((prev) => {
+                          const newPrompts = { ...prev }
+                          delete newPrompts[channelFullSectionKey]
+                          return newPrompts
+                        })
+                      }}
+                      size="sm"
+                      className="flex items-center gap-2"
+                    >
+                      <Check className="w-4 h-4" />
+                      {t("form.steps.step6.accept")}
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        rejectRegeneration(channelFullSectionKey)
+                        setShowRefineField((prev) => {
+                          const newFields = { ...prev }
+                          delete newFields[channelSectionKey]
+                          return newFields
+                        })
+                        setRefinePrompts((prev) => {
+                          const newPrompts = { ...prev }
+                          delete newPrompts[channelFullSectionKey]
+                          return newPrompts
+                        })
+                      }}
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-2"
+                    >
+                      <X className="w-4 h-4" />
+                      {t("form.steps.step6.reject")}
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <Input
+                      type="text"
+                      placeholder={`${t("form.steps.step6.refinePlaceholder")}... (Press Alt+C for suggestions)`}
+                      value={refinePrompts[channelFullSectionKey] || ""}
+                      onChange={(e) =>
+                        setRefinePrompts((prev) => ({
+                          ...prev,
+                          [channelFullSectionKey]: e.target.value,
+                        }))
+                      }
+                      onKeyDown={(e) => {
+                        if (e.altKey && e.key === "c") {
+                          e.preventDefault()
+                          const mockPrompt = fillMockPrompt(channelFullSectionKey)
+                          setRefinePrompts((prev) => ({
+                            ...prev,
+                            [channelFullSectionKey]: mockPrompt,
+                          }))
+                        }
+                      }}
+                      className="flex-1"
+                    />
+                    <div className="flex items-center gap-2">
+                      <Button
+                        onClick={() => {
+                          handleRefine(sectionKey, channel)
+                        }}
+                        disabled={channelIsRefining || !refinePrompts[channelFullSectionKey]?.trim()}
+                        size="sm"
+                        className="flex items-center gap-2"
+                      >
+                        {channelIsRefining ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Sparkles className="w-4 h-4" />
+                        )}
+                        {t("form.steps.step6.regenerate")}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          if (channelSectionState.state !== "staged") {
+                            setShowRefineField((prev) => {
+                              const newFields = { ...prev }
+                              delete newFields[channelSectionKey]
+                              return newFields
+                            })
+                          }
+                        }}
+                        disabled={channelSectionState.state === "staged"}
+                        size="sm"
+                        className="flex items-center gap-2"
+                      >
+                        <X className="w-4 h-4" />
+                        {t("common.cancel")}
+                      </Button>
+                    </div>
+                  </>
+                )
+              ) : (
+                <div className="flex items-center justify-end gap-2 w-full">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setShowRefineField((prev) => ({ ...prev, [channelSectionKey]: true }))
+                    }}
+                    className="flex items-center gap-2"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    {t("form.steps.step6.refine")}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      handleEditStart(sectionKey, channelContent, channel)
+                    }}
+                    className="flex items-center gap-2"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                    {t("form.steps.step6.modify")}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleConfirmChannel(sectionKey, channel)}
+                    className="flex items-center gap-2"
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    {t("form.steps.step6.confirm")}
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+          {channelIsConfirmed && (
+            <div className="flex items-center justify-end gap-2 mt-4 pt-4 border-t">
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 text-green-600">
+                  <Lock className="w-4 h-4" />
+                  <span className="text-sm">{t("form.steps.step6.confirmed")}</span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleUnconfirmChannel(sectionKey, channel)}
+                  className="flex items-center gap-1 text-muted-foreground hover:text-foreground"
+                  title={t("form.steps.step6.undoConfirm") || "Annulla conferma"}
+                >
+                  <Undo2 className="w-4 h-4" />
+                  <span className="text-sm">{t("form.steps.step6.undo") || "Annulla"}</span>
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      )
+    }
 
     return (
       <Card className="hyntelo-elevation-3">
@@ -355,71 +733,129 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
               <Sparkles className="w-5 h-5 text-accent-violet" />
               <CardTitle className="text-lg font-medium">{title}</CardTitle>
             </div>
-            {isConfirmed && (
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1 text-green-600">
-                  <Lock className="w-4 h-4" />
-                  <span className="text-sm">{t("form.steps.step6.confirmed")}</span>
+            <div className="flex items-center gap-4">
+              {isChannelSpecific && channels.length > 1 && (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    {isUnified ? (t("form.steps.step6.unifiedMode") || "Uno per tutti") : (t("form.steps.step6.perChannelMode") || "Uno per mezzo")}
+                  </span>
+                  <Switch
+                    checked={isUnified}
+                    onCheckedChange={(checked) => handleToggleMode(sectionKey, checked)}
+                    disabled={isEditing || isRefining || showRefine}
+                  />
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleUnconfirm(sectionKey)}
-                  className="flex items-center gap-1 text-muted-foreground hover:text-foreground"
-                  title={t("form.steps.step6.undoConfirm") || "Annulla conferma"}
-                >
-                  <Undo2 className="w-4 h-4" />
-                  <span className="text-sm">{t("form.steps.step6.undo") || "Annulla"}</span>
-                </Button>
-              </div>
-            )}
+              )}
+              {isConfirmed && (
+                <div className="flex items-center gap-2">
+                  {!isUnified && isChannelSpecific ? (
+                    <div className="flex items-center gap-1 text-green-600">
+                      <Lock className="w-4 h-4" />
+                      <span className="text-sm">
+                        {(confirmedChannels[sectionKey]?.size || 0)}/{channels.length} {t("form.steps.step6.confirmed")}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1 text-green-600">
+                      <Lock className="w-4 h-4" />
+                      <span className="text-sm">{t("form.steps.step6.confirmed")}</span>
+                    </div>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      if (!isUnified && isChannelSpecific) {
+                        // Clear all channel confirmations
+                        setConfirmedChannels((prev) => ({
+                          ...prev,
+                          [sectionKey]: new Set(),
+                        }))
+                      } else {
+                        handleUnconfirm(sectionKey)
+                      }
+                    }}
+                    className="flex items-center gap-1 text-muted-foreground hover:text-foreground"
+                    title={t("form.steps.step6.undoConfirm") || "Annulla conferma"}
+                  >
+                    <Undo2 className="w-4 h-4" />
+                    <span className="text-sm">{t("form.steps.step6.undo") || "Annulla"}</span>
+                  </Button>
+                </div>
+              )}
+              {!isConfirmed && !isUnified && isChannelSpecific && channels.length > 0 && (
+                <div className="flex items-center gap-1 text-muted-foreground">
+                  <span className="text-sm">
+                    {(confirmedChannels[sectionKey]?.size || 0)}/{channels.length} {t("form.steps.step6.confirmed")}
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
         </CardHeader>
         <CardContent>
-          {isChannelSpecific && channels.length > 1 && (
-            <Tabs
-              value={selectedChannel[sectionKey] || channels[0]}
+          {isChannelSpecific && channels.length > 1 && !isUnified ? (
+            <Accordion
+              type="multiple"
+              className="w-full"
+              value={openAccordionItems[sectionKey] || []}
               onValueChange={(value) => {
-                // Prevent tab change when editing or refining
-                if (!isEditing && !isRefining && !showRefine) {
-                  setSelectedChannel((prev) => ({ ...prev, [sectionKey]: value }))
+                // Prevent accordion change when editing or refining
+                const isAnyChannelEditing = channels.some((ch) => {
+                  const chKey = `${sectionKey}.${ch}`
+                  return editingSection === chKey || regeneratingSection === chKey || showRefineField[chKey]
+                })
+                if (!isAnyChannelEditing) {
+                  setOpenAccordionItems((prev) => ({
+                    ...prev,
+                    [sectionKey]: value,
+                  }))
                 }
               }}
-              className="mb-4"
             >
-              <TabsList>
-                {channels.map((channel) => {
-                  const isActiveChannel = channel === activeChannel
-                  const isEditingThisChannel = isActiveChannel && isEditing
-                  const isRefiningThisChannel = isActiveChannel && (isRefining || showRefine)
-                  // Only disable non-active tabs when editing/refining
-                  const shouldDisable = (isEditing || isRefining || showRefine) && !isActiveChannel
-                  
-                  return (
-                    <TabsTrigger 
-                      key={channel} 
-                      value={channel}
-                      disabled={shouldDisable}
-                      className="flex items-center gap-1.5"
-                    >
-                      {isEditingThisChannel && (
-                        <Edit2 className="w-3.5 h-3.5" />
-                      )}
-                      {isRefiningThisChannel && !isEditingThisChannel && (
-                        <Sparkles className="w-3.5 h-3.5" />
-                      )}
-                      {getChannelDisplayName(channel)}
-                    </TabsTrigger>
-                  )
-                })}
-              </TabsList>
-              {channels.map((channel) => (
-                <TabsContent key={channel} value={channel} />
-              ))}
-            </Tabs>
-          )}
+              {channels.map((channel) => {
+                const channelKey = `${sectionKey}.${channel}`
+                const channelIsEditing = editingSection === channelKey
+                const channelIsRefining = regeneratingSection === channelKey
+                const channelShowRefine = showRefineField[channelKey]
+                const channelIsConfirmed = isChannelConfirmed(sectionKey, channel)
+                const isAnyChannelInEditOrRefine = channels.some((ch) => {
+                  const chKey = `${sectionKey}.${ch}`
+                  return editingSection === chKey || regeneratingSection === chKey || showRefineField[chKey]
+                })
+                const shouldDisable = isAnyChannelInEditOrRefine && !channelIsEditing && !channelIsRefining && !channelShowRefine
 
-          {isEditing && !isConfirmed ? (
+                return (
+                  <AccordionItem key={channel} value={channel} disabled={shouldDisable}>
+                    <AccordionTrigger className="text-base font-semibold flex items-center gap-2">
+                      <span className="flex items-center gap-2">
+                        {channelIsConfirmed && (
+                          <span className="[&>svg]:!rotate-0">
+                            <Lock className="w-4 h-4 text-green-600" />
+                          </span>
+                        )}
+                        {channelIsEditing && !channelIsConfirmed && (
+                          <Edit2 className="w-3.5 h-3.5" />
+                        )}
+                        {channelIsRefining && !channelIsEditing && !channelIsConfirmed && (
+                          <Sparkles className="w-3.5 h-3.5" />
+                        )}
+                        {channelShowRefine && !channelIsEditing && !channelIsRefining && !channelIsConfirmed && (
+                          <Sparkles className="w-3.5 h-3.5" />
+                        )}
+                        {getChannelDisplayName(channel)}
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      {renderChannelContent(channel)}
+                    </AccordionContent>
+                  </AccordionItem>
+                )
+              })}
+            </Accordion>
+          ) : (
+            <>
+              {isEditing && !isConfirmed ? (
             <div>
               <Textarea
                 value={editContent}
@@ -460,10 +896,14 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
               )}
             </div>
           )}
+            </>
+          )}
         </CardContent>
         {!isConfirmed && (
           <CardFooter className="flex items-center gap-2 border-t pt-4">
-            {isEditing ? (
+            {!isChannelSpecific || isUnified ? (
+              <>
+                {isEditing ? (
               <div className="flex items-center justify-end gap-2 w-full">
                 <Button onClick={handleEditSave} size="sm" className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4" />
@@ -481,7 +921,11 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
                   <Button
                     onClick={() => {
                       acceptRegeneration(fullSectionKey)
-                      toggleRefineField(sectionKey)
+                      setShowRefineField((prev) => {
+                        const newFields = { ...prev }
+                        delete newFields[fullSectionKey]
+                        return newFields
+                      })
                       // Clear the prompt
                       setRefinePrompts((prev) => {
                         const newPrompts = { ...prev }
@@ -498,7 +942,11 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
                   <Button
                     onClick={() => {
                       rejectRegeneration(fullSectionKey)
-                      toggleRefineField(sectionKey)
+                      setShowRefineField((prev) => {
+                        const newFields = { ...prev }
+                        delete newFields[fullSectionKey]
+                        return newFields
+                      })
                       // Clear the prompt
                       setRefinePrompts((prev) => {
                         const newPrompts = { ...prev }
@@ -603,6 +1051,22 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
                 >
                   <CheckCircle2 className="w-4 h-4" />
                   {t("form.steps.step6.confirm")}
+                </Button>
+              </div>
+            )}
+              </>
+            ) : (
+              // Per-channel mode: show "conferma tutti" button
+              <div className="flex items-center justify-end gap-2 w-full">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleConfirmAllChannels(sectionKey)}
+                  disabled={isConfirmed}
+                  className="flex items-center gap-2"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  {t("form.steps.step6.confirmAllChannels")}
                 </Button>
               </div>
             )}

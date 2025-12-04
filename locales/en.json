@@ -466,7 +466,10 @@
         "noContent": "No content",
         "attachments": "Attachments",
         "editingChannel": "Editing channel",
-        "completato": "Completed"
+        "completato": "Completed",
+        "unifiedMode": "Single for all",
+        "perChannelMode": "Per channel",
+        "confirmAllChannels": "Confirm All"
       }
     },
     "navigation": {
