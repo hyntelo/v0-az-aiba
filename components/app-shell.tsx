@@ -25,12 +25,16 @@ import {
   Plus,
   PanelLeft,
   PanelRight,
+  Save,
+  Loader2,
 } from "lucide-react"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
 import { useAppStore } from "@/lib/store"
 import { useTranslation } from "@/lib/i18n"
 import { getBuildNumber } from "@/lib/version"
+import { useToast } from "@/hooks/use-toast"
+import type { BriefData } from "@/lib/store/types"
 
 interface AppShellProps {
   children: React.ReactNode
@@ -40,6 +44,7 @@ interface AppShellProps {
 
 export function AppShell({ children, currentPage = "dashboard", onCreateBrief }: AppShellProps) {
   const { t } = useTranslation()
+  const { toast } = useToast()
   const {
     currentView,
     setCurrentView,
@@ -50,9 +55,15 @@ export function AppShell({ children, currentPage = "dashboard", onCreateBrief }:
     getUnreadNotificationCount,
     canAccessView,
     getNavigationItems,
+    campaignData,
+    currentBrief,
+    saveDraft,
+    setCurrentBrief,
+    addCreatedBrief,
   } = useAppStore()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
 
   const unreadCount = getUnreadNotificationCount()
 
@@ -133,6 +144,59 @@ export function AppShell({ children, currentPage = "dashboard", onCreateBrief }:
 
   const handleSettingsClick = () => {
     setCurrentView("settings")
+  }
+
+  const handleSaveDraft = async () => {
+    setIsSaving(true)
+    try {
+      let briefToSave = currentBrief
+
+      // If no brief exists, create a draft brief
+      if (!briefToSave) {
+        const draftBrief: BriefData = {
+          id: `brief-${Date.now()}`,
+          title: campaignData.projectName || "Untitled Brief",
+          campaignData,
+          generatedContent: undefined, // No generated content yet for draft
+          references: [],
+          createdAt: new Date(),
+          status: "draft",
+          lastModified: new Date(),
+          lastSavedAt: new Date(),
+          statusHistory: [],
+          isReadOnly: false,
+        }
+        setCurrentBrief(draftBrief)
+        addCreatedBrief(draftBrief)
+        briefToSave = draftBrief
+      } else {
+        // Update existing brief with current campaign data
+        const updatedBrief: BriefData = {
+          ...briefToSave,
+          campaignData,
+          lastModified: new Date(),
+        }
+        setCurrentBrief(updatedBrief)
+        briefToSave = updatedBrief
+      }
+
+      // Save the brief
+      await saveDraft(briefToSave.id)
+
+      toast({
+        title: t("common.saved"),
+        description: t("form.draftSavedSuccessfully") || "Bozza salvata con successo",
+      })
+    } catch (error) {
+      console.error("[v0] Error saving draft:", error)
+      toast({
+        title: t("common.error") || "Errore",
+        description: t("form.draftSaveError") || "Errore durante il salvataggio della bozza",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const pageTitle =
@@ -283,6 +347,30 @@ export function AppShell({ children, currentPage = "dashboard", onCreateBrief }:
               >
                 <Plus className="w-4 h-4 mr-2" />
                 {t("appShell.newBrief")}
+              </Button>
+            )}
+
+            {/* Save button - only show in form view */}
+            {currentView === "form" && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleSaveDraft}
+                disabled={isSaving}
+                className="border-primary text-primary hover:bg-primary/6 bg-transparent flex items-center gap-2"
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>{t("common.saving")}</span>
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4" />
+                    <span>{t("common.save")}</span>
+                  </>
+                )}
               </Button>
             )}
 

@@ -273,6 +273,8 @@
     "saved": "Salvato",
     "error": "Errore",
     "lastSaved": "Ultimo salvataggio",
+    "draftSavedSuccessfully": "Bozza salvata con successo",
+    "draftSaveError": "Errore durante il salvataggio della bozza",
     "campaignContext": "Contesto della Campagna",
     "campaignContextDescription": "Fornisci dettagli sulla tua campagna per aiutare la nostra IA a generare un brief completo con le tue linee guida del brand",
     "brandGuidelines": "Linee Guida del Brand",
@@ -405,7 +407,7 @@
           "title": "Lista dei materiali",
           "titleWithCount": "{{count}} Materiali Selezionati",
           "documentId": "ID Documento",
-          "title": "Titolo",
+          "titleColumn": "Titolo",
           "usage": "Utilizzo",
           "pages": "Pagine",
           "emptyMessage": "Nessun documento selezionato"
@@ -417,14 +419,14 @@
         "description": "Inserimento delle reference scientifiche da utilizzare per supportare i claim",
         "search": {
           "title": "Cerca su knowledge base",
-          "subtitle": "Citazioni Mediche",
+          "subtitle": "Questi risultati sono stati generati sulla base dei dati compilati nel precedente step, informazioni",
           "aiButton": "Trova con IA"
         },
         "table": {
           "title": "Lista delle reference",
           "titleWithCount": "{{count}} Materiali Selezionati",
           "referenceId": "ID",
-          "title": "Titolo",
+          "titleColumn": "Titolo",
           "authors": "Autori",
           "publicationDate": "pubblicazione",
           "emptyMessage": "Nessuna reference selezionata",

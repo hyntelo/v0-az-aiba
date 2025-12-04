@@ -398,12 +398,44 @@
           "title": "Materials list",
           "titleWithCount": "{{count}} Materials Selected",
           "documentId": "Document ID",
-          "title": "Title",
+          "titleColumn": "Title",
           "usage": "Usage",
           "pages": "Pages",
           "emptyMessage": "No documents selected"
         },
         "viewInVvpm": "View in VVPM"
+      },
+      "step4": {
+        "title": "Scientific References",
+        "description": "Insert scientific references to support claims",
+        "search": {
+          "title": "Search knowledge base",
+          "subtitle": "These results were generated based on data compiled in the previous step, information",
+          "aiButton": "Find with AI"
+        },
+        "table": {
+          "title": "References list",
+          "titleWithCount": "{{count}} Materials Selected",
+          "referenceId": "ID",
+          "titleColumn": "Title",
+          "authors": "Authors",
+          "publicationDate": "publication",
+          "emptyMessage": "No references selected",
+          "claimsCount": "Claims"
+        },
+        "claimsCount": "Claims",
+        "selectClaims": "Select claims",
+        "claimsModal": {
+          "title": "Select claims",
+          "page": "Page {{page}}",
+          "addToBrief": "Add to brief"
+        },
+        "upload": {
+          "title": "or upload a new paper",
+          "subtitle": "Upload supporting documents, reference materials or visual resources to provide additional context for your brief.",
+          "addedToKnowledgeBase": "Document added to knowledge base",
+          "disclaimer": "I accept responsibility for uploading or updating a file in the shared knowledge base. I understand that this document will be visible and usable by other system users."
+        }
       },
       "step6": {
         "title": "Brief Recap",

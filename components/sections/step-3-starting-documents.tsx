@@ -90,7 +90,7 @@ export function Step3StartingDocuments() {
     },
     {
       key: "title",
-      label: t("form.steps.step3.table.title"),
+      label: t("form.steps.step3.table.titleColumn"),
       render: (item) => (
         <div className="min-w-0 max-w-full">
           <span className="truncate block" title={item.title}>
@@ -153,7 +153,7 @@ export function Step3StartingDocuments() {
     },
     {
       key: "title",
-      label: t("form.steps.step3.table.title"),
+      label: t("form.steps.step3.table.titleColumn"),
       render: (item) => <span>{item.title}</span>,
     },
     {

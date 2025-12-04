@@ -1,7 +1,7 @@
 "use client"
 
-import React, { useState } from "react"
-import { Search, Loader2 } from "lucide-react"
+import React, { useState, useMemo } from "react"
+import { Search, Loader2, X } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -56,7 +56,21 @@ export function SearchSection({
     setSearchValues((prev) => ({ ...prev, [name]: value }))
   }
 
+  const handleClearField = (name: string, e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation()
+      e.preventDefault()
+    }
+    setSearchValues((prev) => ({ ...prev, [name]: "" }))
+  }
+
+  // Check if at least one field has a value
+  const hasAtLeastOneValue = useMemo(() => {
+    return Object.values(searchValues).some((value) => value && value.trim() !== "")
+  }, [searchValues])
+
   const handleSearch = async () => {
+    if (!hasAtLeastOneValue) return
     setIsSearching(true)
     try {
       await onSearch(searchValues)
@@ -114,47 +128,81 @@ export function SearchSection({
           {/* Text Fields - Prominent, full width */}
           {fields
             .filter((field) => field.type === "text")
-            .map((field) => (
-            <div key={field.name} className="space-y-2">
-                <Label htmlFor={field.name} className="text-base font-medium">
-                  {field.label}
-                </Label>
-                <Input
-                  id={field.name}
-                  type="text"
-                  placeholder={field.placeholder}
-                  value={searchValues[field.name] || ""}
-                  onChange={(e) => handleFieldChange(field.name, e.target.value)}
-                  className="w-full"
-                />
-              </div>
-            ))}
+            .map((field) => {
+              const hasValue = searchValues[field.name] && searchValues[field.name].trim() !== ""
+              return (
+                <div key={field.name} className="space-y-2">
+                  <Label htmlFor={field.name} className="text-base font-medium">
+                    {field.label}
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id={field.name}
+                      type="text"
+                      placeholder={field.placeholder}
+                      value={searchValues[field.name] || ""}
+                      onChange={(e) => handleFieldChange(field.name, e.target.value)}
+                      className={cn("w-full", hasValue && "pr-8")}
+                    />
+                    {hasValue && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0 hover:bg-transparent z-10"
+                        onClick={(e) => handleClearField(field.name, e)}
+                        aria-label="Clear input"
+                      >
+                        <X className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
 
           {/* Select Fields - All in one row */}
           {fields.filter((field) => field.type === "select").length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {fields
                 .filter((field) => field.type === "select")
-                .map((field) => (
-                  <div key={field.name} className="space-y-2">
-                    <Label htmlFor={field.name}>{field.label}</Label>
-                <Select
-                  value={searchValues[field.name] || ""}
-                  onValueChange={(value) => handleFieldChange(field.name, value)}
-                >
-                  <SelectTrigger id={field.name} className="w-full">
-                    <SelectValue placeholder={field.placeholder || field.label} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {field.options?.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                  </div>
-                ))}
+                .map((field) => {
+                  const hasValue = searchValues[field.name] && searchValues[field.name].trim() !== ""
+                  return (
+                    <div key={field.name} className="space-y-2">
+                      <Label htmlFor={field.name}>{field.label}</Label>
+                      <div className="relative">
+                        <Select
+                          value={searchValues[field.name] || ""}
+                          onValueChange={(value) => handleFieldChange(field.name, value)}
+                        >
+                          <SelectTrigger id={field.name} className="w-full">
+                            <SelectValue placeholder={field.placeholder || field.label} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {field.options?.map((option) => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {hasValue && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-8 top-1/2 -translate-y-1/2 h-6 w-6 p-0 hover:bg-transparent z-10"
+                            onClick={(e) => handleClearField(field.name, e)}
+                            aria-label="Clear selection"
+                          >
+                            <X className="h-4 w-4 text-muted-foreground" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
             </div>
           )}
         </div>
@@ -163,7 +211,7 @@ export function SearchSection({
         <div className="flex justify-end">
           <Button
             onClick={handleSearch}
-            disabled={isSearching}
+            disabled={isSearching || !hasAtLeastOneValue}
             className="w-full md:w-auto"
           >
             {isSearching ? (

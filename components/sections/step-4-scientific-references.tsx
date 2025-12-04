@@ -211,7 +211,7 @@ export function Step4ScientificReferences() {
     },
     {
       key: "title",
-      label: t("form.steps.step4.table.title"),
+      label: t("form.steps.step4.table.titleColumn"),
       render: (item) => (
         <div className="min-w-0 max-w-full">
           <span className="truncate block" title={item.title}>
@@ -271,7 +271,7 @@ export function Step4ScientificReferences() {
     },
     {
       key: "title",
-      label: t("form.steps.step4.table.title"),
+      label: t("form.steps.step4.table.titleColumn"),
       render: (item) => <span className="truncate block" title={item.title}>{item.title}</span>,
     },
     {
