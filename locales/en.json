@@ -439,7 +439,12 @@
           "subtitle": "Upload supporting documents, reference materials or visual resources to provide additional context for your brief.",
           "addedToKnowledgeBase": "Document added to knowledge base",
           "disclaimer": "I accept responsibility for uploading or updating a file in the shared knowledge base. I understand that this document will be visible and usable by other system users."
-        }
+        },
+        "duplicationWarning": "These materials were inherited from the original brief. Please confirm they are still relevant before proceeding.",
+        "validateReference": "Confirm",
+        "validatedReference": "Confirmed",
+        "validateAllReferences": "Confirm All",
+        "referencesValidationRequired": "You must confirm or delete all inherited materials before proceeding."
       },
       "step6": {
         "title": "Brief Recap",

@@ -1,22 +1,23 @@
 "use client"
 
-import React, { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect, useRef, useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ItemsManager } from "@/components/shared/items-manager"
 import { type TableColumn } from "@/components/shared/searchable-items-table"
 import { type ResultColumn } from "@/components/shared/search-results-modal"
 import { useTranslation } from "@/lib/i18n"
 import { useAppStore } from "@/lib/store"
-import type { ScientificReference, KnowledgeBaseDocument } from "@/lib/store/types"
+import type { ScientificReference, KnowledgeBaseDocument, BriefData } from "@/lib/store/types"
 import { searchKnowledgeBase, addDocumentToKnowledgeBase } from "@/lib/mock-knowledge-base"
 import { KnowledgeBaseModal } from "./knowledge-base-modal"
 import { UploadPaperModal } from "./upload-paper-modal"
-import { Search, Upload } from "lucide-react"
+import { Search, Upload, Check, AlertTriangle } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export function Step4ScientificReferences() {
   const { t } = useTranslation()
-  const { campaignData, setCampaignData, currentBrief } = useAppStore()
+  const { campaignData, setCampaignData, currentBrief, createdBriefs } = useAppStore()
   const [references, setReferences] = useState<ScientificReference[]>(
     campaignData.scientificReferences || []
   )
@@ -27,10 +28,84 @@ export function Step4ScientificReferences() {
   
   // Track last searched context to avoid redundant searches
   const lastSearchedContextRef = useRef<string>("")
+  
+  // Sync references when campaignData changes
+  useEffect(() => {
+    if (campaignData.scientificReferences) {
+      setReferences(campaignData.scientificReferences)
+    }
+  }, [campaignData.scientificReferences])
+  
+  // Get original brief if current brief is duplicated
+  const originalBrief: BriefData | null = useMemo(() => {
+    if (!currentBrief?.duplicatedFromBriefId) {
+      return null
+    }
+    return createdBriefs.find((b) => b.id === currentBrief.duplicatedFromBriefId) || null
+  }, [currentBrief, createdBriefs])
+  
+  // Identify inherited references (references that exist in original brief)
+  const inheritedReferenceIds = useMemo(() => {
+    if (!originalBrief) {
+      return new Set<string>()
+    }
+    const originalReferences = originalBrief.campaignData.scientificReferences || []
+    return new Set(originalReferences.map((ref) => ref.id))
+  }, [originalBrief])
+  
+  // Get validated reference IDs
+  const validatedReferenceIds = useMemo(() => {
+    return new Set(campaignData.validatedReferences || [])
+  }, [campaignData.validatedReferences])
+  
+  // Check if there are unvalidated inherited references
+  const hasUnvalidatedInherited = useMemo(() => {
+    if (!originalBrief) {
+      return false
+    }
+    const unvalidated = references.filter(
+      (ref) => inheritedReferenceIds.has(ref.id) && !validatedReferenceIds.has(ref.id)
+    )
+    return unvalidated.length > 0
+  }, [references, inheritedReferenceIds, validatedReferenceIds, originalBrief])
+  
+  // Validate a single reference
+  const validateReference = (referenceId: string) => {
+    const currentValidated = campaignData.validatedReferences || []
+    if (!currentValidated.includes(referenceId)) {
+      setCampaignData({
+        ...campaignData,
+        validatedReferences: [...currentValidated, referenceId],
+      })
+    }
+  }
+  
+  // Validate all inherited references
+  const validateAllReferences = () => {
+    const inheritedIds = references
+      .filter((ref) => inheritedReferenceIds.has(ref.id))
+      .map((ref) => ref.id)
+    const currentValidated = campaignData.validatedReferences || []
+    const newValidated = Array.from(new Set([...currentValidated, ...inheritedIds]))
+    setCampaignData({
+      ...campaignData,
+      validatedReferences: newValidated,
+    })
+  }
 
   const handleReferencesChange = (newReferences: ScientificReference[]) => {
     setReferences(newReferences)
-    setCampaignData({ ...campaignData, scientificReferences: newReferences })
+    
+    // Remove validation state for deleted references
+    const currentValidated = campaignData.validatedReferences || []
+    const remainingIds = new Set(newReferences.map((ref) => ref.id))
+    const updatedValidated = currentValidated.filter((id) => remainingIds.has(id))
+    
+    setCampaignData({
+      ...campaignData,
+      scientificReferences: newReferences,
+      validatedReferences: updatedValidated,
+    })
   }
 
   // Automatic AI search when Step 1 context changes
@@ -147,6 +222,42 @@ export function Step4ScientificReferences() {
     console.log(t("form.steps.step4.upload.addedToKnowledgeBase"))
   }
 
+  // Render validation action for table rows
+  const renderValidationAction = (item: ScientificReference, itemId: string) => {
+    const isInherited = inheritedReferenceIds.has(itemId)
+    const isValidated = validatedReferenceIds.has(itemId)
+    
+    if (!isInherited) {
+      return null
+    }
+    
+    if (isValidated) {
+      return (
+        <Button
+          variant="ghost"
+          size="sm"
+          disabled
+          className="h-8 text-green-600 hover:text-green-600"
+          aria-label={t("form.steps.step4.validatedReference")}
+        >
+          <Check className="w-4 h-4" />
+        </Button>
+      )
+    }
+    
+    return (
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => validateReference(itemId)}
+        className="h-8"
+        aria-label={t("form.steps.step4.validateReference")}
+      >
+        {t("form.steps.step4.validateReference")}
+      </Button>
+    )
+  }
+  
   const tableColumns: TableColumn<ScientificReference>[] = [
     {
       key: "referenceId",
@@ -262,11 +373,6 @@ export function Step4ScientificReferences() {
           <p className="text-sm text-muted-foreground mt-1">
             {t("form.steps.step4.description")}
           </p>
-          {isAutoSearching && (
-            <p className="text-xs text-muted-foreground mt-2">
-              {t("citationSearch.aiSearching")}
-            </p>
-          )}
         </CardHeader>
         <CardContent>
           {/* Action Buttons */}
@@ -289,6 +395,30 @@ export function Step4ScientificReferences() {
             </Button>
           </div>
 
+          {/* Alert banner for duplicated briefs */}
+          {originalBrief && hasUnvalidatedInherited && (
+            <Alert className="mb-6 border-amber-200 bg-amber-50">
+              <AlertTriangle className="h-4 w-4 text-amber-600" />
+              <AlertDescription className="text-amber-800">
+                {t("form.steps.step4.duplicationWarning")}
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          {/* Validate all button */}
+          {originalBrief && hasUnvalidatedInherited && (
+            <div className="mb-4">
+              <Button
+                onClick={validateAllReferences}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                <Check className="w-4 h-4" />
+                {t("form.steps.step4.validateAllReferences")}
+              </Button>
+            </div>
+          )}
+
           <ItemsManager
             searchConfig={{
               enabled: false, // Disable search section since we show results in modal
@@ -300,6 +430,7 @@ export function Step4ScientificReferences() {
               title: (count: number) => t("form.steps.step4.table.titleWithCount", { count }),
               columns: tableColumns,
               emptyMessage: t("form.steps.step4.table.emptyMessage"),
+              renderActions: renderValidationAction,
             }}
             items={references}
             onItemsChange={handleReferencesChange}

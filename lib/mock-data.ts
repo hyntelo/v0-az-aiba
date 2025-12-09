@@ -158,20 +158,108 @@ export const existingBriefs = [
       attachments: [],
       communicationPersonalityId: "scientific-publication",
       targetAudiencePresetId: "results-driven-manager",
+      startingDocuments: [
+        {
+          id: "doc-1",
+          documentId: "IT-762386",
+          title: "Linee Guida ACC/AHA 2023 - Valutazione Rischio Cardiovascolare",
+          usage: "global-adapt",
+          pages: "1-15",
+        },
+        {
+          id: "doc-2",
+          documentId: "IT-7657865",
+          title: "Calcolatore Rischio Cardiovascolare - Manuale Utente",
+          usage: "update",
+          pages: "3-8",
+        },
+      ],
+      scientificReferences: [
+        {
+          id: "ref-001",
+          referenceId: "IT-762386",
+          title: "Cardiovascular Risk Assessment: A Comprehensive Meta-Analysis",
+          authors: "Smith, J. et al.",
+          journal: "Journal of Cardiology",
+          publicationDate: "2024-01-15",
+          claimsCount: 4,
+          selectedClaims: ["claim-001-1", "claim-001-2"],
+        },
+        {
+          id: "ref-002",
+          referenceId: "IT-7657865",
+          title: "Evidence-Based Guidelines for Cardiovascular Risk Management",
+          authors: "Johnson, M. et al.",
+          journal: "American Heart Journal",
+          publicationDate: "2023-11-20",
+          claimsCount: 3,
+          selectedClaims: ["claim-002-1"],
+        },
+      ],
+      technicalFields: {
+        email: {
+          vvpmPlaceholderId: "VVPM-CARDIO-001",
+          utmCode: "utm_source=email&utm_campaign=cardio_risk&utm_medium=newsletter",
+          ctas: [
+            { id: "cta-1", name: "Scarica Linee Guida", link: "https://example.com/guidelines" },
+            { id: "cta-2", name: "Calcola Rischio", link: "https://example.com/calculator" },
+          ],
+        },
+        digitalAdvertising: {
+          vvpmPlaceholderId: "VVPM-CARDIO-AD-001",
+          utmCode: "utm_source=adwords&utm_campaign=cardio_risk&utm_medium=cpc",
+        },
+      },
     },
     generatedContent: {
       objectives:
         "Migliorare le pratiche di valutazione del rischio cardiovascolare tra gli operatori sanitari del 35% entro 4 mesi attraverso educazione digitale mirata e strumenti interattivi di supporto alle decisioni cliniche.",
-      keyMessages:
-        "La valutazione del rischio cardiovascolare basata sull'evidenza migliora gli esiti dei pazienti e riduce i costi sanitari a lungo termine attraverso interventi precoci e strategie di trattamento personalizzate.",
-      toneOfVoice: "Clinico, autorevole, basato sull'evidenza con focus sull'implementazione pratica",
-      complianceNotes:
-        "Tutte le raccomandazioni cliniche devono allinearsi con le attuali linee guida ACC/AHA. Gli strumenti di valutazione del rischio richiedono studi di validazione e disclaimer appropriati.",
+      keyMessages: {
+        emailMarketing: [
+          {
+            id: "km-1-email",
+            tag: "EFFICACY",
+            description: "La valutazione del rischio cardiovascolare basata sull'evidenza migliora gli esiti dei pazienti e riduce i costi sanitari a lungo termine.",
+          },
+          {
+            id: "km-2-email",
+            tag: "AWARENESS",
+            description: "Gli strumenti di screening basati sull'evidenza supportano decisioni cliniche informate e interventi precoci.",
+          },
+        ],
+        digitalAdvertising: [
+          {
+            id: "km-1-digital",
+            tag: "EFFICACY",
+            description: "Riduzione del 35% delle complicanze cardiovascolari attraverso screening tempestivo.",
+          },
+        ],
+        webinars: [
+          {
+            id: "km-1-webinar",
+            tag: "EDUCATION",
+            description: "Formazione continua su protocolli evidence-based per la valutazione del rischio cardiovascolare.",
+          },
+        ],
+      },
+      toneOfVoice: {
+        emailMarketing: "Clinico, autorevole, basato sull'evidenza con focus sull'implementazione pratica",
+        digitalAdvertising: "Professionale, diretto, orientato ai risultati",
+        webinars: "Educativo, interattivo, supportivo per l'apprendimento continuo",
+      },
+      complianceNotes: {
+        emailMarketing:
+          "Tutte le raccomandazioni cliniche devono allinearsi con le attuali linee guida ACC/AHA. Gli strumenti di valutazione del rischio richiedono studi di validazione e disclaimer appropriati.",
+        digitalAdvertising:
+          "Conformità alle normative pubblicitarie AIFA. Tutti i claim devono essere supportati da evidenze scientifiche pubblicate.",
+        webinars:
+          "Materiale formativo ECM. Richiede accreditamento e revisione medico-scientifica prima della pubblicazione.",
+      },
     },
     assets: [],
     references: [],
     createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-    status: "ai-reviewed" as const,
+    status: "completato" as const,
     lastModified: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
     lastSavedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
     statusHistory: [
@@ -194,6 +282,15 @@ export const existingBriefs = [
         comment:
           "Revisione AI completata - il contenuto soddisfa gli standard di marketing farmaceutico e i requisiti di conformità",
       },
+      {
+        id: "status-2b",
+        briefId: "existing-brief-1",
+        fromStatus: "ai-reviewed" as const,
+        toStatus: "completato" as const,
+        changedBy: "Sarah Chen",
+        changedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+        comment: "Brief completato dall'utente",
+      },
     ],
     isReadOnly: true,
   },
@@ -214,15 +311,110 @@ export const existingBriefs = [
       attachments: [],
       communicationPersonalityId: "marketing",
       targetAudiencePresetId: "practical-parent",
+      startingDocuments: [
+        {
+          id: "doc-3",
+          documentId: "IT-7891234",
+          title: "Linee Guida ADA 2024 - Gestione Diabete Tipo 2",
+          usage: "global-adapt",
+          pages: "1-20",
+        },
+        {
+          id: "doc-4",
+          documentId: "IT-7895678",
+          title: "Materiali Educativi Pazienti - Diabete",
+          usage: "inspiration",
+          pages: "5-12",
+        },
+      ],
+      scientificReferences: [
+        {
+          id: "ref-003",
+          referenceId: "IT-7891234",
+          title: "Diabetes Self-Management: Evidence-Based Strategies for Type 2 Diabetes",
+          authors: "Garcia, M.L. et al.",
+          journal: "Diabetes Care",
+          publicationDate: "2023-09-10",
+          claimsCount: 5,
+          selectedClaims: ["claim-003-1", "claim-003-2"],
+        },
+        {
+          id: "ref-004",
+          referenceId: "IT-7895678",
+          title: "Lifestyle Interventions in Type 2 Diabetes: A Systematic Review",
+          authors: "Lee, S.H. et al.",
+          journal: "Journal of Clinical Endocrinology",
+          publicationDate: "2024-02-05",
+          claimsCount: 4,
+          selectedClaims: ["claim-004-1"],
+        },
+      ],
+      technicalFields: {
+        email: {
+          vvpmPlaceholderId: "VVPM-DIAB-001",
+          utmCode: "utm_source=email&utm_campaign=diabetes_edu&utm_medium=newsletter",
+          ctas: [
+            { id: "cta-3", name: "Scarica Guida", link: "https://example.com/diabetes-guide" },
+            { id: "cta-4", name: "Registrati al Programma", link: "https://example.com/register" },
+          ],
+        },
+        printMaterials: {
+          warehouseCode: "WH-DIAB-2024-001",
+          qrCodeLink: "https://example.com/diabetes-resources",
+          rcp: "RCP-DIAB-001",
+          aifaWording: "Materiale informativo destinato ai pazienti. Consultare sempre il medico per informazioni complete.",
+        },
+      },
     },
     generatedContent: {
       objectives:
         "Migliorare i comportamenti di autogestione dei pazienti con diabete di tipo 2 del 50% entro 6 mesi attraverso contenuti educativi completi e strumenti di supporto, ottenendo un migliore controllo glicemico e riduzione delle complicanze.",
-      keyMessages:
-        "L'autogestione efficace del diabete attraverso modifiche dello stile di vita, aderenza alla terapia e monitoraggio regolare consente ai pazienti di vivere vite più sane e prevenire complicanze.",
-      toneOfVoice: "Supportivo, incoraggiante, accessibile, culturalmente sensibile con enfasi sull'empowerment",
-      complianceNotes:
-        "Tutti i contenuti devono essere conformi alle linee guida ADA. I consigli medici devono essere generali e indirizzare i pazienti agli operatori sanitari. I contenuti bilingue richiedono una revisione di adattamento culturale.",
+      keyMessages: {
+        socialMedia: [
+          {
+            id: "km-1-social",
+            tag: "AWARENESS",
+            description: "L'autogestione efficace del diabete attraverso modifiche dello stile di vita consente ai pazienti di vivere vite più sane.",
+          },
+          {
+            id: "km-2-social",
+            tag: "SUPPORT",
+            description: "Non sei solo nella gestione del diabete. Scopri risorse e supporto per il tuo percorso.",
+          },
+        ],
+        emailMarketing: [
+          {
+            id: "km-1-email-diab",
+            tag: "EDUCATION",
+            description: "Aderenza alla terapia e monitoraggio regolare sono fondamentali per prevenire complicanze.",
+          },
+          {
+            id: "km-2-email-diab",
+            tag: "LIFESTYLE",
+            description: "Piccole modifiche allo stile di vita possono fare una grande differenza nel controllo glicemico.",
+          },
+        ],
+        printMaterials: [
+          {
+            id: "km-1-print-diab",
+            tag: "EDUCATION",
+            description: "Guida completa all'autogestione del diabete: alimentazione, esercizio e monitoraggio.",
+          },
+        ],
+      },
+      toneOfVoice: {
+        socialMedia: "Supportivo, incoraggiante, accessibile, empatico con enfasi sull'empowerment",
+        emailMarketing: "Educativo, supportivo, chiaro e diretto per facilitare la comprensione",
+        printMaterials: "Completo, strutturato, accessibile con focus su praticità e chiarezza",
+      },
+      complianceNotes: {
+        socialMedia:
+          "Tutti i contenuti devono essere conformi alle linee guida ADA. I consigli medici devono essere generali e indirizzare i pazienti agli operatori sanitari.",
+        emailMarketing:
+          "Contenuti bilingue richiedono revisione di adattamento culturale. Includere sempre disclaimer medico.",
+        printMaterials:
+          "Materiale informativo pazienti. Deve includere wording AIFA completo e riferimento al RCP.",
+      },
     },
     assets: [],
     references: [],
@@ -260,20 +452,106 @@ export const existingBriefs = [
       attachments: [],
       communicationPersonalityId: "awareness",
       targetAudiencePresetId: "traditional-elder",
+      startingDocuments: [
+        {
+          id: "doc-5",
+          documentId: "IT-7901234",
+          title: "Abstract Conferenza - Terapie Respiratorie Innovative",
+          usage: "global-adapt",
+          pages: "1-5",
+        },
+        {
+          id: "doc-6",
+          documentId: "IT-7905678",
+          title: "Poster Scientifico - Studi Fase III",
+          usage: "inspiration",
+          pages: "1-2",
+        },
+      ],
+      scientificReferences: [
+        {
+          id: "ref-005",
+          referenceId: "IT-7901234",
+          title: "Novel Therapeutic Approaches in Chronic Respiratory Conditions: Phase III Clinical Trial Results",
+          authors: "Kumar, A. et al.",
+          journal: "Respiratory Medicine",
+          publicationDate: "2024-03-20",
+          claimsCount: 6,
+          selectedClaims: ["claim-005-1", "claim-005-2", "claim-005-3"],
+        },
+        {
+          id: "ref-006",
+          referenceId: "IT-7905678",
+          title: "Long-term Outcomes in Chronic Obstructive Pulmonary Disease: A 5-Year Follow-up Study",
+          authors: "Singh, R.P. et al.",
+          journal: "European Respiratory Journal",
+          publicationDate: "2023-12-15",
+          claimsCount: 4,
+          selectedClaims: ["claim-006-1"],
+        },
+      ],
+      technicalFields: {
+        printMaterials: {
+          warehouseCode: "WH-RESP-2024-001",
+          qrCodeLink: "https://example.com/respiratory-resources",
+          rcp: "RCP-RESP-001",
+          aifaWording: "Materiale scientifico destinato esclusivamente agli operatori sanitari. Dati da studi clinici peer-reviewed.",
+        },
+        digitalAdvertising: {
+          vvpmPlaceholderId: "VVPM-RESP-AD-001",
+          utmCode: "utm_source=adwords&utm_campaign=respiratory_conf&utm_medium=cpc",
+        },
+      },
     },
     generatedContent: {
       objectives:
         "Stabilire leadership di pensiero in medicina respiratoria presentando ricerca all'avanguardia a oltre 500 specialisti respiratori, generando oltre 25 lead qualificati e rafforzando le relazioni con i key opinion leader del settore.",
-      keyMessages:
-        "Approcci terapeutici respiratori rivoluzionari supportati da solide evidenze cliniche dimostrano miglioramenti significativi negli esiti dei pazienti e nella qualità della vita per condizioni respiratorie croniche.",
-      toneOfVoice: "Scientifico, autorevole, innovativo con enfasi sull'evidenza clinica e l'eccellenza della ricerca",
-      complianceNotes:
-        "Tutte le presentazioni di dati devono includere fonti peer-reviewed e analisi statistiche appropriate. I materiali per conferenze richiedono revisione medico-scientifica e aderenza agli standard di presentazione del settore.",
+      keyMessages: {
+        medicalConferences: [
+          {
+            id: "km-1-conf",
+            tag: "INNOVATION",
+            description: "Approcci terapeutici respiratori rivoluzionari supportati da solide evidenze cliniche dimostrano miglioramenti significativi negli esiti dei pazienti.",
+          },
+          {
+            id: "km-2-conf",
+            tag: "EFFICACY",
+            description: "Risultati di studi di fase III mostrano miglioramenti nella qualità della vita per condizioni respiratorie croniche.",
+          },
+        ],
+        printMaterials: [
+          {
+            id: "km-1-print-resp",
+            tag: "EVIDENCE",
+            description: "Dati peer-reviewed da studi clinici multicentrici supportano l'efficacia e sicurezza del trattamento.",
+          },
+        ],
+        digitalAdvertising: [
+          {
+            id: "km-1-digital-resp",
+            tag: "LEADERSHIP",
+            description: "Scopri le ultime innovazioni in medicina respiratoria al Summit Annuale.",
+          },
+        ],
+      },
+      toneOfVoice: {
+        medicalConferences: "Scientifico, autorevole, innovativo con enfasi sull'evidenza clinica e l'eccellenza della ricerca",
+        printMaterials: "Rigoroso, dettagliato, basato su evidenze scientifiche pubblicate",
+        digitalAdvertising: "Professionale, orientato ai risultati, evidenziando l'innovazione scientifica",
+      },
+      complianceNotes: {
+        medicalConferences:
+          "Tutte le presentazioni di dati devono includere fonti peer-reviewed e analisi statistiche appropriate. Richiede revisione medico-scientifica.",
+        printMaterials:
+          "Materiali per conferenze richiedono aderenza agli standard di presentazione del settore. Includere wording AIFA completo.",
+        digitalAdvertising:
+          "Conformità alle normative pubblicitarie. Tutti i claim devono essere supportati da evidenze scientifiche.",
+      },
     },
     assets: [],
     references: [],
     createdAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000),
-    status: "ai-reviewed" as const,
+    status: "completato" as const,
     lastModified: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
     lastSavedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
     statusHistory: [
@@ -296,6 +574,15 @@ export const existingBriefs = [
         comment:
           "Revisione AI completata - il contenuto dimostra un'eccellente presentazione dei dati clinici e soddisfa tutti i requisiti di conformità",
       },
+      {
+        id: "status-7b",
+        briefId: "existing-brief-3",
+        fromStatus: "ai-reviewed" as const,
+        toStatus: "completato" as const,
+        changedBy: "Sarah Chen",
+        changedAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
+        comment: "Brief completato dall'utente",
+      },
     ],
     isReadOnly: true,
   },
@@ -316,15 +603,99 @@ export const existingBriefs = [
       attachments: [],
       communicationPersonalityId: "scientific-publication",
       targetAudiencePresetId: "results-driven-manager",
+      startingDocuments: [
+        {
+          id: "doc-7",
+          documentId: "IT-7911234",
+          title: "RCP - Terapia Target Oncologica",
+          usage: "global-adapt",
+          pages: "1-30",
+        },
+        {
+          id: "doc-8",
+          documentId: "IT-7915678",
+          title: "Dati di Sicurezza Aggiornati - Studi Clinici",
+          usage: "update",
+          pages: "10-25",
+        },
+      ],
+      scientificReferences: [
+        {
+          id: "ref-007",
+          referenceId: "IT-7911234",
+          title: "Targeted Therapy in Advanced Solid Tumors: Efficacy and Safety Analysis",
+          authors: "Johnson, M.D. et al.",
+          journal: "Journal of Clinical Oncology",
+          publicationDate: "2024-04-10",
+          claimsCount: 7,
+          selectedClaims: ["claim-007-1", "claim-007-2", "claim-007-3"],
+        },
+        {
+          id: "ref-008",
+          referenceId: "IT-7915678",
+          title: "Predictors of Response to Targeted Therapy: A Comprehensive Meta-Analysis",
+          authors: "Chen, L. et al.",
+          journal: "Nature Medicine",
+          publicationDate: "2024-01-25",
+          claimsCount: 5,
+          selectedClaims: ["claim-008-1", "claim-008-2"],
+        },
+      ],
+      technicalFields: {
+        digitalAdvertising: {
+          vvpmPlaceholderId: "VVPM-ONCO-AD-001",
+          utmCode: "utm_source=adwords&utm_campaign=oncology_target&utm_medium=cpc",
+        },
+        webinars: {
+          vvpmPlaceholderId: "VVPM-ONCO-WEB-001",
+          utmCode: "utm_source=webinar&utm_campaign=oncology_edu&utm_medium=registration",
+        },
+      },
     },
     generatedContent: {
       objectives:
         "Aumentare la consapevolezza tra gli oncologi del 40% entro 6 mesi attraverso educazione mirata, generando oltre 50 lead qualificati e migliorando la comprensione dei meccanismi d'azione della terapia.",
-      keyMessages:
-        "La terapia target rappresenta un avanzamento significativo nel trattamento oncologico, dimostrando miglioramenti nella sopravvivenza globale e nella qualità della vita dei pazienti con tumori avanzati.",
-      toneOfVoice: "Scientifico, rigoroso, basato sull'evidenza con focus sui risultati clinici e sulla sicurezza",
-      complianceNotes:
-        "Tutti i materiali devono essere conformi alle normative EMA e includere dati di sicurezza completi. Le affermazioni devono essere supportate da studi clinici peer-reviewed pubblicati.",
+      keyMessages: {
+        medicalConferences: [
+          {
+            id: "km-1-conf-onco",
+            tag: "INNOVATION",
+            description: "La terapia target rappresenta un avanzamento significativo nel trattamento oncologico, dimostrando miglioramenti nella sopravvivenza globale.",
+          },
+          {
+            id: "km-2-conf-onco",
+            tag: "EFFICACY",
+            description: "Miglioramenti significativi nella qualità della vita dei pazienti con tumori avanzati supportati da evidenze cliniche robuste.",
+          },
+        ],
+        digitalAdvertising: [
+          {
+            id: "km-1-digital-onco",
+            tag: "AWARENESS",
+            description: "Scopri le ultime innovazioni in terapia target per tumori solidi. Partecipa ai nostri eventi formativi.",
+          },
+        ],
+        webinars: [
+          {
+            id: "km-1-webinar-onco",
+            tag: "EDUCATION",
+            description: "Approfondisci i meccanismi d'azione e i criteri di selezione dei pazienti per la terapia target.",
+          },
+        ],
+      },
+      toneOfVoice: {
+        medicalConferences: "Scientifico, rigoroso, basato sull'evidenza con focus sui risultati clinici e sulla sicurezza",
+        digitalAdvertising: "Professionale, orientato ai risultati, evidenziando l'innovazione scientifica",
+        webinars: "Educativo, approfondito, supportivo per la formazione continua degli specialisti",
+      },
+      complianceNotes: {
+        medicalConferences:
+          "Tutti i materiali devono essere conformi alle normative EMA e includere dati di sicurezza completi. Le affermazioni devono essere supportate da studi clinici peer-reviewed pubblicati.",
+        digitalAdvertising:
+          "Conformità alle normative pubblicitarie EMA. Includere sempre disclaimer medico e riferimento al RCP.",
+        webinars:
+          "Materiale formativo ECM. Richiede revisione medico-legale completa prima della pubblicazione.",
+      },
     },
     assets: [],
     references: [],
@@ -372,15 +743,124 @@ export const existingBriefs = [
       attachments: [],
       communicationPersonalityId: "marketing",
       targetAudiencePresetId: "practical-parent",
+      startingDocuments: [
+        {
+          id: "doc-9",
+          documentId: "IT-7921234",
+          title: "Guida Pazienti - Malattie Rare",
+          usage: "global-adapt",
+          pages: "1-40",
+        },
+        {
+          id: "doc-10",
+          documentId: "IT-7925678",
+          title: "Risorse Supporto - Comunità Malattie Rare",
+          usage: "inspiration",
+          pages: "1-15",
+        },
+      ],
+      scientificReferences: [
+        {
+          id: "ref-009",
+          referenceId: "IT-7921234",
+          title: "Patient-Centered Care in Rare Diseases: Improving Quality of Life Through Education and Support",
+          authors: "Roberts, C.D. et al.",
+          journal: "Journal of Rare Diseases",
+          publicationDate: "2023-11-30",
+          claimsCount: 4,
+          selectedClaims: ["claim-009-1"],
+        },
+        {
+          id: "ref-010",
+          referenceId: "IT-7925678",
+          title: "Therapeutic Adherence in Rare Disease Patients: A Multicenter Study",
+          authors: "Martinez, A.F. et al.",
+          journal: "Rare Disease Research",
+          publicationDate: "2024-02-18",
+          claimsCount: 3,
+          selectedClaims: ["claim-010-1", "claim-010-2"],
+        },
+      ],
+      technicalFields: {
+        email: {
+          vvpmPlaceholderId: "VVPM-RARE-001",
+          utmCode: "utm_source=email&utm_campaign=rare_diseases&utm_medium=newsletter",
+          ctas: [
+            { id: "cta-5", name: "Unisciti alla Comunità", link: "https://example.com/community" },
+            { id: "cta-6", name: "Scarica Risorse", link: "https://example.com/resources" },
+          ],
+        },
+        printMaterials: {
+          warehouseCode: "WH-RARE-2024-001",
+          qrCodeLink: "https://example.com/rare-diseases-support",
+          rcp: "RCP-RARE-001",
+          aifaWording: "Materiale informativo destinato ai pazienti e caregiver. Consultare sempre il medico specialista per informazioni complete.",
+        },
+        webinars: {
+          vvpmPlaceholderId: "VVPM-RARE-WEB-001",
+          utmCode: "utm_source=webinar&utm_campaign=rare_diseases&utm_medium=registration",
+        },
+      },
     },
     generatedContent: {
       objectives:
         "Migliorare la qualità della vita dei pazienti con malattie rare del 30% entro 8 mesi attraverso educazione e supporto, aumentando l'aderenza terapeutica e riducendo l'isolamento sociale.",
-      keyMessages:
-        "I pazienti con malattie rare non sono soli. Con le giuste risorse, supporto e informazioni, possono gestire meglio la loro condizione e vivere vite più piene.",
-      toneOfVoice: "Empatico, supportivo, incoraggiante, accessibile con enfasi sulla speranza e sul supporto della comunità",
-      complianceNotes:
-        "Tutti i contenuti devono essere conformi alle linee guida per comunicazioni ai pazienti. I consigli medici devono essere generali e indirizzare sempre alla consultazione con operatori sanitari specializzati.",
+      keyMessages: {
+        socialMedia: [
+          {
+            id: "km-1-social-rare",
+            tag: "SUPPORT",
+            description: "I pazienti con malattie rare non sono soli. Scopri risorse e una comunità che ti supporta.",
+          },
+          {
+            id: "km-2-social-rare",
+            tag: "HOPE",
+            description: "Con le giuste risorse e informazioni, puoi gestire meglio la tua condizione e vivere una vita piena.",
+          },
+        ],
+        emailMarketing: [
+          {
+            id: "km-1-email-rare",
+            tag: "EDUCATION",
+            description: "Informazioni complete e aggiornate per pazienti e caregiver su gestione e supporto.",
+          },
+          {
+            id: "km-2-email-rare",
+            tag: "COMMUNITY",
+            description: "Unisciti a una comunità di supporto che comprende le tue sfide e celebra i tuoi successi.",
+          },
+        ],
+        printMaterials: [
+          {
+            id: "km-1-print-rare",
+            tag: "RESOURCES",
+            description: "Guida completa con risorse pratiche per la gestione quotidiana delle malattie rare.",
+          },
+        ],
+        webinars: [
+          {
+            id: "km-1-webinar-rare",
+            tag: "EDUCATION",
+            description: "Eventi formativi dedicati a pazienti e caregiver con esperti del settore.",
+          },
+        ],
+      },
+      toneOfVoice: {
+        socialMedia: "Empatico, supportivo, incoraggiante, accessibile con enfasi sulla speranza e sul supporto della comunità",
+        emailMarketing: "Caloroso, informativo, supportivo, chiaro e accessibile",
+        printMaterials: "Completo, strutturato, empatico con focus su praticità e supporto",
+        webinars: "Educativo, interattivo, supportivo per pazienti e caregiver",
+      },
+      complianceNotes: {
+        socialMedia:
+          "Tutti i contenuti devono essere conformi alle linee guida per comunicazioni ai pazienti. I consigli medici devono essere generali.",
+        emailMarketing:
+          "Contenuti multilingue richiedono revisione di adattamento culturale. Includere sempre disclaimer medico.",
+        printMaterials:
+          "Materiale informativo pazienti. Deve includere wording AIFA completo e riferimento al RCP.",
+        webinars:
+          "Eventi formativi per pazienti. Richiede revisione medico-scientifica e conformità alle normative.",
+      },
     },
     assets: [],
     references: [],
@@ -418,15 +898,101 @@ export const existingBriefs = [
       attachments: [],
       communicationPersonalityId: "scientific-publication",
       targetAudiencePresetId: "results-driven-manager",
+      startingDocuments: [
+        {
+          id: "doc-11",
+          documentId: "IT-7931234",
+          title: "Linee Guida Nazionali - Gestione Dolore Cronico",
+          usage: "global-adapt",
+          pages: "1-35",
+        },
+        {
+          id: "doc-12",
+          documentId: "IT-7935678",
+          title: "Casi Clinici - Gestione Dolore Multidisciplinare",
+          usage: "inspiration",
+          pages: "1-20",
+        },
+      ],
+      scientificReferences: [
+        {
+          id: "ref-011",
+          referenceId: "IT-7931234",
+          title: "Multidisciplinary Approach to Chronic Pain Management: Evidence-Based Protocols",
+          authors: "Thompson, B.R. et al.",
+          journal: "Pain Medicine",
+          publicationDate: "2024-01-12",
+          claimsCount: 6,
+          selectedClaims: ["claim-011-1", "claim-011-2"],
+        },
+        {
+          id: "ref-012",
+          referenceId: "IT-7935678",
+          title: "Quality of Life Outcomes in Chronic Pain Patients: A Systematic Review",
+          authors: "Clark, J.S. et al.",
+          journal: "Journal of Pain Research",
+          publicationDate: "2023-10-28",
+          claimsCount: 4,
+          selectedClaims: ["claim-012-1"],
+        },
+      ],
+      technicalFields: {
+        printMaterials: {
+          warehouseCode: "WH-PAIN-2024-001",
+          qrCodeLink: "https://example.com/pain-management-resources",
+          rcp: "RCP-PAIN-001",
+          aifaWording: "Materiale formativo destinato esclusivamente agli operatori sanitari. Conforme alle linee guida nazionali.",
+        },
+        webinars: {
+          vvpmPlaceholderId: "VVPM-PAIN-WEB-001",
+          utmCode: "utm_source=webinar&utm_campaign=pain_management&utm_medium=registration",
+        },
+      },
     },
     generatedContent: {
       objectives:
         "Migliorare le competenze dei medici di base nella gestione del dolore cronico del 45% entro 6 mesi, aumentando l'uso di protocolli evidence-based e migliorando gli esiti dei pazienti.",
-      keyMessages:
-        "Una gestione efficace del dolore richiede un approccio multidisciplinare, protocolli evidence-based e attenzione alla qualità della vita del paziente, non solo alla riduzione del dolore.",
-      toneOfVoice: "Educativo, pratico, basato sull'evidenza con focus sull'applicazione clinica e sugli esiti dei pazienti",
-      complianceNotes:
-        "Tutti i materiali formativi devono essere conformi alle linee guida nazionali e internazionali per la gestione del dolore. Richiede revisione medico-scientifica e accreditamento ECM.",
+      keyMessages: {
+        medicalConferences: [
+          {
+            id: "km-1-conf-pain",
+            tag: "EDUCATION",
+            description: "Una gestione efficace del dolore richiede un approccio multidisciplinare e protocolli evidence-based.",
+          },
+          {
+            id: "km-2-conf-pain",
+            tag: "OUTCOMES",
+            description: "Attenzione alla qualità della vita del paziente, non solo alla riduzione del dolore, migliora gli esiti complessivi.",
+          },
+        ],
+        printMaterials: [
+          {
+            id: "km-1-print-pain",
+            tag: "PROTOCOLS",
+            description: "Protocolli evidence-based per la gestione del dolore cronico con casi clinici pratici.",
+          },
+        ],
+        webinars: [
+          {
+            id: "km-1-webinar-pain",
+            tag: "TRAINING",
+            description: "Formazione ECM su approcci multidisciplinari alla gestione del dolore cronico.",
+          },
+        ],
+      },
+      toneOfVoice: {
+        medicalConferences: "Educativo, pratico, basato sull'evidenza con focus sull'applicazione clinica e sugli esiti dei pazienti",
+        printMaterials: "Strutturato, dettagliato, orientato alla pratica clinica quotidiana",
+        webinars: "Interattivo, formativo, supportivo per l'apprendimento continuo",
+      },
+      complianceNotes: {
+        medicalConferences:
+          "Tutti i materiali formativi devono essere conformi alle linee guida nazionali e internazionali per la gestione del dolore.",
+        printMaterials:
+          "Richiede revisione medico-scientifica e accreditamento ECM. Includere wording AIFA completo.",
+        webinars:
+          "Eventi formativi ECM. Richiede accreditamento e conformità alle normative nazionali.",
+      },
     },
     assets: [],
     references: [],
@@ -456,6 +1022,142 @@ export const existingBriefs = [
       },
     ],
     isReadOnly: true,
+  },
+  {
+    id: "existing-brief-duplicated-1",
+    title: "Campagna Digitale per la Valutazione del Rischio Cardiovascolare (Copia)",
+    campaignData: {
+      projectName: "Campagna Digitale per la Valutazione del Rischio Cardiovascolare (Copia)",
+      brand: "Wainzua",
+      therapeuticArea: "Cardiologia",
+      expectedLaunchDate: "2025-04-15",
+      specialty: "Cardiology",
+      requestSummary:
+        "Iniziativa educativa digitale completa rivolta a cardiologi e medici di base per migliorare i protocolli di valutazione del rischio cardiovascolare e gli esiti dei pazienti attraverso strumenti di screening basati sull'evidenza.",
+      channels: ["emailMarketing", "digitalAdvertising", "webinars"],
+      additionalContext:
+        "Deve includere le ultime linee guida ACC/AHA e garantire che tutti i calcolatori di rischio siano validati. La campagna richiede una revisione medico-legale per gli strumenti di supporto alle decisioni cliniche.",
+      attachments: [],
+      communicationPersonalityId: "scientific-publication",
+      targetAudiencePresetId: "results-driven-manager",
+      startingDocuments: [
+        {
+          id: "doc-1",
+          documentId: "IT-762386",
+          title: "Linee Guida ACC/AHA 2023 - Valutazione Rischio Cardiovascolare",
+          usage: "global-adapt",
+          pages: "1-15",
+        },
+        {
+          id: "doc-2",
+          documentId: "IT-7657865",
+          title: "Calcolatore Rischio Cardiovascolare - Manuale Utente",
+          usage: "update",
+          pages: "3-8",
+        },
+      ],
+      scientificReferences: [
+        {
+          id: "ref-001",
+          referenceId: "IT-762386",
+          title: "Cardiovascular Risk Assessment: A Comprehensive Meta-Analysis",
+          authors: "Smith, J. et al.",
+          journal: "Journal of Cardiology",
+          publicationDate: "2024-01-15",
+          claimsCount: 4,
+          selectedClaims: ["claim-001-1", "claim-001-2"],
+        },
+        {
+          id: "ref-002",
+          referenceId: "IT-7657865",
+          title: "Evidence-Based Guidelines for Cardiovascular Risk Management",
+          authors: "Johnson, M. et al.",
+          journal: "American Heart Journal",
+          publicationDate: "2023-11-20",
+          claimsCount: 3,
+          selectedClaims: ["claim-002-1"],
+        },
+      ],
+      validatedReferences: [], // Empty array to trigger warning
+      technicalFields: {
+        email: {
+          vvpmPlaceholderId: "VVPM-CARDIO-001",
+          utmCode: "utm_source=email&utm_campaign=cardio_risk&utm_medium=newsletter",
+          ctas: [
+            { id: "cta-1", name: "Scarica Linee Guida", link: "https://example.com/guidelines" },
+            { id: "cta-2", name: "Calcola Rischio", link: "https://example.com/calculator" },
+          ],
+        },
+        digitalAdvertising: {
+          vvpmPlaceholderId: "VVPM-CARDIO-AD-001",
+          utmCode: "utm_source=adwords&utm_campaign=cardio_risk&utm_medium=cpc",
+        },
+      },
+    },
+    generatedContent: {
+      objectives:
+        "Migliorare le pratiche di valutazione del rischio cardiovascolare tra gli operatori sanitari del 35% entro 4 mesi attraverso educazione digitale mirata e strumenti interattivi di supporto alle decisioni cliniche.",
+      keyMessages: {
+        emailMarketing: [
+          {
+            id: "km-1-email",
+            tag: "EFFICACY",
+            description: "La valutazione del rischio cardiovascolare basata sull'evidenza migliora gli esiti dei pazienti e riduce i costi sanitari a lungo termine.",
+          },
+          {
+            id: "km-2-email",
+            tag: "AWARENESS",
+            description: "Gli strumenti di screening basati sull'evidenza supportano decisioni cliniche informate e interventi precoci.",
+          },
+        ],
+        digitalAdvertising: [
+          {
+            id: "km-1-digital",
+            tag: "EFFICACY",
+            description: "Riduzione del 35% delle complicanze cardiovascolari attraverso screening tempestivo.",
+          },
+        ],
+        webinars: [
+          {
+            id: "km-1-webinar",
+            tag: "EDUCATION",
+            description: "Formazione continua su protocolli evidence-based per la valutazione del rischio cardiovascolare.",
+          },
+        ],
+      },
+      toneOfVoice: {
+        emailMarketing: "Clinico, autorevole, basato sull'evidenza con focus sull'implementazione pratica",
+        digitalAdvertising: "Professionale, diretto, orientato ai risultati",
+        webinars: "Educativo, interattivo, supportivo per l'apprendimento continuo",
+      },
+      complianceNotes: {
+        emailMarketing:
+          "Tutte le raccomandazioni cliniche devono allinearsi con le attuali linee guida ACC/AHA. Gli strumenti di valutazione del rischio richiedono studi di validazione e disclaimer appropriati.",
+        digitalAdvertising:
+          "Conformità alle normative pubblicitarie AIFA. Tutti i claim devono essere supportati da evidenze scientifiche pubblicate.",
+        webinars:
+          "Materiale formativo ECM. Richiede accreditamento e revisione medico-scientifica prima della pubblicazione.",
+      },
+    },
+    assets: [],
+    references: [],
+    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+    status: "draft" as const,
+    lastModified: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+    lastSavedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+    statusHistory: [
+      {
+        id: "status-duplicated-1",
+        briefId: "existing-brief-duplicated-1",
+        fromStatus: null,
+        toStatus: "draft" as const,
+        changedBy: "Sarah Chen",
+        changedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+        comment: "Brief duplicated",
+      },
+    ],
+    isReadOnly: false,
+    duplicatedFromBriefId: "existing-brief-1", // Reference to original brief
   },
 ]
 

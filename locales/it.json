@@ -448,7 +448,12 @@
           "subtitle": "Carica documenti di supporto, materiali di riferimento o risorse visive per fornire contesto aggiuntivo al tuo brief.",
           "addedToKnowledgeBase": "Documento aggiunto alla knowledge base",
           "disclaimer": "Accetto la responsabilità di caricare o aggiornare un file nella knowledge base condivisa. Comprendo che questo documento sarà visibile e utilizzabile da altri utenti del sistema."
-        }
+        },
+        "duplicationWarning": "Questi materiali sono stati ereditati dal brief originale. Conferma che sono ancora rilevanti prima di procedere.",
+        "validateReference": "Conferma",
+        "validatedReference": "Confermato",
+        "validateAllReferences": "Conferma tutti",
+        "referencesValidationRequired": "Devi confermare o eliminare tutti i materiali ereditati prima di procedere."
       },
       "step2d": {
         "title": "Campi tecnici",

@@ -103,6 +103,26 @@ export function Step6BriefRecap({ onStepNavigate, onConfirmationChange }: Step6B
   const generatedContent = brief.generatedContent
   const channels = campaignData.channels || []
 
+  // Initialize confirmed sections for completed briefs
+  useEffect(() => {
+    if (brief && brief.status === "completato") {
+      // For completed briefs, all sections should be confirmed
+      setConfirmedSections(new Set(["objectives", "keyMessages", "toneOfVoice", "complianceNotes"]))
+      // Also confirm all channels for each section
+      if (channels.length > 0) {
+        setConfirmedChannels({
+          keyMessages: new Set(channels),
+          toneOfVoice: new Set(channels),
+          complianceNotes: new Set(channels),
+        })
+      }
+      // Notify parent that all sections are confirmed
+      if (onConfirmationChange) {
+        onConfirmationChange(true)
+      }
+    }
+  }, [brief?.id, brief?.status, channels.length, onConfirmationChange]) // Only run when brief ID, status, or channels change
+
   // Available key message tags
   const keyMessageTags = ["EFFICACY", "AWARENESS", "SAFETY", "QUALITY", "INNOVATION", "PATIENT_CARE", "CLINICAL_EVIDENCE"]
 

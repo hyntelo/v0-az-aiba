@@ -24,7 +24,7 @@ import {
   TooltipProvider,
 } from "@/components/ui/tooltip"
 import * as TooltipPrimitive from "@radix-ui/react-tooltip"
-import { Plus, FileText, Calendar, User, Bell, X, Sparkles, MoreVertical, Search, ChevronUp, ChevronDown } from "lucide-react"
+import { Plus, FileText, Calendar, User, Bell, X, Sparkles, MoreVertical, Search, ChevronUp, ChevronDown, AlertTriangle } from "lucide-react"
 import CampaignForm from "@/components/campaign-form"
 // BriefDisplay removed - step 6 is now the generated brief view
 import { AIGenerationModal } from "@/components/ai-generation-modal"
@@ -143,6 +143,7 @@ export default function Dashboard() {
     markNotificationAsRead,
     dismissNotification,
     setCurrentBrief,
+    setCampaignData,
   } = useAppStore()
 
   useEffect(() => {
@@ -278,7 +279,43 @@ export default function Dashboard() {
 
   const handleDuplicate = (brief: BriefData) => {
     console.log("[v0] Duplicate brief:", brief.id)
-    // TODO: Implement duplicate functionality
+    
+    // Create a new brief with copied data
+    const now = new Date()
+    const duplicatedBrief: BriefData = {
+      ...brief,
+      id: `brief-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      title: `${brief.title} (Copia)`,
+      status: "draft",
+      createdAt: now,
+      lastModified: now,
+      lastSavedAt: now,
+      duplicatedFromBriefId: brief.id,
+      statusHistory: [
+        {
+          id: `status-${Date.now()}`,
+          briefId: `brief-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          fromStatus: null,
+          toStatus: "draft",
+          changedBy: userProfile?.name || "User",
+          changedAt: now,
+          comment: "Brief duplicated",
+        },
+      ],
+      // Copy campaign data and initialize validatedReferences as empty array
+      campaignData: {
+        ...brief.campaignData,
+        validatedReferences: [],
+      },
+    }
+    
+    // Add to created briefs
+    addCreatedBrief(duplicatedBrief)
+    
+    // Load into form for editing
+    setCurrentBrief(duplicatedBrief)
+    setCampaignData(duplicatedBrief.campaignData)
+    setCurrentView("form")
   }
 
   const handleDelete = (brief: BriefData) => {
@@ -302,6 +339,37 @@ export default function Dashboard() {
       return t("dashboard.statusCompletato") || t("dashboard.statusComplete")
     }
     return status.replace("-", " ").toUpperCase()
+  }
+
+  // Check if a brief has major warnings that need attention
+  const hasMajorWarnings = (brief: BriefData, allBriefs: BriefData[]): boolean => {
+    // Check for duplicated brief with unvalidated inherited references
+    if (brief.duplicatedFromBriefId) {
+      const originalBrief = allBriefs.find((b) => b.id === brief.duplicatedFromBriefId)
+      
+      if (originalBrief) {
+        const originalReferences = originalBrief.campaignData.scientificReferences || []
+        const originalReferenceIds = new Set(originalReferences.map((ref) => ref.id))
+        
+        const currentReferences = brief.campaignData.scientificReferences || []
+        const inheritedReferences = currentReferences.filter((ref) =>
+          originalReferenceIds.has(ref.id)
+        )
+        
+        if (inheritedReferences.length > 0) {
+          const validatedReferenceIds = new Set(brief.campaignData.validatedReferences || [])
+          const unvalidatedInherited = inheritedReferences.filter(
+            (ref) => !validatedReferenceIds.has(ref.id)
+          )
+          
+          // Return true if there are unvalidated inherited references
+          return unvalidatedInherited.length > 0
+        }
+      }
+    }
+    
+    // Future warning types can be added here
+    return false
   }
 
   const handleBackToDashboard = () => {
@@ -715,6 +783,9 @@ export default function Dashboard() {
                           className={`flex items-center gap-1 w-fit ${statusColors[brief.status as keyof typeof statusColors]}`}
                         >
                           {(brief.status === "ai-reviewed" || brief.status === "completato") && <Sparkles className="w-3 h-3" />}
+                          {brief.status === "draft" && hasMajorWarnings(brief, createdBriefs) && (
+                            <AlertTriangle className="w-3 h-3 text-amber-600" />
+                          )}
                           {getStatusLabel(brief.status)}
                         </Badge>
                       </TableCell>

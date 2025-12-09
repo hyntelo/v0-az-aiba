@@ -47,8 +47,35 @@ export default function CampaignForm() {
     addCreatedBrief,
     createdBriefs,
   } = useAppStore()
+  
+  // Get original brief if current brief is duplicated
+  const originalBrief = currentBrief?.duplicatedFromBriefId
+    ? createdBriefs.find((b) => b.id === currentBrief.duplicatedFromBriefId)
+    : null
 
   const formData = campaignData
+
+  // Load campaignData from currentBrief when it changes
+  useEffect(() => {
+    if (currentBrief && currentBrief.campaignData) {
+      setCampaignData(currentBrief.campaignData)
+      // If brief has generated content or is completed, navigate to step 6 (brief recap)
+      // Otherwise, start at step 1 to allow editing
+      if (currentBrief.generatedContent || currentBrief.status === "completato") {
+        setCurrentStep(5) // Step 5 is the brief recap (step 6 in the flow)
+        setCompletedSteps(new Set([1, 2, 3, 4, 5]))
+        // For completed briefs, set all sections as confirmed
+        if (currentBrief.status === "completato") {
+          setAllSectionsConfirmed(true)
+        }
+      } else {
+        // For drafts without generated content, start at step 1
+        setCurrentStep(1)
+        setCompletedSteps(new Set())
+        setAllSectionsConfirmed(false)
+      }
+    }
+  }, [currentBrief?.id, setCampaignData]) // Only run when brief ID changes
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -156,7 +183,47 @@ export default function CampaignForm() {
   }
 
   const validateStep4 = (): boolean => {
-    // Placeholder - always valid for now
+    // If brief is not duplicated, always valid
+    if (!currentBrief?.duplicatedFromBriefId || !originalBrief) {
+      return true
+    }
+    
+    // Get original brief's scientific references
+    const originalReferences = originalBrief.campaignData.scientificReferences || []
+    const originalReferenceIds = new Set(originalReferences.map((ref) => ref.id))
+    
+    // Get current references
+    const currentReferences = campaignData.scientificReferences || []
+    
+    // Find inherited references (references that exist in original brief)
+    const inheritedReferences = currentReferences.filter((ref) =>
+      originalReferenceIds.has(ref.id)
+    )
+    
+    // If no inherited references, validation passes
+    if (inheritedReferences.length === 0) {
+      return true
+    }
+    
+    // Get validated reference IDs
+    const validatedReferenceIds = new Set(campaignData.validatedReferences || [])
+    
+    // Check if all inherited references are either validated or deleted
+    // (deleted references won't be in currentReferences, so we only check existing ones)
+    const unvalidatedInherited = inheritedReferences.filter(
+      (ref) => !validatedReferenceIds.has(ref.id)
+    )
+    
+    // Validation fails if there are unvalidated inherited references
+    if (unvalidatedInherited.length > 0) {
+      setFormErrors({
+        ...formErrors,
+        scientificReferences: t("form.steps.step4.referencesValidationRequired") || 
+          "Devi confermare o eliminare tutti i materiali ereditati prima di procedere.",
+      })
+      return false
+    }
+    
     return true
   }
 
@@ -312,6 +379,32 @@ export default function CampaignForm() {
 
   // Build steps for stepper
   const buildSteps = (): Step[] => {
+    // Check if step 3 should show warning (duplicated brief with unvalidated inherited references)
+    const shouldShowWarning = (): boolean => {
+      // Only show warning on step 3 (scientific references)
+      if (!currentBrief?.duplicatedFromBriefId || !originalBrief) {
+        return false
+      }
+      
+      const originalReferences = originalBrief.campaignData.scientificReferences || []
+      const originalReferenceIds = new Set(originalReferences.map((ref) => ref.id))
+      const currentReferences = campaignData.scientificReferences || []
+      const inheritedReferences = currentReferences.filter((ref) =>
+        originalReferenceIds.has(ref.id)
+      )
+      
+      if (inheritedReferences.length === 0) {
+        return false
+      }
+      
+      const validatedReferenceIds = new Set(campaignData.validatedReferences || [])
+      const unvalidatedInherited = inheritedReferences.filter(
+        (ref) => !validatedReferenceIds.has(ref.id)
+      )
+      
+      return unvalidatedInherited.length > 0
+    }
+    
     return [
       {
         id: 1,
@@ -327,6 +420,7 @@ export default function CampaignForm() {
         id: 3,
         label: t("form.steps.step4.title"),
         status: getStepStatus(3),
+        warning: shouldShowWarning(),
       },
       {
         id: 4,

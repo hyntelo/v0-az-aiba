@@ -66,6 +66,7 @@ export interface CampaignData {
   targetAudiencePresetId?: string
   typology?: string
   technicalFields?: TechnicalFields
+  validatedReferences?: string[] // Array of validated reference IDs (for duplicated briefs)
 }
 
 export interface Asset {
@@ -135,6 +136,7 @@ export interface BriefData {
   statusHistory: StatusChange[]
   isReadOnly: boolean
   aIFeedback?: AIFeedback // Added AIFeedback interface for star-based scoring system
+  duplicatedFromBriefId?: string // ID of the original brief if this is a duplicate
 }
 
 export interface UserProfile {
