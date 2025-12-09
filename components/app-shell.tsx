@@ -177,6 +177,16 @@ export function AppShell({ children, currentPage = "dashboard", onCreateBrief }:
           lastModified: new Date(),
         }
         setCurrentBrief(updatedBrief)
+        // Also update in createdBriefs to keep them in sync
+        const { createdBriefs } = useAppStore.getState()
+        const briefExists = createdBriefs.find((b) => b.id === updatedBrief.id)
+        if (briefExists) {
+          useAppStore.setState({
+            createdBriefs: createdBriefs.map((b) => 
+              b.id === updatedBrief.id ? updatedBrief : b
+            ),
+          })
+        }
         briefToSave = updatedBrief
       }
 
@@ -354,11 +364,10 @@ export function AppShell({ children, currentPage = "dashboard", onCreateBrief }:
             {currentView === "form" && (
               <Button
                 type="button"
-                variant="outline"
                 size="sm"
                 onClick={handleSaveDraft}
                 disabled={isSaving}
-                className="border-primary text-primary hover:bg-primary/6 bg-transparent flex items-center gap-2"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-150 ease-out hover:scale-[0.97] active:scale-[0.97] flex items-center gap-2"
               >
                 {isSaving ? (
                   <>

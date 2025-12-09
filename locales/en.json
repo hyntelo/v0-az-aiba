@@ -473,7 +473,11 @@
         "completato": "Completed",
         "unifiedMode": "Single for all",
         "perChannelMode": "Per channel",
-        "confirmAllChannels": "Confirm All"
+        "confirmAllChannels": "Confirm All",
+        "confirmAllRequired": "Confirm all sections",
+        "confirmAllSectionsMessage": "To complete the brief, you must confirm all sections.",
+        "briefCompleted": "Brief completed",
+        "briefCompletedSuccess": "The brief has been created successfully and added to the dashboard."
       }
     },
     "navigation": {

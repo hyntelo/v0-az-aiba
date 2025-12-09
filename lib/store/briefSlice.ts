@@ -201,7 +201,14 @@ export const createBriefSlice: StateCreator<BriefSlice, [], [], BriefSlice> = (s
   setCurrentBrief: (brief) => set({ currentBrief: brief }),
   clearCurrentBrief: () => set({ currentBrief: null }),
   createdBriefs: [],
-  addCreatedBrief: (brief) => set((state) => ({ createdBriefs: [brief, ...state.createdBriefs] })),
+  addCreatedBrief: (brief) => set((state) => {
+    // Check if brief already exists to prevent duplicates
+    const exists = state.createdBriefs.some((b) => b.id === brief.id)
+    if (exists) {
+      return state // Don't add duplicate
+    }
+    return { createdBriefs: [brief, ...state.createdBriefs] }
+  }),
   updateBriefSection: (sectionKey, content) =>
     set((state) => {
       if (!state.currentBrief?.generatedContent) return state
@@ -290,7 +297,11 @@ export const createBriefSlice: StateCreator<BriefSlice, [], [], BriefSlice> = (s
       }
     }),
   generateBrief: async () => {
-    const { campaignData } = get()
+    const { campaignData, currentBrief } = get()
+    // Access userProfile from the merged store
+    const state = get() as any
+    const userProfile = state.userProfile
+    const authorName = userProfile?.name || "system"
     // isGeneratingBrief is controlled by the caller (campaign-form.tsx)
     
     // Generate channel-specific content
@@ -328,17 +339,66 @@ export const createBriefSlice: StateCreator<BriefSlice, [], [], BriefSlice> = (s
       keyMessages,
     }
     
+    const now = new Date()
+    
+    // If a draft brief already exists, update it instead of creating new
+    if (currentBrief && currentBrief.status === "draft") {
+      const updatedBrief: BriefData = {
+        ...currentBrief,
+        title: campaignData.projectName || currentBrief.title,
+        campaignData,
+        generatedContent: generated,
+        lastModified: now,
+        lastSavedAt: now,
+        // Preserve existing statusHistory or add initial entry if empty
+        statusHistory: currentBrief.statusHistory.length > 0
+          ? currentBrief.statusHistory
+          : [
+              {
+                id: `status-${Date.now()}`,
+                briefId: currentBrief.id,
+                fromStatus: null,
+                toStatus: "draft",
+                changedBy: authorName,
+                changedAt: currentBrief.createdAt || now,
+                comment: "Brief created",
+              },
+            ],
+      }
+      
+      set((state) => ({
+        currentBrief: updatedBrief,
+        createdBriefs: state.createdBriefs.map((b) => 
+          b.id === updatedBrief.id ? updatedBrief : b
+        ),
+        // Don't set isGeneratingBrief: false here - let the caller handle the timing
+      }))
+      return
+    }
+    
+    // Otherwise, create new brief (if no existing draft)
+    const briefId = `brief-${Date.now()}`
     const brief: BriefData = {
-      id: `brief-${Date.now()}`,
+      id: briefId,
       title: campaignData.projectName || "Untitled Brief",
       campaignData,
       generatedContent: generated,
       references: [],
-      createdAt: new Date(),
+      createdAt: now,
       status: "draft",
-      lastModified: new Date(),
-      lastSavedAt: new Date(),
-      statusHistory: [],
+      lastModified: now,
+      lastSavedAt: now,
+      statusHistory: [
+        {
+          id: `status-${Date.now()}`,
+          briefId: briefId,
+          fromStatus: null,
+          toStatus: "draft",
+          changedBy: authorName, // Set author when brief is created
+          changedAt: now,
+          comment: "Brief created",
+        },
+      ],
       isReadOnly: false,
     }
     set((state) => ({
@@ -368,6 +428,15 @@ export const createBriefSlice: StateCreator<BriefSlice, [], [], BriefSlice> = (s
     const { createdBriefs, currentBrief } = get()
     const brief = createdBriefs.find((b) => b.id === id)
     if (!brief) return false
+    
+    // Get the original author from statusHistory or use current user
+    // Access userProfile from the merged store
+    const state = get() as any // Type assertion to access merged store
+    const userProfile = state.userProfile
+    const originalAuthor = brief.statusHistory && brief.statusHistory.length > 0
+      ? brief.statusHistory[0].changedBy
+      : (userProfile?.name || "system") // Use current user if no history, fallback to "system"
+    
     const updated: BriefData = {
       ...brief,
       status,
@@ -379,7 +448,7 @@ export const createBriefSlice: StateCreator<BriefSlice, [], [], BriefSlice> = (s
           briefId: id,
           fromStatus: brief.status,
           toStatus: status,
-          changedBy: "system",
+          changedBy: originalAuthor, // Preserve original author instead of "system"
           changedAt: new Date(),
           comment,
         },

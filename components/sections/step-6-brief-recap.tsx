@@ -38,9 +38,10 @@ import type { KeyMessage, ScientificReference, Claim } from "@/lib/store/types"
 
 interface Step6BriefRecapProps {
   onStepNavigate?: (step: number) => void
+  onConfirmationChange?: (allConfirmed: boolean) => void
 }
 
-export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
+export function Step6BriefRecap({ onStepNavigate, onConfirmationChange }: Step6BriefRecapProps) {
   const { t } = useTranslation()
   const {
     campaignData,
@@ -444,10 +445,21 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
       const sectionChannels = prev[sectionKey] || new Set()
       const newSet = new Set(sectionChannels)
       newSet.add(channel)
-      return {
+      const updated = {
         ...prev,
         [sectionKey]: newSet,
       }
+      
+      // If all channels are now confirmed, add section to confirmedSections
+      if (channels.length > 0 && newSet.size === channels.length) {
+        setConfirmedSections((prevSections) => {
+          const newConfirmed = new Set(prevSections)
+          newConfirmed.add(sectionKey)
+          return newConfirmed
+        })
+      }
+      
+      return updated
     })
   }
 
@@ -457,10 +469,21 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
       const sectionChannels = prev[sectionKey] || new Set()
       const newSet = new Set(sectionChannels)
       newSet.delete(channel)
-      return {
+      const updated = {
         ...prev,
         [sectionKey]: newSet,
       }
+      
+      // If not all channels are confirmed anymore, remove section from confirmedSections
+      if (newSet.size < channels.length) {
+        setConfirmedSections((prevSections) => {
+          const newConfirmed = new Set(prevSections)
+          newConfirmed.delete(sectionKey)
+          return newConfirmed
+        })
+      }
+      
+      return updated
     })
   }
 
@@ -470,11 +493,35 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
       ...prev,
       [sectionKey]: new Set(channels),
     }))
+    // Add section to confirmedSections when all channels are confirmed
+    setConfirmedSections((prevSections) => {
+      const newConfirmed = new Set(prevSections)
+      newConfirmed.add(sectionKey)
+      return newConfirmed
+    })
   }
 
-  // Get confirmation count
-  const confirmationCount = confirmedSections.size
+  // Get confirmation count - count sections that are confirmed either via confirmedSections
+  // or via all channels being confirmed in per-channel mode
+  const confirmationCount = (() => {
+    const allSections = ["objectives", "keyMessages", "toneOfVoice", "complianceNotes"]
+    return allSections.filter((sectionKey) => {
+      // If in unified mode, check confirmedSections
+      if (isUnifiedMode[sectionKey] ?? true) {
+        return confirmedSections.has(sectionKey)
+      }
+      // If in per-channel mode, check if all channels are confirmed
+      const sectionChannels = confirmedChannels[sectionKey] || new Set()
+      return channels.length > 0 && sectionChannels.size === channels.length
+    }).length
+  })()
   const totalSections = 4
+
+  // Notify parent component of confirmation status changes
+  useEffect(() => {
+    const allConfirmed = confirmationCount === totalSections
+    onConfirmationChange?.(allConfirmed)
+  }, [confirmationCount, totalSections, onConfirmationChange])
 
   // Render content card
   const renderContentCard = (
@@ -783,6 +830,12 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
                           ...prev,
                           [sectionKey]: new Set(),
                         }))
+                        // Also remove from confirmedSections
+                        setConfirmedSections((prevSections) => {
+                          const newConfirmed = new Set(prevSections)
+                          newConfirmed.delete(sectionKey)
+                          return newConfirmed
+                        })
                       } else {
                         handleUnconfirm(sectionKey)
                       }
@@ -1382,7 +1435,7 @@ export function Step6BriefRecap({ onStepNavigate }: Step6BriefRecapProps) {
                   {t("form.steps.step6.created")}:{" "}
                   {new Date(brief.createdAt).toLocaleDateString("it-IT")}
                 </span>
-                <span className="flex items-center gap-1 text-accent-violet">
+                <span className={`flex items-center gap-1 ${confirmationCount === totalSections ? "text-green-600" : "text-accent-violet"}`}>
                   <CheckCircle2 className="w-4 h-4" />
                   {confirmationCount}/{totalSections} {t("form.steps.step6.confirmed")}
                 </span>

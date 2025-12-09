@@ -41,6 +41,7 @@ import type { BriefData } from "@/lib/store/types"
 const statusColors = {
   draft: "bg-gray-100 text-gray-800",
   "ai-reviewed": "bg-gradient-to-r from-green-100 to-blue-100 text-green-800",
+  "completato": "bg-gradient-to-r from-green-100 to-blue-100 text-green-800",
 }
 
 // Helper functions
@@ -145,19 +146,28 @@ export default function Dashboard() {
   } = useAppStore()
 
   useEffect(() => {
-    console.log("[v0] Forcing reset to mock data with correct statuses")
-    useAppStore.setState({ createdBriefs: [...existingBriefs] })
+    // Only reset if createdBriefs is empty, don't overwrite user's briefs
+    const { createdBriefs } = useAppStore.getState()
+    if (createdBriefs.length === 0) {
+      console.log("[v0] Initializing with mock data")
+      useAppStore.setState({ createdBriefs: [...existingBriefs] })
+    }
   }, []) // Run only once on mount
 
   const draftCount = createdBriefs.filter((brief) => brief.status === "draft").length
-  const aiReviewedCount = createdBriefs.filter((brief) => brief.status === "ai-reviewed").length
+  const aiReviewedCount = createdBriefs.filter((brief) => brief.status === "ai-reviewed" || brief.status === "completato").length
 
   // Filter and sort briefs
   const filteredAndSortedBriefs = useMemo(() => {
     // First filter by status
     let filtered = createdBriefs
     if (statusFilter !== "all") {
-      filtered = createdBriefs.filter((brief) => brief.status === statusFilter)
+      if (statusFilter === "ai-reviewed") {
+        // Include both "ai-reviewed" and "completato" for backward compatibility
+        filtered = createdBriefs.filter((brief) => brief.status === "ai-reviewed" || brief.status === "completato")
+      } else {
+        filtered = createdBriefs.filter((brief) => brief.status === statusFilter)
+      }
     }
     
     // Then filter by search query
@@ -289,7 +299,7 @@ export default function Dashboard() {
       return t("dashboard.statusComplete")
     }
     if (status === "completato") {
-      return t("dashboard.statusCompletato")
+      return t("dashboard.statusCompletato") || t("dashboard.statusComplete")
     }
     return status.replace("-", " ").toUpperCase()
   }
@@ -463,8 +473,8 @@ export default function Dashboard() {
             onClick={() => setStatusFilter("ai-reviewed")}
           >
             <CardContent className="p-6 text-center">
-              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-gradient-to-r from-[#8582FC]/10 to-[#8EB4D6]/10 flex items-center justify-center">
-                <Sparkles className="w-6 h-6 text-[#8582FC]" />
+              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-gradient-to-r from-green-100 to-blue-100 flex items-center justify-center">
+                <Sparkles className="w-6 h-6 text-green-800" />
               </div>
               <h3 className="font-medium text-[#211C38] mb-2">{t("dashboard.aiReviewed")}</h3>
               <p className="text-sm text-muted-foreground mb-2">
@@ -505,7 +515,7 @@ export default function Dashboard() {
                   <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="hidden sm:table-cell w-[100px] min-w-[100px] max-w-[100px] whitespace-nowrap">
+                    <TableHead className="hidden sm:table-cell min-w-[120px] max-w-0 whitespace-nowrap">
                       <button
                         onClick={() => handleSort("id")}
                         className="flex items-center gap-2 hover:text-foreground transition-colors"
@@ -525,7 +535,7 @@ export default function Dashboard() {
                         )}
                       </button>
                     </TableHead>
-                    <TableHead className="min-w-[150px] sm:min-w-[200px]">
+                    <TableHead className="min-w-[150px] sm:min-w-[200px] max-w-0">
                       <button
                         onClick={() => handleSort("title")}
                         className="flex items-center gap-2 hover:text-foreground transition-colors w-full"
@@ -545,7 +555,7 @@ export default function Dashboard() {
                         )}
                       </button>
                     </TableHead>
-                    <TableHead className="hidden md:table-cell min-w-[120px]">
+                    <TableHead className="hidden md:table-cell min-w-[120px] max-w-0">
                       <button
                         onClick={() => handleSort("author")}
                         className="flex items-center gap-2 hover:text-foreground transition-colors"
@@ -565,7 +575,7 @@ export default function Dashboard() {
                         )}
                       </button>
                     </TableHead>
-                    <TableHead className="hidden lg:table-cell min-w-[100px]">
+                    <TableHead className="hidden lg:table-cell min-w-[100px] max-w-0">
                       <button
                         onClick={() => handleSort("brand")}
                         className="flex items-center gap-2 hover:text-foreground transition-colors"
@@ -585,7 +595,7 @@ export default function Dashboard() {
                         )}
                       </button>
                     </TableHead>
-                    <TableHead className="hidden xl:table-cell min-w-[150px]">
+                    <TableHead className="hidden xl:table-cell min-w-[150px] max-w-0">
                       <button
                         onClick={() => handleSort("channels")}
                         className="flex items-center gap-2 hover:text-foreground transition-colors"
@@ -651,7 +661,11 @@ export default function Dashboard() {
                 <TableBody>
                   {filteredAndSortedBriefs.map((brief) => (
                     <TableRow key={brief.id} className="hover:bg-muted/50">
-                      <TableCell className="hidden sm:table-cell font-mono text-sm w-[100px] min-w-[100px] max-w-[100px] whitespace-nowrap">{formatBriefId(brief.id)}</TableCell>
+                      <TableCell className="hidden sm:table-cell font-mono text-sm min-w-[120px] max-w-0 whitespace-nowrap">
+                        <div className="min-w-0 truncate" title={formatBriefId(brief.id)}>
+                          {formatBriefId(brief.id)}
+                        </div>
+                      </TableCell>
                       <TableCell className="min-w-[150px] sm:min-w-[200px] max-w-0">
                         <div className="min-w-0">
                           <button
@@ -700,7 +714,7 @@ export default function Dashboard() {
                           variant="secondary"
                           className={`flex items-center gap-1 w-fit ${statusColors[brief.status as keyof typeof statusColors]}`}
                         >
-                          {brief.status === "ai-reviewed" && <Sparkles className="w-3 h-3" />}
+                          {(brief.status === "ai-reviewed" || brief.status === "completato") && <Sparkles className="w-3 h-3" />}
                           {getStatusLabel(brief.status)}
                         </Badge>
                       </TableCell>

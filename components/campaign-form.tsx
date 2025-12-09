@@ -4,10 +4,11 @@ import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Loader2 } from "lucide-react"
+import { Loader2, Save, Download, Sparkles } from "lucide-react"
 import { useAppStore } from "@/lib/store"
 import { demoData } from "@/lib/mock-data"
 import { useTranslation } from "@/lib/i18n"
+import { useToast } from "@/hooks/use-toast"
 import { BriefStepper, type Step, type StepStatus } from "@/components/brief-stepper"
 import { Step1CampaignContext } from "@/components/sections/step-1-campaign-context"
 import { Step3StartingDocuments } from "@/components/sections/step-3-starting-documents"
@@ -20,9 +21,11 @@ const TOTAL_STEPS = 5
 
 export default function CampaignForm() {
   const { t } = useTranslation()
+  const { toast } = useToast()
   const [currentStep, setCurrentStep] = useState(1)
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set())
   const [showExportModal, setShowExportModal] = useState(false)
+  const [allSectionsConfirmed, setAllSectionsConfirmed] = useState(false)
   const topRef = useRef<HTMLDivElement>(null)
 
   const {
@@ -39,6 +42,10 @@ export default function CampaignForm() {
     autoSaveDraft,
     brandGuidelines,
     saveDraft,
+    setCurrentView,
+    updateBriefStatus,
+    addCreatedBrief,
+    createdBriefs,
   } = useAppStore()
 
   const formData = campaignData
@@ -381,7 +388,7 @@ export default function CampaignForm() {
       case 4:
         return <Step2dTechnicalFields />
       case 5:
-        return <Step6BriefRecap onStepNavigate={setCurrentStep} />
+        return <Step6BriefRecap onStepNavigate={setCurrentStep} onConfirmationChange={setAllSectionsConfirmed} />
       default:
         return null
     }
@@ -431,21 +438,64 @@ export default function CampaignForm() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={async () => {
-                    if (currentBrief) {
-                      await saveDraft(currentBrief.id)
-                    }
-                  }}
-                  className="border-primary text-primary hover:bg-primary/6 bg-transparent"
+                  onClick={() => setShowExportModal(true)}
+                  className="border-primary text-primary hover:bg-primary/6 bg-transparent flex items-center gap-2"
                 >
-                  {t("common.save")}
+                  <Download className="w-4 h-4" />
+                  {t("common.export")}
                 </Button>
                 <Button
                   type="button"
-                  onClick={() => setShowExportModal(true)}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-150 ease-out hover:scale-[0.97] active:scale-[0.97]"
+                  onClick={async () => {
+                    if (!currentBrief) return
+
+                    // Check if all sections are confirmed
+                    if (!allSectionsConfirmed) {
+                      toast({
+                        title: t("form.steps.step6.confirmAllRequired") || "Conferma tutte le sezioni",
+                        description: t("form.steps.step6.confirmAllSectionsMessage") || "Per completare il brief, devi confermare tutte le sezioni.",
+                        variant: "destructive",
+                      })
+                      return
+                    }
+
+                    // Ensure currentBrief is in createdBriefs and they're in sync
+                    const briefInCreated = createdBriefs.find((b) => b.id === currentBrief.id)
+                    if (!briefInCreated) {
+                      // Brief exists in currentBrief but not in createdBriefs - add it
+                      addCreatedBrief(currentBrief)
+                    } else {
+                      // Brief exists in both - ensure they're in sync
+                      // Update createdBriefs with currentBrief data to keep them synchronized
+                      useAppStore.setState({
+                        createdBriefs: createdBriefs.map((b) => 
+                          b.id === currentBrief.id ? currentBrief : b
+                        ),
+                      })
+                    }
+
+                    // All sections confirmed - update status to "completato"
+                    const success = updateBriefStatus(
+                      currentBrief.id,
+                      "completato",
+                      "Brief completato dall'utente"
+                    )
+
+                    if (success) {
+                      // Navigate to dashboard
+                      setCurrentView("dashboard")
+
+                      // Show success toast
+                      toast({
+                        title: t("form.steps.step6.briefCompleted") || "Brief completato",
+                        description: t("form.steps.step6.briefCompletedSuccess") || "Il brief è stato creato con successo e aggiunto alla dashboard.",
+                      })
+                    }
+                  }}
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-150 ease-out hover:scale-[0.97] active:scale-[0.97] flex items-center gap-2"
                 >
-                  {t("common.export")}
+                  <Sparkles className="w-4 h-4" />
+                  Completa
                 </Button>
               </>
             )}

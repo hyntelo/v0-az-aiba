@@ -3,11 +3,10 @@
 import { useEffect, useState } from "react"
 import { useAppStore } from "@/lib/store"
 import { useTranslation } from "@/lib/i18n"
-import { demoBrief } from "@/lib/mock-data"
 
 export function AIGenerationModal() {
   const { t } = useTranslation()
-  const { isGeneratingBrief, setIsGeneratingBrief, campaignData, setCurrentBrief, setCurrentView, brandGuidelines } = useAppStore()
+  const { isGeneratingBrief } = useAppStore()
   const [progress, setProgress] = useState(0)
   const [currentStep, setCurrentStep] = useState("")
 
@@ -31,9 +30,8 @@ export function AIGenerationModal() {
         const newProgress = prev + 20
         if (newProgress >= 100) {
           clearInterval(interval)
-          setTimeout(() => {
-            generateBrief()
-          }, 500)
+          // DON'T call generateBrief here - it's already called by campaign-form
+          // The store's generateBrief() handles brief creation properly
           return 100
         }
 
@@ -48,65 +46,6 @@ export function AIGenerationModal() {
 
     return () => clearInterval(interval)
   }, [isGeneratingBrief, t])
-
-  const generateBrief = () => {
-    if (!campaignData) return
-
-    // Use demoBrief structure as base, but this function shouldn't really be called
-    // since the store's generateBrief() already handles this properly
-    // This is kept for backwards compatibility but should ideally be removed
-    const channels = campaignData.channels || []
-    const baseGenerated = demoBrief.generatedContent
-    
-    // Generate channel-specific content
-    const toneOfVoice: Record<string, string> = {}
-    const complianceNotes: Record<string, string> = {}
-    const keyMessages: Record<string, any[]> = {}
-    
-    channels.forEach((channel) => {
-      // Use channel-specific content if available, otherwise use base content
-      if (baseGenerated.toneOfVoice && typeof baseGenerated.toneOfVoice === "object") {
-        const channelTone = (baseGenerated.toneOfVoice as Record<string, string>)[channel]
-        toneOfVoice[channel] = channelTone || (baseGenerated.toneOfVoice as Record<string, string>)[Object.keys(baseGenerated.toneOfVoice as Record<string, string>)[0]] || ""
-      }
-      
-      if (baseGenerated.complianceNotes && typeof baseGenerated.complianceNotes === "object") {
-        const channelCompliance = (baseGenerated.complianceNotes as Record<string, string>)[channel]
-        complianceNotes[channel] = channelCompliance || (baseGenerated.complianceNotes as Record<string, string>)[Object.keys(baseGenerated.complianceNotes as Record<string, string>)[0]] || ""
-      }
-      
-      // Generate key messages per channel
-      if (baseGenerated.keyMessages && typeof baseGenerated.keyMessages === "object" && !Array.isArray(baseGenerated.keyMessages)) {
-        const channelKeyMessages = (baseGenerated.keyMessages as Record<string, any[]>)[channel]
-        keyMessages[channel] = channelKeyMessages || (baseGenerated.keyMessages as Record<string, any[]>)[Object.keys(baseGenerated.keyMessages as Record<string, any[]>)[0]] || []
-      }
-    })
-    
-    const generated = {
-      ...baseGenerated,
-      toneOfVoice,
-      complianceNotes,
-      keyMessages,
-    }
-
-    const mockBrief = {
-      id: `brief-${Date.now()}`,
-      title: campaignData.projectName || "Untitled Brief",
-      campaignData,
-      generatedContent: generated,
-      references: [],
-      createdAt: new Date(),
-      status: "draft" as const,
-      lastModified: new Date(),
-      lastSavedAt: new Date(),
-      statusHistory: [],
-      isReadOnly: false,
-    }
-
-    setCurrentBrief(mockBrief)
-    setIsGeneratingBrief(false)
-    // Don't navigate away - stay in form view (step 6 will show the brief)
-  }
 
   if (!isGeneratingBrief) return null
 
